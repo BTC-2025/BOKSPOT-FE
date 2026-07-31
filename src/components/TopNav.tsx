@@ -271,7 +271,7 @@ export function TopNav({
                 className="custom-nav-btn px-4 h-8 shadow-md duration-200"
               >
                 <MapPin size={14} className={status === 'detecting' ? 'animate-bounce' : ''} />
-                <span>{mounted ? city : 'Chennai'}</span>
+                <span className="!text-white">{mounted ? city : 'Chennai'}</span>
                 <span className="material-symbols-outlined text-[16px] transition-transform duration-200" style={{ transform: locationDropdownOpen ? 'rotate(180deg)' : 'none' }}>keyboard_arrow_down</span>
               </button>
               {locationDropdownOpen && (
@@ -504,7 +504,7 @@ export function TopNav({
                   </div>
 
                   {/* Username in the middle */}
-                  <span className="text-inherit text-[12px] font-bold tracking-wide select-none">
+                  <span className="!text-white text-[12px] font-bold tracking-wide select-none">
                     {userName}
                   </span>
 
