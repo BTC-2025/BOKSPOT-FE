@@ -816,21 +816,21 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 px-1">
               <button
                 onClick={() => setDashboardOpen(true)}
-                className="custom-nav-btn pl-1 pr-3 h-7 rounded-full flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-[11px] font-bold cursor-pointer shrink-0"
+                className="custom-nav-btn pl-1.5 pr-4 h-8 rounded-full flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-[11px] font-bold cursor-pointer shrink-0"
               >
-                <div className="h-5 w-5 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
+                <div className="h-5.5 w-5.5 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
                   <span className="material-symbols-outlined text-[13px] text-[#0a3161]">dashboard</span>
                 </div>
                 <span className="text-inherit text-[11px] font-bold tracking-wide select-none">DASHBOARD</span>
               </button>
               <Link
                 href="/vendor/register"
-                className="custom-nav-btn pl-1 pr-3 h-7 rounded-full flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-[11px] font-bold cursor-pointer shrink-0"
+                className="custom-nav-btn pl-1.5 pr-4 h-8 rounded-full flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-[11px] font-bold cursor-pointer shrink-0"
               >
-                <div className="h-5 w-5 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
+                <div className="h-5.5 w-5.5 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
                   <span className="material-symbols-outlined text-[13px] text-[#0a3161]">storefront</span>
                 </div>
                 <span className="text-inherit text-[11px] font-bold tracking-wide select-none">VENDOR</span>

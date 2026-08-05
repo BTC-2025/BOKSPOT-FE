@@ -18,12 +18,12 @@ export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
       user: {
-        username: 'sssandy_1',
-        fullName: 'Ramesh Kumar',
-        email: 'sssandy_1@bnxmail.com',
+        username: 'vinothkumar',
+        fullName: 'vinothkumar',
+        email: 'gmvinoth@bnxmail.com',
         phone: '+91 99887 76655',
         emoji: '🧑',
-        avatarColor: 'from-amber-400 to-yellow-600',
+        avatarColor: 'from-blue-600 to-indigo-700',
         profilePhoto: null
       },
       token: 'mock-session-token-sssandy_1',

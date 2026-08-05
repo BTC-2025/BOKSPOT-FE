@@ -54,11 +54,28 @@ export function TopNav({
   const [markerPos, setMarkerPos] = useState<{ x: string; y: string } | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { user, logout } = useUserStore();
-  const userName = user?.username || 'Guest';
+  const { user, setUser, logout } = useUserStore();
+  const userName = user?.fullName || user?.username || 'vinothkumar';
   const userEmoji = user?.emoji || '🧑';
-  const userEmail = user?.email || '';
+  const userEmail = user?.email || 'gmvinoth@bnxmail.com';
   const userPhoto = user?.profilePhoto || null;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result && typeof reader.result === 'string') {
+          setUser({
+            ...(user || {}),
+            profilePhoto: reader.result
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   // UI toggle states
   const [searchOpen, setSearchOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -490,16 +507,16 @@ export function TopNav({
               <div className="hidden lg:flex items-center gap-2 relative" ref={profileRef}>
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="custom-nav-btn pl-1 pr-3 h-8 rounded-full flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                  className="custom-nav-btn pl-1.5 pr-3 h-8 rounded-full flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                   aria-label="Toggle profile menu"
                   title="Profile Settings"
                 >
-                  {/* Solid white circle with a small outline user icon on the left */}
-                  <div className="h-6 w-6 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm overflow-hidden profile-avatar-circle">
+                  {/* Solid circle with user photo or initial on the left */}
+                  <div className="h-6 w-6 rounded-full bg-[#1557bf] text-white flex items-center justify-center shrink-0 shadow-sm overflow-hidden text-[11px] font-bold profile-avatar-circle">
                     {userPhoto ? (
                       <img src={userPhoto} alt={userName} className="h-full w-full object-cover animate-fade-in" />
                     ) : (
-                      <span className="text-xs">{userEmoji}</span>
+                      <span>{userName ? userName.charAt(0).toUpperCase() : 'V'}</span>
                     )}
                   </div>
 
@@ -517,111 +534,120 @@ export function TopNav({
                   </span>
                 </button>
                 {profileOpen && (
-                  <div className="absolute right-0 top-full mt-3 w-64 bg-surface-container rounded-2xl shadow-2xl border border-outline-variant/30 z-20 overflow-hidden backdrop-blur-md animate-fade-up">
-                    {/* User Profile Header */}
-                    <div className="px-5 py-4 bg-surface-container-high/40 border-b border-outline-variant/20 flex items-center justify-between gap-3">
-                      <div className="flex flex-col min-w-0 text-left">
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-outline">Signed in as</span>
-                        <span className="font-extrabold text-[13px] text-on-surface mt-1 truncate max-w-[165px]" title={userEmail}>
-                          {userEmail}
-                        </span>
-                        <span className="text-[11px] text-on-surface-variant flex items-center gap-1.5 mt-1 font-medium">
-                          <span>🇮🇳</span> India
-                        </span>
-                      </div>
-                      {/* Switch Account Button */}
-                      <button 
-                        className="p-2 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-primary transition-all cursor-pointer flex items-center justify-center shrink-0 border border-outline-variant/20 shadow-sm hover:scale-105 active:scale-95"
-                        title="Switch Account"
-                        onClick={() => router.push('/login')}
-                      >
-                        <span className="material-symbols-outlined text-[16px]">sync_alt</span>
-                      </button>
-                    </div>
-                    
-                    {/* Dropdown Options */}
-                    <ul className="py-2">
-                      <li>
-                        <Link href="/profile#settings" className="flex items-center justify-between px-5 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-sm group">
-                          <div className="flex items-center gap-3">
-                            <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors">person</span>
-                            <span className="font-semibold text-[13px]">Account Profile</span>
-                          </div>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/profile#language" className="flex items-center justify-between px-5 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-sm group">
-                          <div className="flex items-center gap-3">
-                            <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors">language</span>
-                            <span className="font-semibold text-[13px]">Language</span>
-                          </div>
-                          <span className="text-xs text-outline font-medium">English</span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/profile#currency" className="flex items-center justify-between px-5 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-sm group">
-                          <div className="flex items-center gap-3">
-                            <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors">payments</span>
-                            <span className="font-semibold text-[13px]">Currency</span>
-                          </div>
-                          <span className="text-xs text-outline font-medium">INR (₹)</span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/profile#country" className="flex items-center justify-between px-5 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-sm group">
-                          <div className="flex items-center gap-3">
-                            <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors">flag</span>
-                            <span className="font-semibold text-[13px]">Country</span>
-                          </div>
-                          <span className="text-xs text-outline font-medium">India</span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/profile#trust" className="flex items-center justify-between px-5 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-sm group">
-                          <div className="flex items-center gap-3">
-                            <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors">verified_user</span>
-                            <span className="font-semibold text-[13px]">Beta Trust</span>
-                          </div>
-                          <span className="text-xs text-emerald-500 font-extrabold tracking-wide">85%</span>
-                        </Link>
-                      </li>
-                      <li className="px-5 py-3.5 bg-surface-container-high/30 border-t border-outline-variant/10">
-                        <div className="flex flex-col gap-2">
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-outline text-left">Display Theme</span>
-                          <div className="grid grid-cols-3 gap-1 bg-surface-container p-1 rounded-xl border border-outline-variant/20">
-                            {(['light', 'dark', 'system'] as const).map((t) => {
-                              const isThemeActive = theme === t;
-                              return (
-                                <button
-                                  key={t}
-                                  onClick={() => setTheme(t)}
-                                  className={`py-1.5 rounded-lg text-[10px] font-bold transition-all uppercase tracking-wider capitalize cursor-pointer flex items-center justify-center gap-1 ${
-                                    isThemeActive
-                                      ? 'bg-primary text-on-primary shadow-sm'
-                                      : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high'
-                                  }`}
-                                >
-                                  {t === 'light' ? <Sun className="h-3 w-3" /> : t === 'dark' ? <Moon className="h-3 w-3" /> : <Laptop className="h-3 w-3" />}
-                                  <span>{t}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
+                  <div className="absolute right-0 top-full mt-3 w-80 bg-white dark:bg-[#1a1d24] text-slate-800 dark:text-slate-100 rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-slate-800/80 z-50 overflow-hidden backdrop-blur-xl animate-fade-up p-5">
+                    {/* Profile Avatar & Info */}
+                    <div className="flex flex-col items-center pt-2 pb-1">
+                      <div className="relative">
+                        <div className="w-20 h-20 rounded-full overflow-hidden shadow-md flex items-center justify-center bg-[#1557bf]">
+                          {userPhoto ? (
+                            <img src={userPhoto} alt={userName} className="w-full h-full object-cover animate-fade-in" />
+                          ) : (
+                            <span className="text-3xl font-bold text-white select-none">
+                              {userName ? userName.charAt(0).toUpperCase() : 'V'}
+                            </span>
+                          )}
                         </div>
-                      </li>
-                    </ul>
-                    
-                    {/* Bottom Divider & Sign Out */}
-                    <div className="border-t border-outline-variant/20 px-2.5 py-2.5 bg-surface-container-low/20">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer hover:scale-110"
+                          title="Upload profile photo"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">photo_camera</span>
+                        </button>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </div>
+
+                      <h4 className="font-bold text-[17px] text-slate-900 dark:text-white mt-3 tracking-tight text-center">
+                        {userName}
+                      </h4>
+                      <p className="text-[13px] text-slate-500 dark:text-slate-400 font-normal text-center mt-0.5">
+                        {userEmail}
+                      </p>
+
+                      {/* Manage your account Button */}
+                      <Link
+                        href="/profile"
+                        onClick={() => setProfileOpen(false)}
+                        className="mt-3.5 px-5 py-2 rounded-full border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-[13px] font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-all shadow-sm active:scale-98"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">manage_accounts</span>
+                        <span>Manage your account</span>
+                      </Link>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="w-full border-b border-slate-200 dark:border-slate-800/80 my-3.5" />
+
+                    {/* Secondary Account Row */}
+                    <div 
+                      onClick={() => {
+                        setUser({
+                          username: 'beta',
+                          fullName: 'beta',
+                          email: 'beta@beta-softnet.com',
+                          phone: '+91 98765 43210',
+                          emoji: '💼',
+                          avatarColor: 'from-blue-600 to-indigo-700',
+                          profilePhoto: null
+                        });
+                        setProfileOpen(false);
+                      }}
+                      className="w-full px-3 py-2 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-3 transition-colors cursor-pointer group"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-[#0d47a1] text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+                        B
+                      </div>
+                      <div className="flex flex-col min-w-0 text-left flex-1">
+                        <span className="text-[13px] font-bold text-slate-800 dark:text-slate-200 leading-tight">beta</span>
+                        <span className="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5">beta@beta-softnet.com</span>
+                      </div>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="w-full border-b border-slate-200 dark:border-slate-800/80 my-2" />
+
+                    {/* Action buttons */}
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        onClick={() => {
+                          setProfileOpen(false);
+                          router.push('/login');
+                        }}
+                        className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 flex items-center gap-3 text-[13px] font-semibold text-slate-700 dark:text-slate-300 transition-colors text-left cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[19px] text-slate-500 dark:text-slate-400">person_add</span>
+                        <span>Add another account</span>
+                      </button>
+
                       <button
                         onClick={() => {
                           setProfileOpen(false);
                           logout();
                           router.push('/');
                         }}
-                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-[#ff4d4f] hover:bg-[#ff4d4f]/10 transition-colors rounded-xl text-sm font-bold cursor-pointer"
+                        className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 flex items-center gap-3 text-[13px] font-semibold text-slate-700 dark:text-slate-300 transition-colors text-left cursor-pointer"
                       >
-                        <span className="material-symbols-outlined text-[18px]">logout</span>Sign out
+                        <span className="material-symbols-outlined text-[19px] text-slate-500 dark:text-slate-400">logout</span>
+                        <span>Sign out of this account</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setProfileOpen(false);
+                          logout();
+                          router.push('/');
+                        }}
+                        className="w-full px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-3 text-[13px] font-bold text-[#e53935] hover:text-[#d32f2f] transition-colors text-left cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[19px] text-[#e53935]">logout</span>
+                        <span>Sign out of all accounts</span>
                       </button>
                     </div>
                   </div>
