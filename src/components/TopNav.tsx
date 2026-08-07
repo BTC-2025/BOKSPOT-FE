@@ -615,6 +615,16 @@ export function TopNav({
 
                     {/* Action buttons */}
                     <div className="flex flex-col gap-0.5">
+                      
+                      <Link
+                        href="/support"
+                        onClick={() => setProfileOpen(false)}
+                        className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 flex items-center gap-3 text-[13px] font-semibold text-slate-700 dark:text-slate-300 transition-colors text-left cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[19px] text-slate-500 dark:text-slate-400">help</span>
+                        <span>Help & Support</span>
+                      </Link>
+
                       <button
                         onClick={() => {
                           setProfileOpen(false);

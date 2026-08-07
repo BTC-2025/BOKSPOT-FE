@@ -22,6 +22,7 @@ export default function LoginPage() {
 
   const [mounted, setMounted] = useState(false);
   const [isLogin, setIsLogin] = useState(true); // toggle between login & register
+  const [isAdminMode, setIsAdminMode] = useState(false); // toggle admin mode
   
   // Custom Registration Form State
   const [regUsername, setRegUsername] = useState('');
@@ -64,6 +65,14 @@ export default function LoginPage() {
       if (!loginIdentifier || !loginPassword) {
         setError('Please enter your username/email and password');
         setIsLoading(false);
+        return;
+      }
+
+      if (loginIdentifier === 'Admin' && loginPassword === 'Admin123') {
+        setSuccess('Super Admin access granted. Redirecting to admin console...');
+        setTimeout(() => {
+          window.location.href = 'http://localhost:4001/admin';
+        }, 1000);
         return;
       }
 
@@ -146,10 +155,10 @@ export default function LoginPage() {
             <Sparkles className="h-4 w-4 text-[color:var(--color-primary)] animate-pulse" />
           </Link>
           <h1 className="text-2xl font-black tracking-tight">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
+            {isAdminMode ? 'Super Admin Access' : isLogin ? 'Welcome Back' : 'Create Account'}
           </h1>
           <p className="text-xs text-[color:var(--color-on-surface-variant)] mt-1.5">
-            {isLogin ? 'Access your custom bookings and luxury profiles' : 'Register to manage and reserve services globally'}
+            {isAdminMode ? 'Authenticate to access platform-wide controls.' : isLogin ? 'Access your custom bookings and luxury profiles' : 'Register to manage and reserve services globally'}
           </p>
         </div>
 
@@ -333,6 +342,17 @@ export default function LoginPage() {
             >
               {isLogin ? 'Sign Up' : 'Sign In'}
             </button>
+          </div>
+
+          {/* Admin Login Option */}
+          <div className="mt-4 pt-4 border-t border-[color:var(--color-outline-variant)]/20 text-center">
+            <p className="text-[10px] text-[color:var(--color-outline)] font-semibold">
+              {isAdminMode ? (
+                <>Are you a user? <button onClick={(e) => { e.preventDefault(); setIsAdminMode(false); }} className="text-indigo-400 font-bold hover:underline">User Login</button></>
+              ) : (
+                <>Platform Administrator? <button onClick={(e) => { e.preventDefault(); setIsAdminMode(true); setIsLogin(true); setLoginIdentifier(''); setLoginPassword(''); }} className="text-[color:var(--color-primary)] font-bold hover:underline">Admin Login</button></>
+              )}
+            </p>
           </div>
         </div>
       </div>

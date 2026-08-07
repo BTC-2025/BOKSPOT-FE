@@ -102,6 +102,17 @@ export interface VendorRequest {
   supervisorAddress?: string;
 }
 
+export interface UserTicket {
+  id: string;
+  targetType: 'ADMIN' | 'BUSINESS';
+  merchantId?: string; 
+  merchantName?: string;
+  subject: string;
+  message: string;
+  status: 'OPEN' | 'PENDING' | 'RESOLVED';
+  createdAt: string;
+}
+
 interface BookingFlowState {
   selectedService: any | null;
   selectedSlot: any | null;
@@ -112,6 +123,7 @@ interface BookingFlowState {
   services: MockService[];
   merchants: PersistedMerchant[];
   vendorRequests: VendorRequest[];
+  userTickets: UserTicket[];
   commissionRate: number;
   nextVendorSerial: number;
   setCommissionRate: (rate: number) => void;
@@ -131,6 +143,8 @@ interface BookingFlowState {
   assignVendorId: (merchantId: string, vendorId: string) => void;
   addVendorRequest: (request: VendorRequest) => void;
   updateVendorRequestStatus: (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') => void;
+  addUserTicket: (ticket: Omit<UserTicket, 'id' | 'status' | 'createdAt'>) => void;
+  fetchTickets: () => Promise<void>;
   resetFlow: () => void;
 }
 
@@ -180,6 +194,7 @@ export const useBookingFlowStore = create<BookingFlowState>()(
           submittedAt: '2026-06-09T11:30:00.000Z'
         }
       ],
+      userTickets: [],
       commissionRate: 10,
       nextVendorSerial: 5,
       setCommissionRate: (rate) => set({ commissionRate: rate }),
@@ -232,6 +247,44 @@ export const useBookingFlowStore = create<BookingFlowState>()(
           req.id === id ? { ...req, status } : req
         )
       })),
+      fetchTickets: async () => {
+        try {
+          const res = await fetch('http://localhost:9000/api/v1/tickets');
+          if (res.ok) {
+            const body = await res.json();
+            set({ userTickets: body.data || [] });
+          }
+        } catch (e) {
+          console.error('Failed to fetch tickets from backend', e);
+        }
+      },
+      addUserTicket: async (ticket) => {
+        try {
+          const res = await fetch('http://localhost:9000/api/v1/tickets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ticket)
+          });
+          if (res.ok) {
+            const body = await res.json();
+            set((state) => ({ userTickets: [body.data, ...state.userTickets] }));
+          }
+        } catch (e) {
+          console.error('Failed to save ticket to backend', e);
+          // Fallback
+          set((state) => ({
+            userTickets: [
+              {
+                ...ticket,
+                id: 'TKT-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+                status: 'OPEN',
+                createdAt: new Date().toISOString()
+              },
+              ...state.userTickets
+            ]
+          }));
+        }
+      },
       resetFlow: () => set({
         selectedService: null,
         selectedSlot: null,
