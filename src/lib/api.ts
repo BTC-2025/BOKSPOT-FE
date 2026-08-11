@@ -210,6 +210,7 @@ export const api = {
             currency: srv.currency || 'INR',
             durationMinutes: srv.durationMinutes || 60,
             images: (srv.images && srv.images.length > 0) ? srv.images : ['https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80'],
+            image: (srv.images && srv.images.length > 0 && srv.images[0]) ? srv.images[0] : 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80',
             rating: srv.rating || 5,
             reviewCount: srv.reviewCount || 10,
             isFeatured: srv.isFeatured || false,
