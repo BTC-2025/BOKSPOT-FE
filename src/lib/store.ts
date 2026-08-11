@@ -249,7 +249,7 @@ export const useBookingFlowStore = create<BookingFlowState>()(
       })),
       fetchTickets: async () => {
         try {
-          const res = await fetch('http://localhost:9000/api/v1/tickets');
+          const res = await fetch(`${API_BASE}/tickets`);
           if (res.ok) {
             const body = await res.json();
             set({ userTickets: body.data || [] });
