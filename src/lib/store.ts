@@ -249,7 +249,7 @@ export const useBookingFlowStore = create<BookingFlowState>()(
       })),
       fetchTickets: async () => {
         try {
-          const res = await fetch(`${API_BASE}/tickets`);
+          const res = await fetch('https://bokspot-be.onrender.com/api/v1/tickets');
           if (res.ok) {
             const body = await res.json();
             set({ userTickets: body.data || [] });
