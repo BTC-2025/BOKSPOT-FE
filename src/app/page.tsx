@@ -990,7 +990,7 @@ export default function HomePage() {
                 className="h-10 px-4 rounded-2xl border border-dashed border-[color:var(--color-primary)]/40 bg-[color:var(--color-primary)]/[0.03] hover:border-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/10 hover:scale-[1.03] transition-all flex items-center gap-1.5 cursor-pointer text-xs font-extrabold text-[color:var(--color-primary)]"
               >
                 <span className="material-symbols-outlined text-[16px]">add</span>
-                <span>Shortcut +</span>
+                <span>Shortcut</span>
               </button>
             </div>
           </section>

@@ -1570,13 +1570,6 @@ export default function ProviderDiscoveryPage() {
         let response = await api.services.list(params);
         let list = Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : []);
         
-        // Fallback: If empty, it's possible services were created under default 'general-service'
-        if (list.length === 0) {
-          const fallbackParams = { ...params, categorySlug: 'general-service' };
-          response = await api.services.list(fallbackParams);
-          list = Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : []);
-        }
-        
         if (active) {
           setServicesList(list);
         }
