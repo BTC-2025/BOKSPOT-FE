@@ -187,24 +187,64 @@ export const api = {
       return [];
     },
     list: async (params?: Record<string, string>) => {
-      const slug = params?.categorySlug;
-      const city = params?.city || 'Chennai';
       try {
-        const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-        const res = await apiFetch<any>(`/services${qs}`);
-        if (res && res.success && res.data) {
-          return res.data;
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+        
+        // Build query string
+        const queryParams = new URLSearchParams();
+        if (params?.categorySlug) queryParams.append('categorySlug', params.categorySlug);
+        if (params?.city) queryParams.append('city', params.city);
+        if (params?.search) queryParams.append('search', params.search);
+        
+        const res = await fetch(`${baseUrl}/services?${queryParams.toString()}`);
+        if (res.ok) {
+          const body = await res.json();
+          // Map Prisma Backend output to the frontend interface
+          const servicesArray = body.data?.data || [];
+          const mappedServices = servicesArray.map((srv: any) => ({
+            id: srv.id,
+            name: srv.name,
+            slug: srv.slug || srv.id,
+            description: srv.description,
+            shortDescription: srv.shortDescription || srv.description?.substring(0, 50),
+            serviceType: srv.serviceType || srv.name,
+            basePrice: srv.basePrice || 0,
+            currency: srv.currency || 'INR',
+            durationMinutes: srv.durationMinutes || 60,
+            images: (srv.images && srv.images.length > 0) ? srv.images : ['https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80'],
+            rating: srv.rating || 5,
+            reviewCount: srv.reviewCount || 10,
+            isFeatured: srv.isFeatured || false,
+            merchant: srv.merchant?.name || 'Merchant',
+            merchantObj: srv.merchant ? {
+              id: srv.merchant.id,
+              name: srv.merchant.name,
+              city: srv.merchant.city,
+              address: `${srv.merchant.city} Main Road`,
+              rating: srv.merchant.rating || 5,
+              reviewCount: srv.merchant.reviewCount || 10,
+              images: [],
+              tags: [],
+              amenities: []
+            } : undefined,
+            categoryObj: srv.category ? {
+              id: srv.category.id,
+              name: srv.category.name,
+              slug: srv.category.slug
+            } : undefined,
+            city: srv.merchant?.city || 'Chennai',
+            category: srv.category?.name || 'Category',
+            // Pass the dynamic configurations straight to UI
+            rawConfig: srv 
+          }));
+          
+          return {
+            data: mappedServices,
+            meta: { total: body.data?.meta?.total || mappedServices.length, page: 1, limit: 100, totalPages: 1 }
+          };
         }
       } catch (err) {
-        console.warn('Backend service fetch error, falling back to mock services:', err);
-      }
-      
-      if (slug) {
-        const mocks = getMockServicesByCategory(slug, city);
-        return {
-          data: mocks,
-          meta: { total: mocks.length, page: 1, limit: 10, totalPages: 1 }
-        };
+        console.warn('Backend services list error:', err);
       }
       return {
         data: [],
@@ -213,12 +253,11 @@ export const api = {
     },
     byId: async (id: string) => {
       try {
-        const res = await apiFetch<any>(`/services/${id}`);
-        if (res && res.success && res.data) {
-          return res.data;
-        }
+        const listRes = await api.services.list();
+        const found = listRes.data?.find((s: any) => s.id === id);
+        if (found) return found;
       } catch (err) {
-        console.warn('Backend service details error, falling back to mock parser:', err);
+        console.warn('Backend service details error, falling back to static parser:', err);
       }
       
       if (id.startsWith('ds-')) {

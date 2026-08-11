@@ -26,6 +26,19 @@ export default function ServiceDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(0);
   const [localSelectedSlot, setLocalSelectedSlot] = useState<string | null>(null);
+  const [selectedCapacity, setSelectedCapacity] = useState<number>(1);
+  const [selectedAddons, setSelectedAddons] = useState<any[]>([]);
+
+  // Derived dynamic config
+  const rawConfig = service?.rawConfig || {};
+  const isTimingEnabled = rawConfig.isTimingEnabled ?? true;
+  const isCapacityEnabled = rawConfig.isCapacityEnabled ?? false;
+  const isAddonsEnabled = rawConfig.isAddonsEnabled ?? false;
+  
+  // Calculate total price based on addons and base price
+  const basePrice = service?.price || 0;
+  const addonsTotal = selectedAddons.reduce((acc, curr) => acc + (curr.price || 0), 0);
+  const totalPrice = basePrice + addonsTotal;
 
   useEffect(() => {
     let active = true;
@@ -238,25 +251,65 @@ export default function ServiceDetailPage() {
                 </div>
               </div>
 
-              {/* Time Slots */}
-              <div className="mb-6">
-                <h3 className="font-semibold text-sm mb-3">Available Slots</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {mockSlots.map((slot) => (
-                    <button key={slot.id} disabled={!slot.available} onClick={() => setLocalSelectedSlot(slot.id)}
-                      className={`rounded-lg py-2 text-sm font-medium transition-all ${!slot.available ? 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] cursor-not-allowed line-through' : localSelectedSlot === slot.id ? 'bg-[var(--primary)] text-white shadow-md' : 'border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)]'}`}>
-                      {slot.time}
-                    </button>
-                  ))}
+              {/* Dynamic Toggles Rendering */}
+              {isTimingEnabled && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-sm mb-3">Available Slots</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {mockSlots.map((slot) => (
+                      <button key={slot.id} disabled={!slot.available} onClick={() => setLocalSelectedSlot(slot.id)}
+                        className={`rounded-lg py-2 text-sm font-medium transition-all ${!slot.available ? 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] cursor-not-allowed line-through' : localSelectedSlot === slot.id ? 'bg-[var(--primary)] text-white shadow-md' : 'border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)]'}`}>
+                        {slot.time}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {isCapacityEnabled && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-sm mb-3">Number of Persons (Capacity)</h3>
+                  <select 
+                    value={selectedCapacity}
+                    onChange={(e) => setSelectedCapacity(Number(e.target.value))}
+                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm"
+                  >
+                    {Array.from({ length: rawConfig.participantCapacity || 10 }, (_, i) => (
+                      <option key={i+1} value={i+1}>{i+1} Person{i+1 > 1 ? 's' : ''}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {isAddonsEnabled && rawConfig.addOns && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-sm mb-3">Optional Add-ons</h3>
+                  <div className="space-y-3">
+                    {Array.isArray(rawConfig.addOns) && rawConfig.addOns.map((addon: any, idx: number) => {
+                      const isSelected = selectedAddons.some(a => a.id === idx);
+                      return (
+                        <label key={idx} className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${isSelected ? 'border-[var(--primary)] bg-[var(--primary)]/5' : 'border-[var(--border)] hover:bg-[var(--bg-secondary)]'}`}>
+                          <div className="flex items-center gap-3">
+                            <input type="checkbox" checked={isSelected} onChange={(e) => {
+                              if (e.target.checked) setSelectedAddons([...selectedAddons, { id: idx, ...addon }]);
+                              else setSelectedAddons(selectedAddons.filter(a => a.id !== idx));
+                            }} className="w-4 h-4 text-[var(--primary)] rounded focus:ring-[var(--primary)]" />
+                            <span className="text-sm font-medium">{addon.name}</span>
+                          </div>
+                          <span className="text-sm font-semibold text-[var(--text-secondary)]">+₹{addon.price}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <Link
                 href="/booking/checkout"
                 onClick={handleBookNow}
-                className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold text-white transition-all ${localSelectedSlot ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25' : 'bg-gray-300 cursor-not-allowed pointer-events-none'}`}
+                className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold text-white transition-all ${(!isTimingEnabled || localSelectedSlot) ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25' : 'bg-gray-300 cursor-not-allowed pointer-events-none'}`}
               >
-                Book Now — ₹{service.price}
+                Book Now — ₹{totalPrice}
               </Link>
               <p className="mt-3 text-center text-xs text-[var(--text-muted)]">Free cancellation up to 2 hours before</p>
             </div>

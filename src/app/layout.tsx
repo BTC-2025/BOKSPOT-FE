@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           })();
         ` }} />
       </head>
-      <body className="selection:bg-primary/30">
+      <body suppressHydrationWarning className="selection:bg-primary/30">
         <ThemeManager />
         <ClientLayout>{children}</ClientLayout>
       </body>

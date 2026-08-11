@@ -6,10 +6,11 @@ import Link from 'next/link';
 import { Search, SlidersHorizontal, MapPin, Star, Clock, ChevronDown, Grid3X3, List } from 'lucide-react';
 import { useLocationStore, useBookingFlowStore } from '../../lib/store';
 import { calculateDistance } from '../../lib/mockData';
+import { api } from '../../lib/api';
 
 export default function SearchPage() {
   const { city, latitude, longitude } = useLocationStore();
-  const { services } = useBookingFlowStore();
+  const [services, setServices] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,6 +25,13 @@ export default function SearchPage() {
         setSearchQuery(query);
       }
     }
+    
+    // Fetch live services from mock sync API
+    api.services.list().then(res => {
+      if (res && res.data) {
+        setServices(res.data);
+      }
+    });
   }, []);
 
   // Helper to get distance
