@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ChevronRight, Star, Clock, MapPin, Shield, Phone, Mail, Calendar, Info } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocationStore } from '../../../../lib/store';
 import { getMerchantBySlug } from '../../../../lib/mockData';
+import { api } from '../../../../lib/api';
 
 export default function MerchantDetailPage() {
   const params = useParams();
@@ -15,8 +16,40 @@ export default function MerchantDetailPage() {
   const merchantSlug = params?.merchantSlug as string;
   const { city } = useLocationStore();
   const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [liveServices, setLiveServices] = useState<any[]>([]);
+  
+  useEffect(() => {
+    api.services.list({ merchantId: merchantSlug }).then(res => {
+      if (res && res.data && res.data.length > 0) {
+        setLiveServices(res.data);
+      } else {
+        // Fallback: search by name/slug if merchantId didn't return anything
+        api.services.list({ search: merchantSlug }).then(resFallback => {
+           if (resFallback && resFallback.data) {
+             setLiveServices(resFallback.data);
+           }
+        });
+      }
+    });
+  }, [merchantSlug]);
 
-  const merchant = getMerchantBySlug(merchantSlug, category, bookingType, city);
+  const mockMerchant = getMerchantBySlug(merchantSlug, category, bookingType, city);
+  const liveMerchantObj = liveServices.length > 0 ? liveServices[0].merchantObj : null;
+  
+  const merchant = {
+    ...mockMerchant,
+    name: liveMerchantObj?.name || mockMerchant.name || merchantSlug,
+    services: [
+      ...liveServices.map(ls => ({
+         id: ls.id,
+         name: ls.name,
+         desc: ls.shortDescription || ls.description,
+         duration: `${ls.durationMinutes} min`,
+         price: ls.basePrice
+      })),
+      ...mockMerchant.services
+    ]
+  };
 
   return (
     <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-300">

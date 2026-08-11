@@ -193,6 +193,7 @@ export const api = {
         if (params?.categorySlug) queryParams.append('categorySlug', params.categorySlug);
         if (params?.city) queryParams.append('city', params.city);
         if (params?.search) queryParams.append('search', params.search);
+        if (params?.merchantId) queryParams.append('merchantId', params.merchantId);
         
         const res = await fetch(`${baseUrl}/services?${queryParams.toString()}`);
         if (res.ok) {

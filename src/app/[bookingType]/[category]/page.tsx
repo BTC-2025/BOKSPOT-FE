@@ -1567,9 +1567,18 @@ export default function ProviderDiscoveryPage() {
           params.latitude = String(latitude);
           params.longitude = String(longitude);
         }
-        const response = await api.services.list(params);
+        let response = await api.services.list(params);
+        let list = Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : []);
+        
+        // Fallback: If empty, it's possible services were created under default 'general-service'
+        if (list.length === 0) {
+          const fallbackParams = { ...params, categorySlug: 'general-service' };
+          response = await api.services.list(fallbackParams);
+          list = Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : []);
+        }
+        
         if (active) {
-          setServicesList(Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : []));
+          setServicesList(list);
         }
       } catch (err: any) {
         console.error('Error fetching services:', err);
