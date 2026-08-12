@@ -215,15 +215,15 @@ export const api = {
             rating: srv.rating || 5,
             reviewCount: srv.reviewCount || 10,
             isFeatured: srv.isFeatured || false,
-            merchant: srv.merchant?.name || 'Merchant',
+            merchant: srv.metadata?.merchantName || srv.merchant?.name || 'Merchant',
             merchantObj: srv.merchant ? {
               id: srv.merchant.id,
-              name: srv.merchant.name,
+              name: srv.metadata?.merchantName || srv.merchant.name,
               city: srv.merchant.city,
               address: `${srv.merchant.city} Main Road`,
               rating: srv.merchant.rating || 5,
               reviewCount: srv.merchant.reviewCount || 10,
-              images: [],
+              images: srv.images && srv.images.length > 0 ? srv.images : [],
               tags: [],
               amenities: []
             } : undefined,
@@ -274,8 +274,12 @@ export const api = {
                 rating: srv.rating || 5,
                 reviewCount: srv.reviewCount || 10,
                 isFeatured: srv.isFeatured || false,
-                merchant: srv.merchant?.name || 'Merchant',
-                merchantObj: srv.merchant,
+                merchant: srv.metadata?.merchantName || srv.merchant?.name || 'Merchant',
+                merchantObj: srv.merchant ? {
+                  ...srv.merchant,
+                  name: srv.metadata?.merchantName || srv.merchant.name,
+                  images: srv.images && srv.images.length > 0 ? srv.images : []
+                } : undefined,
                 categoryObj: srv.category,
                 city: srv.merchant?.city || 'Chennai',
                 category: srv.category?.name || 'Category',

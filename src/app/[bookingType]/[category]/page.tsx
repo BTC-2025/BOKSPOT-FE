@@ -1830,56 +1830,61 @@ export default function ProviderDiscoveryPage() {
                   />
                 </div>
               ) : (
-                <div className="grid gap-4">
-                  {filteredServices.map((service, i) => {
-                    const dist = (latitude !== null && longitude !== null && service.merchant.latitude && service.merchant.longitude)
-                      ? `${calculateDistance(latitude, longitude, service.merchant.latitude, service.merchant.longitude)} km`
-                      : 'Nearby';
-
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Object.values(filteredServices.reduce((acc: any, service: any) => {
+                    const mId = service.merchantObj?.id || service.merchant;
+                    if (!acc[mId]) {
+                      const mObj = service.merchantObj || { name: service.merchant };
+                      acc[mId] = {
+                        merchantObj: mObj,
+                        categories: new Set(),
+                        dist: (latitude !== null && longitude !== null && mObj.latitude && mObj.longitude)
+                            ? `${calculateDistance(latitude, longitude, mObj.latitude, mObj.longitude)} km`
+                            : '4.5 km',
+                      };
+                    }
+                    if (service.name) {
+                       acc[mId].categories.add(service.name);
+                    }
+                    return acc;
+                  }, {})).map((group: any, i) => {
+                    const m = group.merchantObj;
+                    const chips = Array.from(group.categories).slice(0, 3);
                     return (
                       <motion.div
-                        key={service.id}
+                        key={m.id || m.name || i}
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.06 }}
                       >
-                        <Link href={`/service/${service.id}`}>
-                          <div className="group glass-card p-5 md:p-6 flex gap-5 cursor-pointer hover:border-[var(--border-strong)] transition-all">
-                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-[var(--border-subtle)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                              {service.images && service.images[0] ? (
-                                <img src={service.images[0]} alt={service.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <span className="text-3xl">✨</span>
-                              )}
+                        <Link href={`/${bookingType}/${category}/${encodeURIComponent(m.name)}`}>
+                          <div className="group flex flex-col h-full bg-[var(--bg-surface)] rounded-2xl overflow-hidden border border-[var(--border-subtle)] hover:border-[var(--border-strong)] transition-all cursor-pointer shadow-sm hover:shadow-md">
+                            {/* Card Image */}
+                            <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-indigo-500/20 to-purple-500/20 shrink-0">
+                              <img 
+                                src={m.images && m.images[0] ? m.images[0] : `https://picsum.photos/seed/${m.name}/600/400`} 
+                                alt={m.name} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                              />
                             </div>
 
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="font-bold text-base md:text-lg truncate text-[var(--text-primary)]">{service.name}</h3>
-                                    {service.merchant.isVerified && (
-                                      <Shield size={14} className="text-blue-400 shrink-0" />
-                                    )}
-                                  </div>
-                                  <p className="text-sm font-semibold text-indigo-400 mb-1">{service.merchant.name}</p>
-                                  <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)] mb-2 flex-wrap">
-                                    <div className="flex items-center gap-1">
-                                      <Star size={13} className="text-amber-400 fill-amber-400" />
-                                      <span className="text-[var(--text-primary)] font-semibold">{service.rating}</span>
-                                      <span>({service.reviewCount})</span>
-                                    </div>
-                                    <span className="text-[var(--border-strong)]">•</span>
-                                    <div className="flex items-center gap-1">
-                                      <MapPin size={13} />
-                                      {dist}
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="text-right shrink-0">
-                                  <div className="text-lg font-bold text-[var(--text-primary)]">₹{service.basePrice}</div>
-                                  <button className="btn-primary text-xs py-2 px-4 mt-2 rounded-lg">Book Now</button>
-                                </div>
+                            {/* Card Body */}
+                            <div className="p-4 flex flex-col flex-1">
+                              <h3 className="font-bold text-lg text-[var(--text-primary)] truncate mb-1">{m.name}</h3>
+                              
+                              <div className="flex items-center text-xs text-[var(--text-secondary)] font-semibold mb-4">
+                                <span>{group.dist}</span>
+                                <span className="mx-1.5 text-[var(--border-strong)]">•</span>
+                                <span className="truncate">{city || 'Chennai'}</span>
+                              </div>
+
+                              {/* Tags/Chips */}
+                              <div className="flex flex-wrap gap-2 mt-auto">
+                                {chips.map((chip: any, idx) => (
+                                  <span key={idx} className="bg-[var(--bg-base)] border border-[var(--border-subtle)] px-2.5 py-1 rounded-full text-[10px] font-bold text-[var(--text-secondary)] truncate max-w-[120px]">
+                                    {chip}
+                                  </span>
+                                ))}
                               </div>
                             </div>
                           </div>

@@ -58,10 +58,7 @@ export default function SearchPage() {
       svc.category.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || svc.category === selectedCategory;
     
-    // Automatically limit to major services (rating >= 4.6) if there is no search query or category selected
-    const matchesMajor = searchQuery || selectedCategory !== 'All' || svc.rating >= 4.6;
-
-    return matchesLocation && matchesSearch && matchesCategory && matchesMajor;
+    return matchesLocation && matchesSearch && matchesCategory;
   });
 
   // Sort services

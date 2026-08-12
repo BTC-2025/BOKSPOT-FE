@@ -195,14 +195,25 @@ export default function ServiceDetailPage() {
               <p className="text-[var(--text-secondary)] leading-relaxed">
                 {service.desc || service.description || 'No description provided.'}
               </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {['Consultation', 'Hair Wash', 'Precision Cut', 'Styling', 'Finishing'].map((item) => (
-                  <span key={item} className="flex items-center gap-1 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700">
-                    <Check className="h-3.5 w-3.5" /> {item}
-                  </span>
-                ))}
-              </div>
             </div>
+
+            {/* Metadata (Dynamic Config Rendering) */}
+            {service.metadata && Object.keys(service.metadata).length > 0 && (
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-primary)] p-6">
+                <h2 className="font-semibold text-lg mb-3">Hotel Specifics</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(service.metadata).map(([key, val]) => (
+                    <div key={key} className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                      <div className="h-2 w-2 rounded-full bg-[var(--primary)]"></div>
+                      <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                      <span className="font-medium text-[var(--text-primary)]">
+                        {typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Reviews */}
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-primary)] p-6">

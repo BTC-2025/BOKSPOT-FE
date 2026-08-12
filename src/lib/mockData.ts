@@ -13,9 +13,13 @@ export interface MockService {
   lng?: number;
   desc?: string;
   customCommissionRate?: number;
+  metadata?: Record<string, any>;
 }
 
 export const MOCK_SERVICES: MockService[] = [
+  // H101 Hotel Demo
+  { id: 'svc-h101', name: 'Deluxe Suite', merchant: 'Grand Hotel', price: 2500, rating: 4.8, reviews: 342, duration: 1440, city: 'Chennai', image: 'https://picsum.photos/seed/h101/400/250', category: 'Hotel Booking', lat: 13.085, lng: 80.275, metadata: { bedSize: 'King', maxGuests: 2, hasAC: true, hasWiFi: true, hasBreakfast: true } },
+  
   // Chennai (2 services)
   { id: 'svc-1', name: 'Premium Haircut', merchant: 'Style Studio', price: 599, rating: 4.8, reviews: 234, duration: 45, city: 'Chennai', image: 'https://picsum.photos/seed/10/400/250', category: 'Salon / Spa Appointment', lat: 13.085, lng: 80.275 },
   { id: 'svc-2', name: 'Yoga Class', merchant: 'ZenFit', price: 499, rating: 4.9, reviews: 189, duration: 60, city: 'Chennai', image: 'https://picsum.photos/seed/11/400/250', category: 'Gym / Yoga Slot Booking', lat: 13.078, lng: 80.268 },
@@ -272,13 +276,18 @@ export function getMerchantBySlug(merchantSlug: string, category: string, bookin
   }
 
   const parts = merchantSlug.split('-');
-  const index = parts.pop() || '1';
+  let indexStr = parts.pop() || '1';
+  let index = parseInt(indexStr);
+  if (isNaN(index)) {
+    index = 1;
+    parts.push(indexStr); // Put the word back if it wasn't a number
+  }
   const categorySlug = parts.join('-');
   const categoryFormatted = categorySlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
   const names = ['Care', 'Studio', 'Pro', 'Express', 'Hub', 'Specialists'];
-  const nameIdx = (categorySlug.length + parseInt(index)) % names.length;
-  const merchantName = `${categoryFormatted} ${names[nameIdx]}`;
+  const nameIdx = (categorySlug.length + index) % names.length;
+  const merchantName = categoryFormatted ? `${categoryFormatted} ${names[nameIdx]}` : merchantSlug;
 
   return {
     name: merchantName,
