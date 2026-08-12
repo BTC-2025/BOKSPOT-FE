@@ -66,8 +66,8 @@ export default function SearchPage() {
 
   // Sort services
   const sortedServices = [...filteredServices].sort((a, b) => {
-    if (sortBy === 'price-low') return a.price - b.price;
-    if (sortBy === 'price-high') return b.price - a.price;
+    if (sortBy === 'price-low') return (a.basePrice || 0) - (b.basePrice || 0);
+    if (sortBy === 'price-high') return (b.basePrice || 0) - (a.basePrice || 0);
     if (sortBy === 'rating') return b.rating - a.rating;
     
     // Sort by proximity by default if GPS coordinates are available
@@ -216,11 +216,11 @@ export default function SearchPage() {
                             <span>({service.reviews})</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" /> {service.duration} min
+                            <Clock className="h-3.5 w-3.5" /> {service.durationMinutes} min
                           </div>
                         </div>
                         <div className="mt-3 pt-3 border-t border-[color:var(--color-outline-variant)]/20 flex items-center justify-between">
-                          <span className="text-base font-black text-[color:var(--color-primary)]">₹{service.price}</span>
+                          <span className="text-base font-black text-[color:var(--color-primary)]">₹{service.basePrice}</span>
                           <span className="rounded-lg bg-[color:var(--color-primary)]/10 px-3 py-1.5 text-xs font-semibold text-[color:var(--color-primary)] border border-[color:var(--color-primary)]/20">Book Now</span>
                         </div>
                       </div>
