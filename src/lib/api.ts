@@ -253,9 +253,36 @@ export const api = {
     },
     byId: async (id: string) => {
       try {
-        const listRes = await api.services.list();
-        const found = listRes.data?.find((s: any) => s.id === id);
-        if (found) return found;
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+        const res = await fetch(`${baseUrl}/services/${id}`);
+        if (res.ok) {
+          const body = await res.json();
+          if (body.data) {
+             const srv = body.data;
+             return {
+                id: srv.id,
+                name: srv.name,
+                slug: srv.slug || srv.id,
+                description: srv.description,
+                shortDescription: srv.shortDescription || srv.description?.substring(0, 50),
+                serviceType: srv.serviceType || srv.name,
+                basePrice: srv.basePrice || 0,
+                currency: srv.currency || 'INR',
+                durationMinutes: srv.durationMinutes || 60,
+                images: (srv.images && srv.images.length > 0) ? srv.images : ['https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80'],
+                image: (srv.images && srv.images.length > 0 && srv.images[0]) ? srv.images[0] : 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80',
+                rating: srv.rating || 5,
+                reviewCount: srv.reviewCount || 10,
+                isFeatured: srv.isFeatured || false,
+                merchant: srv.merchant?.name || 'Merchant',
+                merchantObj: srv.merchant,
+                categoryObj: srv.category,
+                city: srv.merchant?.city || 'Chennai',
+                category: srv.category?.name || 'Category',
+                rawConfig: srv 
+             };
+          }
+        }
       } catch (err) {
         console.warn('Backend service details error, falling back to static parser:', err);
       }
