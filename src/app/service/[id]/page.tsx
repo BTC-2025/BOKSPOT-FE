@@ -69,8 +69,8 @@ export default function ServiceDetailPage() {
           };
           setService(mapped);
           
-          if (listingId && rawService.rawConfig?.metadata?.listings) {
-            const listings = rawService.rawConfig.metadata.listings;
+          if (listingId && (rawService as any).rawConfig?.metadata?.listings) {
+            const listings = (rawService as any).rawConfig.metadata.listings;
             const found = listings.find((l: any) => l.id === listingId || rawService.id + '-' + (l.name || l.title || rawService.name) === listingId);
             if (found) setListingContext(found);
           }

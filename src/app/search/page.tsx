@@ -17,6 +17,8 @@ export default function SearchPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState<'relevance' | 'price-low' | 'price-high' | 'rating'>('relevance');
 
+  const categories = ['All', 'Hotels', 'Salons', 'Dining', 'Fitness', 'Sports', 'Wellness', 'Events'];
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);

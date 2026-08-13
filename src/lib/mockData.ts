@@ -296,7 +296,7 @@ export function getMerchantBySlug(merchantSlug: string, category: string, bookin
     reviewCount: 145,
     city: activeCity,
     address: `${Math.floor(categorySlug.length * 7)} Main Road, Block ${index}`,
-    distance: `${(1.2 + parseInt(index) * 0.9).toFixed(1)} km`,
+    distance: `${(1.2 + index * 0.9).toFixed(1)} km`,
     phone: `+91 90000 00${index}00`,
     email: `contact@${categorySlug}-${index}.com`,
     isVerified: true,
