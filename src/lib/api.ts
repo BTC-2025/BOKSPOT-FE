@@ -255,9 +255,19 @@ export const api = {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
         const res = await fetch(`${baseUrl}/services/${id}`);
-        if (res.ok) {
-          const body = await res.json();
-          if (body.data) {
+        
+        if (!res.ok) {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+              const errorData = await res.json();
+              throw new Error(errorData.error?.message || 'Failed to fetch service');
+          } else {
+              throw new Error(`Server Error: ${res.status} ${res.statusText}`);
+          }
+        }
+        
+        const body = await res.json();
+        if (body.data) {
              const srv = body.data;
              return {
                 id: srv.id,
@@ -285,7 +295,6 @@ export const api = {
                 category: srv.category?.name || 'Category',
                 rawConfig: srv 
              };
-          }
         }
       } catch (err) {
         console.warn('Backend service details error, falling back to static parser:', err);

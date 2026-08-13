@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { Star, Clock, MapPin, Heart, Share2, ChevronLeft, ChevronRight, Check, Users, ArrowLeft, AlertCircle } from 'lucide-react';
+import { useParams, useSearchParams } from 'next/navigation';
+import { Star, Clock, MapPin, Heart, Share2, ChevronLeft, ChevronRight, Check, Users, ArrowLeft, AlertCircle, Info, Tag, AlertTriangle } from 'lucide-react';
 import { api } from '../../../lib/api';
 import { useBookingFlowStore } from '../../../lib/store';
 
@@ -18,10 +18,13 @@ const mockSlots = Array.from({ length: 16 }, (_, i) => ({
 
 export default function ServiceDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params?.id as string;
+  const listingId = searchParams?.get('listing');
   const { setSelectedService, setSelectedSlot } = useBookingFlowStore();
 
   const [service, setService] = useState<any | null>(null);
+  const [listingContext, setListingContext] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(0);
@@ -31,12 +34,15 @@ export default function ServiceDetailPage() {
 
   // Derived dynamic config
   const rawConfig = service?.rawConfig || {};
-  const isTimingEnabled = rawConfig.isTimingEnabled ?? true;
-  const isCapacityEnabled = rawConfig.isCapacityEnabled ?? false;
-  const isAddonsEnabled = rawConfig.isAddonsEnabled ?? false;
+  // Prefer listing properties if available, fallback to service config
+  const configSource = listingContext || rawConfig;
+  
+  const isTimingEnabled = configSource.isTimingEnabled ?? rawConfig.isTimingEnabled ?? true;
+  const isCapacityEnabled = configSource.isCapacityEnabled ?? rawConfig.isCapacityEnabled ?? false;
+  const isAddonsEnabled = configSource.isAddonsEnabled ?? rawConfig.isAddonsEnabled ?? false;
   
   // Calculate total price based on addons and base price
-  const basePrice = service?.price || 0;
+  const basePrice = listingContext?.price || service?.price || 0;
   const addonsTotal = selectedAddons.reduce((acc, curr) => acc + (curr.price || 0), 0);
   const totalPrice = basePrice + addonsTotal;
 
@@ -62,6 +68,12 @@ export default function ServiceDetailPage() {
             desc: rawService.description,
           };
           setService(mapped);
+          
+          if (listingId && rawService.rawConfig?.metadata?.listings) {
+            const listings = rawService.rawConfig.metadata.listings;
+            const found = listings.find((l: any) => l.id === listingId || rawService.id + '-' + (l.name || l.title || rawService.name) === listingId);
+            if (found) setListingContext(found);
+          }
         }
       } catch (err: any) {
         console.error('Error fetching service details:', err);
@@ -90,11 +102,11 @@ export default function ServiceDetailPage() {
   });
 
   const handleBookNow = (e: React.MouseEvent) => {
-    if (!localSelectedSlot || !service) {
+    if (!service || (isTimingEnabled && !localSelectedSlot)) {
       e.preventDefault();
       return;
     }
-    const slotObj = mockSlots.find(s => s.id === localSelectedSlot);
+    const slotObj = isTimingEnabled ? mockSlots.find(s => s.id === localSelectedSlot) : undefined;
     setSelectedService(service);
     setSelectedSlot({
       date: dates[selectedDate].full,
@@ -142,7 +154,7 @@ export default function ServiceDetailPage() {
               <ChevronRight size={14} />
               <Link href="/search" className="hover:text-[var(--text-primary)] transition-colors">Search</Link>
               <ChevronRight size={14} />
-              <span className="text-[var(--text-primary)]">{service.name}</span>
+              <span className="text-[var(--text-primary)]">{listingContext?.name || listingContext?.title || service.name}</span>
             </div>
           </div>
         </div>
@@ -151,11 +163,11 @@ export default function ServiceDetailPage() {
       <div className="pt-16">
         {/* Image Gallery */}
         <div className="relative h-[300px] sm:h-[400px] bg-gradient-to-br from-indigo-600 to-purple-700">
-        <img src={service.image} alt={service.name} className="w-full h-full object-cover opacity-80" />
+        <img src={listingContext?.imageUrl || service.image} alt={listingContext?.name || listingContext?.title || service.name} className="w-full h-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-6 left-6 right-6">
           <span className="inline-block rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-medium text-white mb-2">{service.category}</span>
-          <h1 className="text-3xl font-bold text-white">{service.name}</h1>
+          <h1 className="text-3xl font-bold text-white">{listingContext?.name || listingContext?.title || service.name}</h1>
           <p className="text-white/70 mt-1 flex items-center gap-2"><MapPin className="h-4 w-4" /> {service.merchant} · {service.city}</p>
         </div>
         <div className="absolute top-4 right-4 flex gap-2">
@@ -176,7 +188,7 @@ export default function ServiceDetailPage() {
             <div className="flex flex-wrap gap-4">
               {[
                 { icon: Star, value: `${service.rating}`, label: `${service.reviews} reviews`, color: 'text-yellow-500' },
-                { icon: Clock, value: `${service.duration} min`, label: 'Duration', color: 'text-blue-500' },
+                { icon: Clock, value: `${listingContext?.duration || service.duration} min`, label: 'Duration', color: 'text-blue-500' },
                 { icon: Users, value: `${Math.round(service.rating * service.reviews * 1.5)}+`, label: 'Bookings', color: 'text-green-500' },
               ].map((stat) => (
                 <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] px-4 py-3">
@@ -193,9 +205,52 @@ export default function ServiceDetailPage() {
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-primary)] p-6">
               <h2 className="font-semibold text-lg mb-3">About this service</h2>
               <p className="text-[var(--text-secondary)] leading-relaxed">
-                {service.desc || service.description || 'No description provided.'}
+                {listingContext?.description || service.desc || service.description || 'No description provided.'}
               </p>
             </div>
+            
+            {/* Dynamic Features from Business Configuration */}
+            {rawConfig.isOffersEnabled && rawConfig.offersAndDiscounts && (
+              <div className="rounded-2xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 p-6 flex items-start gap-4">
+                <div className="p-3 bg-emerald-500/20 rounded-full text-emerald-600"><Tag size={24} /></div>
+                <div>
+                  <h3 className="text-emerald-700 font-bold text-lg mb-1">Special Offers & Discounts</h3>
+                  <p className="text-emerald-600/80 text-sm font-medium">{rawConfig.offersAndDiscounts}</p>
+                </div>
+              </div>
+            )}
+            
+            {(rawConfig.isRestrictionsEnabled || rawConfig.isTipsEnabled || rawConfig.isInstructionsEnabled) && (
+              <div className="space-y-4">
+                {rawConfig.isRestrictionsEnabled && rawConfig.restrictions && (
+                  <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 flex items-start gap-3">
+                    <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={20} />
+                    <div>
+                      <h3 className="font-bold text-red-700 text-sm mb-1">Restrictions & Rules</h3>
+                      <p className="text-sm text-red-600/80 leading-relaxed">{rawConfig.restrictions}</p>
+                    </div>
+                  </div>
+                )}
+                {rawConfig.isInstructionsEnabled && rawConfig.specialInstructions && (
+                  <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-5 flex items-start gap-3">
+                    <Info className="text-blue-500 shrink-0 mt-0.5" size={20} />
+                    <div>
+                      <h3 className="font-bold text-blue-700 text-sm mb-1">Special Instructions</h3>
+                      <p className="text-sm text-blue-600/80 leading-relaxed">{rawConfig.specialInstructions}</p>
+                    </div>
+                  </div>
+                )}
+                {rawConfig.isTipsEnabled && rawConfig.tipsAndGuidelines && (
+                  <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 flex items-start gap-3">
+                    <Check className="text-emerald-500 shrink-0 mt-0.5" size={20} />
+                    <div>
+                      <h3 className="font-bold text-[var(--text-primary)] text-sm mb-1">Tips & Guidelines</h3>
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{rawConfig.tipsAndGuidelines}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Metadata (Dynamic Config Rendering) */}
             {service.metadata && Object.keys(service.metadata).length > 0 && (
@@ -244,8 +299,8 @@ export default function ServiceDetailPage() {
           <div className="lg:col-span-1">
             <div className="sticky top-20 rounded-2xl border border-[var(--border)] bg-[var(--bg-primary)] p-6 shadow-lg">
               <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-[var(--primary)]">₹{service.price}</div>
-                <div className="text-sm text-[var(--text-muted)]">per session</div>
+                <div className="text-3xl font-bold text-[var(--primary)]">₹{basePrice}</div>
+                <div className="text-sm text-[var(--text-muted)]">base price</div>
               </div>
 
               {/* Date Selector */}

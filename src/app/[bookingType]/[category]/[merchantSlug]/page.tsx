@@ -21,6 +21,10 @@ export default function MerchantDetailPage() {
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   
+  // New states for category selection modal
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [selectedCategoryForBooking, setSelectedCategoryForBooking] = useState<string | null>(null);
+  
   useEffect(() => {
     api.services.list({ merchantId: merchantSlug }).then(res => {
       if (res && res.data && res.data.length > 0) {
@@ -47,7 +51,9 @@ export default function MerchantDetailPage() {
           if (listings.length > 0) {
             return listings.map((list: any) => ({
               id: list.id || ls.id + '-' + (list.name || list.title || ls.name),
+              serviceId: ls.id,
               name: list.name || list.title || ls.name,
+              categoryName: ls.name,
               desc: list.description || ls.shortDescription || ls.description,
               duration: `${ls.durationMinutes || 60} min`,
               price: list.price || ls.basePrice,
@@ -56,7 +62,9 @@ export default function MerchantDetailPage() {
           }
           return [{
              id: ls.id,
+             serviceId: ls.id,
              name: ls.name,
+             categoryName: ls.name,
              desc: ls.shortDescription || ls.description,
              duration: `${ls.durationMinutes || 60} min`,
              price: ls.basePrice,
@@ -66,7 +74,16 @@ export default function MerchantDetailPage() {
       : mockMerchant.services
   };
 
+  const categoryOptions = Array.from(new Set(merchant.services.map(s => s.categoryName || s.name))).map(catName => ({
+    name: String(catName),
+    count: merchant.services.filter(s => (s.categoryName || s.name) === catName).length
+  }));
+
   if (viewState === 'booking') {
+    const filteredServices = selectedCategoryForBooking 
+      ? merchant.services.filter(s => (s.categoryName || s.name) === selectedCategoryForBooking)
+      : merchant.services;
+
     return (
       <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
         {/* District.in Style Header for Booking Selection */}
@@ -112,9 +129,9 @@ export default function MerchantDetailPage() {
 
             {/* Inventory / Rooms */}
             <div>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)] mb-4">{merchant.services.length} Rooms Available</h2>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)] mb-4">{filteredServices.length} Rooms Available</h2>
               <div className="space-y-4">
-                {merchant.services.map((service, index) => {
+                {filteredServices.map((service, index) => {
                   const isSelected = selectedRoom === service.id;
                   return (
                     <label 
@@ -162,11 +179,18 @@ export default function MerchantDetailPage() {
               className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--bg-base)] border-t border-[var(--border-subtle)] z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]"
             >
               <div className="max-w-3xl mx-auto">
-                <Link href={`/service/${selectedRoom}`} className="block w-full">
-                  <button className="w-full bg-[var(--text-primary)] text-[var(--bg-base)] font-black uppercase tracking-widest text-sm py-4 rounded-xl shadow-xl hover:opacity-90 active:scale-[0.99] transition-all">
-                    Proceed to Booking
-                  </button>
-                </Link>
+                {(() => {
+                   const sRoom = merchant.services.find(s => s.id === selectedRoom);
+                   const validServiceId = sRoom?.serviceId || sRoom?.id || selectedRoom;
+                   const href = sRoom ? `/service/${validServiceId}?listing=${sRoom.id}` : `/service/${selectedRoom}`;
+                   return (
+                     <Link href={href} className="block w-full">
+                       <button className="w-full bg-[var(--text-primary)] text-[var(--bg-base)] font-black uppercase tracking-widest text-sm py-4 rounded-xl shadow-xl hover:opacity-90 active:scale-[0.99] transition-all">
+                         Proceed to Booking
+                       </button>
+                     </Link>
+                   );
+                })()}
               </div>
             </motion.div>
           )}
@@ -226,13 +250,20 @@ export default function MerchantDetailPage() {
           <div className="lg:col-span-2 space-y-10">
             {/* Category Tag */}
             <div>
-              <h2 className="text-lg font-bold mb-3">{merchant.services.length} Option{merchant.services.length !== 1 ? 's' : ''} available</h2>
+              <h2 className="text-lg font-bold mb-3">{categoryOptions.length} Option{categoryOptions.length !== 1 ? 's' : ''} available</h2>
               <div className="flex flex-wrap gap-2">
-                {Array.from(new Set(merchant.services.map(s => s.name))).map((serviceName, idx) => (
-                  <div key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-secondary)]">
+                {categoryOptions.map((cat, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => {
+                      setSelectedCategoryForBooking(cat.name);
+                      setViewState('booking');
+                    }}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-secondary)] hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] transition-all cursor-pointer"
+                  >
                     <CheckCircle2 size={14} className="text-emerald-400" />
-                    {serviceName}
-                  </div>
+                    {cat.name}
+                  </button>
                 ))}
               </div>
             </div>
@@ -287,10 +318,10 @@ export default function MerchantDetailPage() {
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
               <button 
-                onClick={() => setViewState('booking')}
+                onClick={() => setIsCategoryModalOpen(true)}
                 className="w-full bg-[var(--text-primary)] text-[var(--bg-base)] py-5 rounded-2xl font-black text-lg tracking-wide hover:opacity-90 active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
               >
-                Book Slots
+                Book
               </button>
 
               <div className="border border-[var(--border-subtle)] rounded-2xl p-5 bg-[var(--bg-surface)]/50">
@@ -307,6 +338,54 @@ export default function MerchantDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Category Selection Modal */}
+      <AnimatePresence>
+        {isCategoryModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              onClick={() => setIsCategoryModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 20 }} 
+              className="relative w-full max-w-2xl bg-[var(--bg-base)] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+            >
+              <div className="p-6 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                <h2 className="text-xl font-black">Select Category</h2>
+                <button onClick={() => setIsCategoryModalOpen(false)} className="p-2 rounded-full hover:bg-[var(--bg-surface)] transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {categoryOptions.map((cat, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedCategoryForBooking(cat.name);
+                        setIsCategoryModalOpen(false);
+                        setViewState('booking');
+                      }}
+                      className="flex flex-col text-left p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)] hover:shadow-md transition-all group"
+                    >
+                      <h3 className="font-bold text-[var(--text-primary)] text-lg mb-1">{cat.name}</h3>
+                      <p className="text-sm font-semibold text-[var(--text-secondary)]">
+                        {cat.count} {cat.count === 1 ? 'option' : 'options'}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
