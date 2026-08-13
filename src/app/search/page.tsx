@@ -185,16 +185,11 @@ export default function SearchPage() {
           ) : (
             <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
               {merchantResults.map((service, i) => {
-                const bTypeMap: Record<string, string> = {
-                  'hotels': 'stay-accommodation',
-                  'resorts': 'stay-accommodation',
-                  'turfs': 'sports-recreation',
-                  'salons': 'personal-care'
-                };
-                const catSlug = service.categoryObj?.slug || service.category?.replace(/\s+/g, '-').toLowerCase() || 'hotels';
-                const bType = bTypeMap[catSlug] || service.serviceType?.replace(/\s+/g, '-').toLowerCase() || 'stay';
-                const mSlug = service.merchantObj?.slug || service.merchantObj?.id || service.merchant?.replace(/\s+/g, '-').toLowerCase() || 'merchant';
-                const mHref = `/${bType}/${catSlug}/${mSlug}`;
+                const slugify = (text: string) => text.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                const bType = slugify(service.serviceType || 'stay');
+                const cat = slugify(service.category || 'hotels');
+                const mSlug = service.merchantObj?.slug || service.merchantObj?.id || slugify(service.merchant || 'merchant');
+                const mHref = `/${bType}/${cat}/${mSlug}`;
                 
                 return (
                 <motion.div
