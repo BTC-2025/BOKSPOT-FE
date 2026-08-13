@@ -186,7 +186,9 @@ export const api = {
     },
     list: async (params?: Record<string, string>) => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+        const baseUrl = API_BASE;
         
         // Build query string
         const queryParams = new URLSearchParams();
@@ -195,7 +197,8 @@ export const api = {
         if (params?.search) queryParams.append('search', params.search);
         if (params?.merchantId) queryParams.append('merchantId', params.merchantId);
         
-        const res = await fetch(`${baseUrl}/services?${queryParams.toString()}`);
+        const res = await fetch(`${baseUrl}/services?${queryParams.toString()}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         if (res.ok) {
           const body = await res.json();
           // Map Prisma Backend output to the frontend interface
@@ -253,8 +256,11 @@ export const api = {
     },
     byId: async (id: string) => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
-        const res = await fetch(`${baseUrl}/services/${id}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+        const baseUrl = API_BASE;
+        const res = await fetch(`${baseUrl}/services/${id}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         
         if (!res.ok) {
           const contentType = res.headers.get("content-type");
