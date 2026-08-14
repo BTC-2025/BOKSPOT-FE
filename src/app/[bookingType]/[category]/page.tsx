@@ -1832,9 +1832,9 @@ export default function ProviderDiscoveryPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {Object.values(filteredServices.reduce((acc: any, service: any) => {
-                    const mId = service.merchantObj?.id || service.merchant;
+                    const mId = service.merchantObj?.id || (typeof service.merchant === 'string' ? service.merchant : service.merchant?.id) || 'unknown';
                     if (!acc[mId]) {
-                      const mObj = service.merchantObj || { name: service.merchant };
+                      const mObj = service.merchantObj || (typeof service.merchant === 'string' ? { id: service.merchant, name: service.merchant } : service.merchant) || { name: 'BokSpot Merchant', id: 'unknown' };
                       acc[mId] = {
                         merchantObj: mObj,
                         categories: new Set(),
@@ -1857,12 +1857,12 @@ export default function ProviderDiscoveryPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.06 }}
                       >
-                        <Link href={`/${bookingType}/${category}/${encodeURIComponent(m.name)}`}>
+                        <Link href={`/${bookingType}/${category}/${m.id}`}>
                           <div className="group flex flex-col h-full bg-[var(--bg-surface)] rounded-2xl overflow-hidden border border-[var(--border-subtle)] hover:border-[var(--border-strong)] transition-all cursor-pointer shadow-sm hover:shadow-md">
                             {/* Card Image */}
                             <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-indigo-500/20 to-purple-500/20 shrink-0">
                               <img 
-                                src={m.images && m.images[0] ? m.images[0] : `https://picsum.photos/seed/${m.name}/600/400`} 
+                                src={m.images && m.images[0] ? m.images[0] : `https://picsum.photos/seed/${m.id}/600/400`} 
                                 alt={m.name} 
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                               />
@@ -1879,13 +1879,15 @@ export default function ProviderDiscoveryPage() {
                               </div>
 
                               {/* Tags/Chips */}
-                              <div className="flex flex-wrap gap-2 mt-auto">
-                                {chips.map((chip: any, idx) => (
-                                  <span key={idx} className="bg-[var(--bg-base)] border border-[var(--border-subtle)] px-2.5 py-1 rounded-full text-[10px] font-bold text-[var(--text-secondary)] truncate max-w-[120px]">
-                                    {chip}
-                                  </span>
-                                ))}
-                              </div>
+                              {chips.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-auto">
+                                  {chips.map((chip: any, idx: number) => (
+                                    <span key={idx} className="bg-[var(--bg-base)] border border-[var(--border-subtle)] px-2.5 py-1 rounded-full text-[10px] font-bold text-[var(--text-secondary)] truncate max-w-[120px]">
+                                      {chip}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </Link>

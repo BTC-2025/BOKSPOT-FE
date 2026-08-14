@@ -1,50 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { useParams, useSearchParams } from 'next/navigation';
-import { Star, Clock, MapPin, Heart, Share2, ChevronLeft, ChevronRight, Check, Users, ArrowLeft, AlertCircle, Info, Tag, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Clock, Plus, Minus, Info, AlertTriangle } from 'lucide-react';
 import { api } from '../../../lib/api';
 import { useBookingFlowStore } from '../../../lib/store';
 
-const mockSlots = Array.from({ length: 16 }, (_, i) => ({
+const DUMMY_SLOTS = Array.from({ length: 8 }, (_, i) => ({
   id: `slot-${i}`,
-  time: `${9 + Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`,
-  available: Math.random() > 0.3,
-  price: 599,
-  remaining: Math.floor(Math.random() * 5) + 1,
+  timeStr: `${(i + 9) > 12 ? (i + 9) - 12 : (i + 9)}:00 ${i + 9 >= 12 ? 'PM' : 'AM'} - ${(i + 10) > 12 ? (i + 10) - 12 : (i + 10)}:00 ${i + 10 >= 12 ? 'PM' : 'AM'}`,
+  available: Math.random() > 0.2,
+  remaining: Math.floor(Math.random() * 4) + 1,
 }));
 
-export default function ServiceDetailPage() {
+export default function DistrictServiceDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const id = params?.id as string;
   const listingId = searchParams?.get('listing');
   const { setSelectedService, setSelectedSlot } = useBookingFlowStore();
 
   const [service, setService] = useState<any | null>(null);
-  const [listingContext, setListingContext] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState(0);
-  const [localSelectedSlot, setLocalSelectedSlot] = useState<string | null>(null);
-  const [selectedCapacity, setSelectedCapacity] = useState<number>(1);
-  const [selectedAddons, setSelectedAddons] = useState<any[]>([]);
 
-  // Derived dynamic config
-  const rawConfig = service?.rawConfig || {};
-  // Prefer listing properties if available, fallback to service config
-  const configSource = listingContext || rawConfig;
-  
-  const isTimingEnabled = configSource.isTimingEnabled ?? rawConfig.isTimingEnabled ?? true;
-  const isCapacityEnabled = configSource.isCapacityEnabled ?? rawConfig.isCapacityEnabled ?? false;
-  const isAddonsEnabled = configSource.isAddonsEnabled ?? rawConfig.isAddonsEnabled ?? false;
-  
-  // Calculate total price based on addons and base price
-  const basePrice = listingContext?.price || service?.price || 0;
-  const addonsTotal = selectedAddons.reduce((acc, curr) => acc + (curr.price || 0), 0);
-  const totalPrice = basePrice + addonsTotal;
+  const [selectedDateIdx, setSelectedDateIdx] = useState(0);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [selectedListings, setSelectedListings] = useState<string[]>([]);
+  const [durationHr, setDurationHr] = useState(1);
 
   useEffect(() => {
     let active = true;
@@ -57,332 +42,205 @@ export default function ServiceDetailPage() {
           const mapped = {
             ...rawService,
             price: parseFloat(rawService.basePrice),
-            merchant: rawService.merchant.name,
-            city: rawService.merchant.city,
-            duration: rawService.durationMinutes,
-            reviews: rawService.reviewCount,
-            image: rawService.images[0] || '✨',
-            category: rawService.category.name,
-            lat: rawService.merchant.latitude,
-            lng: rawService.merchant.longitude,
-            desc: rawService.description,
+            merchant: rawService.merchant?.name || 'Venue',
+            category: rawService.category?.name || 'Category',
           };
           setService(mapped);
           
-          if (listingId && (rawService as any).rawConfig?.metadata?.listings) {
-            const listings = (rawService as any).rawConfig.metadata.listings;
-            const found = listings.find((l: any) => l.id === listingId || rawService.id + '-' + (l.name || l.title || rawService.name) === listingId);
-            if (found) setListingContext(found);
+          if (listingId && selectedListings.length === 0) {
+            setSelectedListings([listingId]);
           }
         }
       } catch (err: any) {
-        console.error('Error fetching service details:', err);
-        if (active) {
-          setError(err.message || 'Failed to load service details.');
-        }
+        if (active) setError(err.message || 'Failed to load service details.');
       } finally {
-        if (active) {
-          setLoading(false);
-        }
+        if (active) setLoading(false);
       }
     };
-
-    if (id) {
-      fetchService();
-    }
-    return () => {
-      active = false;
-    };
+    if (id) fetchService();
+    return () => { active = false; };
   }, [id]);
 
-  const dates = Array.from({ length: 7 }, (_, i) => {
+  const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
-    return { day: d.toLocaleDateString('en', { weekday: 'short' }), date: d.getDate(), month: d.toLocaleDateString('en', { month: 'short' }), full: d.toISOString().split('T')[0] };
+    return {
+      dateObj: d,
+      month: d.toLocaleString('default', { month: 'short' }).toUpperCase(),
+      dayName: d.toLocaleString('default', { weekday: 'short' }),
+      dayNum: d.getDate(),
+    };
   });
 
-  const handleBookNow = (e: React.MouseEvent) => {
-    if (!service || (isTimingEnabled && !localSelectedSlot)) {
-      e.preventDefault();
-      return;
+  const toggleListing = (lid: string) => {
+    if (selectedListings.includes(lid)) {
+      setSelectedListings(selectedListings.filter(l => l !== lid));
+    } else {
+      setSelectedListings([...selectedListings, lid]);
     }
-    const slotObj = isTimingEnabled ? mockSlots.find(s => s.id === localSelectedSlot) : undefined;
+  };
+
+  const handleProceed = () => {
+    if (selectedListings.length === 0) return alert('Please select at least one option.');
+    if (!selectedSlotId) return alert('Please select a time slot.');
     setSelectedService(service);
-    setSelectedSlot({
-      date: dates[selectedDate].full,
-      time: slotObj?.time,
-    });
+    setSelectedSlot(selectedSlotId);
+    router.push(`/checkout`);
   };
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider animate-pulse">Loading Service Details...</p>
-        </div>
-      </main>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-[color:var(--color-surface)]"><div className="animate-spin w-8 h-8 border-4 border-[color:var(--color-primary)] border-t-transparent rounded-full" /></div>;
+  }
+  if (error || !service) {
+    return <div className="min-h-screen flex items-center justify-center bg-[color:var(--color-surface)]"><p className="text-[color:var(--color-error)] font-bold">{error || 'Service not found.'}</p></div>;
   }
 
-  if (error || !service) {
-    return (
-      <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] flex flex-col items-center justify-center p-4">
-        <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
-          <AlertCircle className="h-8 w-8 text-red-500" />
-        </div>
-        <h2 className="text-xl font-bold">Service Not Found</h2>
-        <p className="text-sm text-[var(--text-muted)] mt-1">{error || 'The requested service could not be located.'}</p>
-        <Link href="/search" className="mt-6 btn-primary py-2.5 px-5 text-sm font-semibold rounded-xl">
-          Back to Search
-        </Link>
-      </main>
-    );
-  }
+  const listings = service.rawConfig?.metadata?.listings || [
+    { id: '1', name: 'Standard Option 1', price: service.price, description: 'Indoor | Standard' },
+    { id: '2', name: 'Standard Option 2', price: service.price, description: 'Indoor | Standard' }
+  ];
 
   return (
-    <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-300">
-      {/* Sticky header */}
-      <nav className="fixed top-0 left-0 right-0 z-50 custom-navbar border-b border-[var(--border-subtle)]">
-        <div className="container-main flex items-center justify-between h-16">
-          <div className="flex items-center gap-4">
-            <Link href="/search" className="btn-ghost p-2">
-              <ArrowLeft size={20} />
-            </Link>
-            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-              <Link href="/" className="hover:text-[var(--text-primary)] transition-colors">Home</Link>
-              <ChevronRight size={14} />
-              <Link href="/search" className="hover:text-[var(--text-primary)] transition-colors">Search</Link>
-              <ChevronRight size={14} />
-              <span className="text-[var(--text-primary)]">{listingContext?.name || listingContext?.title || service.name}</span>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="pt-16">
-        {/* Image Gallery */}
-        <div className="relative h-[300px] sm:h-[400px] bg-gradient-to-br from-indigo-600 to-purple-700">
-        <img src={listingContext?.imageUrl || service.image} alt={listingContext?.name || listingContext?.title || service.name} className="w-full h-full object-cover opacity-80" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-6 left-6 right-6">
-          <span className="inline-block rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-medium text-white mb-2">{service.category}</span>
-          <h1 className="text-3xl font-bold text-white">{listingContext?.name || listingContext?.title || service.name}</h1>
-          <p className="text-white/70 mt-1 flex items-center gap-2"><MapPin className="h-4 w-4" /> {service.merchant} · {service.city}</p>
-        </div>
-        <div className="absolute top-4 right-4 flex gap-2">
-          <button className="rounded-full bg-white/20 backdrop-blur-sm p-2.5 text-white hover:bg-white/30 transition-colors">
-            <Heart className="h-5 w-5" />
-          </button>
-          <button className="rounded-full bg-white/20 backdrop-blur-sm p-2.5 text-white hover:bg-white/30 transition-colors">
-            <Share2 className="h-5 w-5" />
-          </button>
+    <div className="min-h-screen bg-[color:var(--color-surface)] flex flex-col pb-32">
+      {/* 1. Header (District Style) */}
+      <div className="sticky top-0 z-40 bg-[color:var(--color-surface)] border-b border-[color:var(--color-outline-variant)]/20 shadow-sm px-4 py-4 flex items-center justify-between">
+        <button onClick={() => router.back()} className="p-2 hover:bg-[color:var(--color-surface-variant)] rounded-full transition-colors">
+          <ArrowLeft size={20} className="text-[color:var(--color-on-surface)]" />
+        </button>
+        <div className="flex flex-col items-center flex-1 pr-10">
+          <h1 className="text-lg font-bold text-[color:var(--color-on-surface)]">{service.name || service.category}</h1>
+          <p className="text-[10px] text-[color:var(--color-on-surface-variant)] uppercase tracking-wide font-semibold">{service.merchant}</p>
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Stats Row */}
-            <div className="flex flex-wrap gap-4">
-              {[
-                { icon: Star, value: `${service.rating}`, label: `${service.reviews} reviews`, color: 'text-yellow-500' },
-                { icon: Clock, value: `${listingContext?.duration || service.duration} min`, label: 'Duration', color: 'text-blue-500' },
-                { icon: Users, value: `${Math.round(service.rating * service.reviews * 1.5)}+`, label: 'Bookings', color: 'text-green-500' },
-              ].map((stat) => (
-                <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] px-4 py-3">
-                  <stat.icon className={`h-5 w-5 ${stat.color} ${stat.icon === Star ? 'fill-yellow-500' : ''}`} />
-                  <div>
-                    <div className="font-semibold text-sm">{stat.value}</div>
-                    <div className="text-xs text-[var(--text-muted)]">{stat.label}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+      <div className="flex-1 w-full max-w-4xl mx-auto px-4 py-6 overflow-hidden">
+        
+        {/* 2. Date Picker (Horizontal Scroll) */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="text-[10px] uppercase font-bold text-[color:var(--color-outline)] -rotate-90 origin-right pr-2 shrink-0">
+            {dates[selectedDateIdx].month}
+          </div>
+          <div className="flex-1 overflow-x-auto hide-scrollbar flex gap-2 pb-2">
+            {dates.map((d, i) => {
+              const isSelected = i === selectedDateIdx;
+              return (
+                <button
+                  key={i}
+                  onClick={() => setSelectedDateIdx(i)}
+                  className={`flex flex-col items-center justify-center min-w-[50px] py-2 rounded-xl transition-colors ${
+                    isSelected 
+                      ? 'bg-black text-white' 
+                      : 'hover:bg-[color:var(--color-surface-variant)] text-[color:var(--color-on-surface)]'
+                  }`}
+                >
+                  <span className={`text-[10px] font-bold ${isSelected ? 'text-white/80' : 'text-[color:var(--color-on-surface-variant)]'}`}>{d.dayName}</span>
+                  <span className="text-sm font-black">{d.dayNum}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-            {/* Description */}
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-primary)] p-6">
-              <h2 className="font-semibold text-lg mb-3">About this service</h2>
-              <p className="text-[var(--text-secondary)] leading-relaxed">
-                {listingContext?.description || service.desc || service.description || 'No description provided.'}
+        {/* 3. Duration Selector */}
+        <div className="flex items-center justify-between mb-8 pb-6 border-b border-[color:var(--color-outline-variant)]/20">
+          <div>
+            <h3 className="text-sm font-bold">Duration</h3>
+            <p className="text-[10px] text-[color:var(--color-on-surface-variant)]">Duration of the slots</p>
+          </div>
+          <div className="flex items-center bg-black text-white rounded-full p-1 shadow-md">
+            <button onClick={() => setDurationHr(Math.max(1, durationHr - 0.5))} className="p-1 hover:bg-white/20 rounded-full transition-colors"><Minus size={14} /></button>
+            <span className="px-4 text-xs font-bold">{durationHr} hr</span>
+            <button onClick={() => setDurationHr(durationHr + 0.5)} className="p-1 hover:bg-white/20 rounded-full transition-colors"><Plus size={14} /></button>
+          </div>
+        </div>
+
+        {/* 4. Time Slots */}
+        <div className="mb-8">
+          <h3 className="text-sm font-bold mb-4">Time slots available</h3>
+          <div className="flex overflow-x-auto hide-scrollbar gap-3 pb-4 px-1">
+            {DUMMY_SLOTS.map(slot => {
+              const isSelected = selectedSlotId === slot.id;
+              if (!slot.available) return null;
+              return (
+                <button
+                  key={slot.id}
+                  onClick={() => setSelectedSlotId(slot.id)}
+                  className={`shrink-0 flex flex-col items-center justify-center px-5 py-3 rounded-2xl border transition-all ${
+                    isSelected 
+                      ? 'border-black bg-[color:var(--color-primary)]/5 ring-1 ring-black shadow-sm' 
+                      : 'border-[color:var(--color-outline-variant)]/30 hover:border-black/50 bg-[color:var(--color-surface)]'
+                  }`}
+                >
+                  <span className={`text-xs font-bold ${isSelected ? 'text-black' : 'text-[color:var(--color-on-surface)]'}`}>{slot.timeStr}</span>
+                  <span className="text-[10px] text-[color:var(--color-on-surface-variant)] mt-1">{slot.remaining} option{slot.remaining>1?'s':''}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 5. Units / Listings */}
+        <div>
+          <h3 className="text-sm font-bold mb-4">{listings.length} option{listings.length>1?'s':''} available</h3>
+          <div className="space-y-4">
+            {listings.map((l: any, i: number) => {
+              const isSelected = selectedListings.includes(l.id);
+              return (
+                <label 
+                  key={l.id || i}
+                  className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
+                    isSelected 
+                      ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/5 shadow-sm' 
+                      : 'border-[color:var(--color-outline-variant)]/30 hover:border-black/30'
+                  }`}
+                >
+                  <div className="w-16 h-12 bg-gray-200 rounded-lg overflow-hidden shrink-0">
+                    <img src={`https://picsum.photos/seed/${l.id}/200/150`} alt={l.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-bold text-[color:var(--color-on-surface)]">{l.name || l.title}</h4>
+                    <p className="text-[10px] text-[color:var(--color-on-surface-variant)] mt-0.5">{l.description || 'Standard'}</p>
+                    <p className="text-xs font-semibold mt-1">₹{l.price || service.price}</p>
+                  </div>
+                  <div className="shrink-0 flex items-center justify-center">
+                    <input type="checkbox" checked={isSelected} onChange={() => toggleListing(l.id)} className="hidden" />
+                    <div className={`w-6 h-6 rounded-md flex items-center justify-center border transition-colors ${
+                      isSelected ? 'bg-[color:var(--color-primary)] border-[color:var(--color-primary)] text-[color:var(--color-on-primary)]' : 'border-[color:var(--color-outline)] bg-transparent'
+                    }`}>
+                      {isSelected && <Check size={14} strokeWidth={3} />}
+                    </div>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* 6. Sticky Bottom Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[color:var(--color-surface)] border-t border-[color:var(--color-outline-variant)]/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] p-4 md:px-8">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold">{selectedListings.length} option{selectedListings.length !== 1 ? 's' : ''} reserved</p>
+            {selectedSlotId && (
+              <p className="text-xs text-[color:var(--color-on-surface-variant)] mt-0.5">
+                {DUMMY_SLOTS.find(s => s.id === selectedSlotId)?.timeStr}
               </p>
-            </div>
-            
-            {/* Dynamic Features from Business Configuration */}
-            {rawConfig.isOffersEnabled && rawConfig.offersAndDiscounts && (
-              <div className="rounded-2xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 p-6 flex items-start gap-4">
-                <div className="p-3 bg-emerald-500/20 rounded-full text-emerald-600"><Tag size={24} /></div>
-                <div>
-                  <h3 className="text-emerald-700 font-bold text-lg mb-1">Special Offers & Discounts</h3>
-                  <p className="text-emerald-600/80 text-sm font-medium">{rawConfig.offersAndDiscounts}</p>
-                </div>
-              </div>
             )}
-            
-            {(rawConfig.isRestrictionsEnabled || rawConfig.isTipsEnabled || rawConfig.isInstructionsEnabled) && (
-              <div className="space-y-4">
-                {rawConfig.isRestrictionsEnabled && rawConfig.restrictions && (
-                  <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 flex items-start gap-3">
-                    <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={20} />
-                    <div>
-                      <h3 className="font-bold text-red-700 text-sm mb-1">Restrictions & Rules</h3>
-                      <p className="text-sm text-red-600/80 leading-relaxed">{rawConfig.restrictions}</p>
-                    </div>
-                  </div>
-                )}
-                {rawConfig.isInstructionsEnabled && rawConfig.specialInstructions && (
-                  <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-5 flex items-start gap-3">
-                    <Info className="text-blue-500 shrink-0 mt-0.5" size={20} />
-                    <div>
-                      <h3 className="font-bold text-blue-700 text-sm mb-1">Special Instructions</h3>
-                      <p className="text-sm text-blue-600/80 leading-relaxed">{rawConfig.specialInstructions}</p>
-                    </div>
-                  </div>
-                )}
-                {rawConfig.isTipsEnabled && rawConfig.tipsAndGuidelines && (
-                  <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 flex items-start gap-3">
-                    <Check className="text-emerald-500 shrink-0 mt-0.5" size={20} />
-                    <div>
-                      <h3 className="font-bold text-[var(--text-primary)] text-sm mb-1">Tips & Guidelines</h3>
-                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{rawConfig.tipsAndGuidelines}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Metadata (Dynamic Config Rendering) */}
-            {service.metadata && Object.keys(service.metadata).length > 0 && (
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-primary)] p-6">
-                <h2 className="font-semibold text-lg mb-3">Hotel Specifics</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  {Object.entries(service.metadata).map(([key, val]) => (
-                    <div key={key} className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                      <div className="h-2 w-2 rounded-full bg-[var(--primary)]"></div>
-                      <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                      <span className="font-medium text-[var(--text-primary)]">
-                        {typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Reviews */}
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-primary)] p-6">
-              <h2 className="font-semibold text-lg mb-4">Reviews</h2>
-              {[
-                { name: 'Rahul M.', rating: 5, comment: 'Amazing experience! The stylist was very professional and attentive.', date: '2 days ago' },
-                { name: 'Priya S.', rating: 4, comment: 'Great service, loved the ambiance. Would definitely come back.', date: '1 week ago' },
-                { name: 'Arjun K.', rating: 5, comment: 'Best haircut I\'ve ever had! Highly recommend this place.', date: '2 weeks ago' },
-              ].map((review, i) => (
-                <div key={i} className={`py-4 ${i > 0 ? 'border-t border-[var(--border)]' : ''}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold">{review.name[0]}</div>
-                      <div>
-                        <div className="font-medium text-sm">{review.name}</div>
-                        <div className="flex items-center gap-0.5">{Array.from({ length: review.rating }, (_, i) => <Star key={i} className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />)}</div>
-                      </div>
-                    </div>
-                    <span className="text-xs text-[var(--text-muted)]">{review.date}</span>
-                  </div>
-                  <p className="mt-2 text-sm text-[var(--text-secondary)]">{review.comment}</p>
-                </div>
-              ))}
-            </div>
           </div>
-
-          {/* Booking Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-20 rounded-2xl border border-[var(--border)] bg-[var(--bg-primary)] p-6 shadow-lg">
-              <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-[var(--primary)]">₹{basePrice}</div>
-                <div className="text-sm text-[var(--text-muted)]">base price</div>
-              </div>
-
-              {/* Date Selector */}
-              <div className="mb-4">
-                <h3 className="font-semibold text-sm mb-3">Select Date</h3>
-                <div className="flex gap-2 overflow-x-auto pb-2">
-                  {dates.map((d, i) => (
-                    <button key={i} onClick={() => setSelectedDate(i)} className={`shrink-0 flex flex-col items-center rounded-xl px-3 py-2 text-center transition-all ${selectedDate === i ? 'bg-[var(--primary)] text-white shadow-lg shadow-indigo-500/25' : 'border border-[var(--border)] hover:border-[var(--primary)]'}`}>
-                      <span className="text-xs font-medium">{d.day}</span>
-                      <span className="text-lg font-bold">{d.date}</span>
-                      <span className="text-xs opacity-70">{d.month}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Dynamic Toggles Rendering */}
-              {isTimingEnabled && (
-                <div className="mb-6">
-                  <h3 className="font-semibold text-sm mb-3">Available Slots</h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    {mockSlots.map((slot) => (
-                      <button key={slot.id} disabled={!slot.available} onClick={() => setLocalSelectedSlot(slot.id)}
-                        className={`rounded-lg py-2 text-sm font-medium transition-all ${!slot.available ? 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] cursor-not-allowed line-through' : localSelectedSlot === slot.id ? 'bg-[var(--primary)] text-white shadow-md' : 'border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)]'}`}>
-                        {slot.time}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {isCapacityEnabled && (
-                <div className="mb-6">
-                  <h3 className="font-semibold text-sm mb-3">Number of Persons (Capacity)</h3>
-                  <select 
-                    value={selectedCapacity}
-                    onChange={(e) => setSelectedCapacity(Number(e.target.value))}
-                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm"
-                  >
-                    {Array.from({ length: rawConfig.participantCapacity || 10 }, (_, i) => (
-                      <option key={i+1} value={i+1}>{i+1} Person{i+1 > 1 ? 's' : ''}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {isAddonsEnabled && rawConfig.addOns && (
-                <div className="mb-6">
-                  <h3 className="font-semibold text-sm mb-3">Optional Add-ons</h3>
-                  <div className="space-y-3">
-                    {Array.isArray(rawConfig.addOns) && rawConfig.addOns.map((addon: any, idx: number) => {
-                      const isSelected = selectedAddons.some(a => a.id === idx);
-                      return (
-                        <label key={idx} className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${isSelected ? 'border-[var(--primary)] bg-[var(--primary)]/5' : 'border-[var(--border)] hover:bg-[var(--bg-secondary)]'}`}>
-                          <div className="flex items-center gap-3">
-                            <input type="checkbox" checked={isSelected} onChange={(e) => {
-                              if (e.target.checked) setSelectedAddons([...selectedAddons, { id: idx, ...addon }]);
-                              else setSelectedAddons(selectedAddons.filter(a => a.id !== idx));
-                            }} className="w-4 h-4 text-[var(--primary)] rounded focus:ring-[var(--primary)]" />
-                            <span className="text-sm font-medium">{addon.name}</span>
-                          </div>
-                          <span className="text-sm font-semibold text-[var(--text-secondary)]">+₹{addon.price}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <Link
-                href="/booking/checkout"
-                onClick={handleBookNow}
-                className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold text-white transition-all ${(!isTimingEnabled || localSelectedSlot) ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25' : 'bg-gray-300 cursor-not-allowed pointer-events-none'}`}
-              >
-                Book Now — ₹{totalPrice}
-              </Link>
-              <p className="mt-3 text-center text-xs text-[var(--text-muted)]">Free cancellation up to 2 hours before</p>
-            </div>
-          </div>
+          <button 
+            onClick={handleProceed}
+            disabled={selectedListings.length === 0 || !selectedSlotId}
+            className={`px-8 py-3 rounded-full font-bold text-sm shadow-md transition-all ${
+              selectedListings.length > 0 && selectedSlotId 
+                ? 'bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/90 text-[color:var(--color-on-primary)] hover:scale-105' 
+                : 'bg-[color:var(--color-surface-variant)] text-[color:var(--color-outline)] cursor-not-allowed'
+            }`}
+          >
+            Proceed
+          </button>
         </div>
       </div>
-      </div>
-    </main>
+    </div>
   );
 }
