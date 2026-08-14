@@ -187,7 +187,7 @@ export const api = {
     list: async (params?: Record<string, string>) => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for Render cold start
         const baseUrl = API_BASE;
         
         // Build query string
@@ -249,15 +249,28 @@ export const api = {
       } catch (err) {
         console.warn('Backend services list error:', err);
       }
+      
+      // Fallback to mock data if backend fails or is sleeping
+      let mockData: any[] = [];
+      if (params?.categorySlug) {
+        mockData = getMockServicesByCategory(params.categorySlug, params.city);
+      } else {
+        // Just return a mix of mocks if no category is specified
+        mockData = [
+          ...getMockServicesByCategory('hotels'),
+          ...getMockServicesByCategory('salons')
+        ];
+      }
+      
       return {
-        data: [],
-        meta: { total: 0, page: 1, limit: 10, totalPages: 0 }
+        data: mockData,
+        meta: { total: mockData.length, page: 1, limit: 10, totalPages: 1 }
       };
     },
     byId: async (id: string) => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for Render cold start
         const baseUrl = API_BASE;
         const res = await fetch(`${baseUrl}/services/${id}`, { signal: controller.signal });
         clearTimeout(timeoutId);
