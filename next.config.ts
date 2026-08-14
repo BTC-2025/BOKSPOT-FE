@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:4500';
+    const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:9000';
     return [
       {
         source: '/api/:path*',

@@ -5,9 +5,16 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://bokspot-be.onrender.com/api/v1';
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const defaultOptions: RequestInit = {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store',
+  };
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    ...defaultOptions,
     ...options,
+    headers: { ...defaultOptions.headers, ...options?.headers },
   });
   if (!res.ok) throw new Error(`API error ${res.status}: ${path}`);
   return res.json();
@@ -197,7 +204,7 @@ export const api = {
         if (params?.search) queryParams.append('search', params.search);
         if (params?.merchantId) queryParams.append('merchantId', params.merchantId);
         
-        const res = await fetch(`${baseUrl}/services?${queryParams.toString()}`, { signal: controller.signal });
+        const res = await fetch(`${baseUrl}/services?${queryParams.toString()}`, { signal: controller.signal, cache: 'no-store' });
         clearTimeout(timeoutId);
         if (res.ok) {
           const body = await res.json();
