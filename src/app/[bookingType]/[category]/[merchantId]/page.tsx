@@ -85,10 +85,14 @@ export default function VenueProfilePage() {
               <h2 className="text-xl font-bold mb-4">{liveServices.length} Options available</h2>
               <div className="flex flex-wrap gap-3">
                 {liveServices.map(svc => (
-                  <div key={svc.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[color:var(--color-primary)]/30 bg-[color:var(--color-primary)]/5 text-[color:var(--color-primary)] text-xs font-bold">
+                  <button 
+                    key={svc.id} 
+                    onClick={() => router.push(`/service/${svc.id}`)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-[color:var(--color-primary)]/30 bg-[color:var(--color-primary)]/5 text-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-on-primary)] transition-all cursor-pointer text-xs font-bold shadow-sm"
+                  >
                     <CheckCircle2 size={14} />
                     <span>{svc.name}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
