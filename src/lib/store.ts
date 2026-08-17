@@ -330,6 +330,35 @@ export interface LocationState {
   setStatus: (status: 'idle' | 'detecting' | 'detected' | 'error') => void;
 }
 
+export const POPULAR_CITIES = [
+  { name: 'Chennai', lat: 13.0827, lng: 80.2707 },
+  { name: 'Bangalore', lat: 12.9716, lng: 77.5946 },
+  { name: 'Goa', lat: 15.2993, lng: 74.1240 },
+  { name: 'Hyderabad', lat: 17.3850, lng: 78.4867 },
+  { name: 'Kolkata', lat: 22.5726, lng: 88.3639 },
+  { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
+  { name: 'Pune', lat: 18.5204, lng: 73.8567 },
+];
+
+export const ALL_CITIES = [
+  'Abohar', 'Abu Road', 'Achampet', 'Acharapakkam', 'Addanki', 'Adilabad', 'Adipur',
+  'Adoni', 'Adoor', 'Agar', 'Agartala', 'Agra', 'Ahmedabad', 'Ahmedgarh', 'Ahmednagar', 'Aizawl',
+  'Ajmer', 'Akbarpur', 'Akividu', 'Akola', 'Alakode', 'Alangayam', 'Alangudi', 'Aligarh',
+  'Allahabad', 'Alleppey', 'Alwar', 'Ambala', 'Amravati', 'Amritsar', 'Anand', 'Anantapur',
+  'Aurangabad', 'Bangalore', 'Bareilly', 'Belgaum', 'Bhavnagar', 'Bhilai', 'Bhiwandi', 'Bhopal',
+  'Bhubaneswar', 'Bikaner', 'Bilaspur', 'Bokaro', 'Chandigarh', 'Chennai', 'Coimbatore', 'Cuttack',
+  'Dehradun', 'Delhi', 'Dhanbad', 'Durgapur', 'Erode', 'Faridabad', 'Firozabad', 'Ghaziabad',
+  'Goa', 'Gorakhpur', 'Gulbarga', 'Guntur', 'Gurgaon', 'Guwahati', 'Gwalior', 'Hubli', 'Hyderabad',
+  'Indore', 'Jabalpur', 'Jaipur', 'Jalandhar', 'Jammu', 'Jamnagar', 'Jamshedpur', 'Jhansi', 'Jodhpur',
+  'Kakinada', 'Kannur', 'Kanpur', 'Karnal', 'Kochi', 'Kolhapur', 'Kolkata', 'Kollam', 'Kota',
+  'Kozhikode', 'Kurnool', 'Lucknow', 'Ludhiana', 'Madurai', 'Mangalore', 'Mathura', 'Meerut',
+  'Moradabad', 'Mumbai', 'Mysore', 'Nagpur', 'Nanded', 'Nashik', 'Nellore', 'Noida', 'Patna',
+  'Pondicherry', 'Pune', 'Raipur', 'Rajkot', 'Ranchi', 'Rohtak', 'Rourkela', 'Salem', 'Sangli',
+  'Shimla', 'Siliguri', 'Solapur', 'Srinagar', 'Surat', 'Thiruvananthapuram', 'Thrissur', 'Tiruchirappalli',
+  'Tirunelveli', 'Tiruppur', 'Udaipur', 'Ujjain', 'Vadodara', 'Varanasi', 'Vasai', 'Vellore', 'Vijayawada',
+  'Visakhapatnam', 'Warangal'
+].sort();
+
 export const useLocationStore = create<LocationState>()(
   persist(
     (set) => ({

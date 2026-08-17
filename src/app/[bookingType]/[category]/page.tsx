@@ -1631,7 +1631,7 @@ export default function ProviderDiscoveryPage() {
   }
 
   // Intercept the custom booking flows for custom dashboard category views
-  const isCustomBooking = ['cabs', 'flights', 'trains', 'buses', 'metro', 'turfs', 'football-turf', 'cricket-ground'].includes(category);
+  const isCustomBooking = ['cabs', 'flights', 'trains', 'buses', 'metro'].includes(category);
 
   // Handle local sorting
   const sortedServices = [...(Array.isArray(servicesList) ? servicesList : [])].sort((a, b) => {
@@ -1746,7 +1746,7 @@ export default function ProviderDiscoveryPage() {
           {category === 'trains' && <TrainBookingView categoryName={categoryName} city={city} />}
           {category === 'buses' && <BusBookingView categoryName={categoryName} city={city} />}
           {category === 'metro' && <MetroBookingView categoryName={categoryName} city={city} />}
-          {['turfs', 'football-turf', 'cricket-ground'].includes(category) && <TurfsBookingView categoryName={categoryName} city={city} />}
+          {/* {['turfs', 'football-turf', 'cricket-ground'].includes(category) && <TurfsBookingView categoryName={categoryName} city={city} />} */}
 
           {/* Standard fallback listing for all other categories */}
           {!isCustomBooking && (

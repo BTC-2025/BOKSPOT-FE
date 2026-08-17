@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { useLocationStore, useUIStore, useUserStore } from '../lib/store';
 import { LiveClock } from './LiveClock';
 import { ALL_SEARCHABLE_SERVICES } from '../lib/searchData';
+import { LocationSelectorModal } from './LocationSelectorModal';
 import { UtilityDrawer } from './UtilityDrawer';
 
 const CITY_NODES = [
@@ -81,6 +82,7 @@ export function TopNav({
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileOpenMobile, setProfileOpenMobile] = useState(false);
   const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   // Refs for dropdown positioning / click‑outside handling
   const profileRef = useRef<HTMLDivElement>(null);
   const profileRefMobile = useRef<HTMLDivElement>(null);
@@ -282,56 +284,15 @@ export function TopNav({
               <img src="/logo.png?v=3" alt="BokSpot" className="h-10 md:h-12 object-contain" />
             </Link>
 
-            <div className="relative hidden lg:inline-block" ref={locationRef}>
+            <div className="relative hidden lg:inline-block">
               <button
-                onClick={() => setLocationDropdownOpen(!locationDropdownOpen)}
+                onClick={() => setIsLocationModalOpen(true)}
                 className="custom-nav-btn px-4 h-8 shadow-md duration-200"
               >
                 <MapPin size={14} className={status === 'detecting' ? 'animate-bounce' : ''} />
-                <span className="!text-white">{mounted ? city : 'Chennai'}</span>
-                <span className="material-symbols-outlined text-[16px] transition-transform duration-200" style={{ transform: locationDropdownOpen ? 'rotate(180deg)' : 'none' }}>keyboard_arrow_down</span>
+                <span className="!text-white">{mounted ? (city || 'Select Location') : 'Chennai'}</span>
+                <span className="material-symbols-outlined text-[16px] transition-transform duration-200" style={{ transform: isLocationModalOpen ? 'rotate(180deg)' : 'none' }}>keyboard_arrow_down</span>
               </button>
-              {locationDropdownOpen && (
-                <div className="absolute left-0 top-full mt-3 w-56 bg-surface-container rounded-2xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden backdrop-blur-md animate-fade-up">
-                  <div className="py-2 divide-y divide-outline-variant/10">
-                    <button
-                      onClick={() => {
-                        detectGPSLocation();
-                        setLocationDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-primary hover:bg-primary/10 transition-colors text-left text-xs font-bold"
-                    >
-                      <span className="material-symbols-outlined text-[16px] animate-pulse">my_location</span>
-                      🎯 Detect GPS
-                    </button>
-                    <div className="py-1">
-                      {['Chennai', 'Madurai', 'Theni', 'Coimbatore', 'Bangalore', 'Mumbai', 'Delhi'].map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => {
-                            handleCityChange(c);
-                            setLocationDropdownOpen(false);
-                          }}
-                          className={`w-full flex items-center justify-between px-4 py-2 text-left text-xs font-semibold hover:bg-surface-container-highest transition-colors text-on-surface ${city === c ? 'text-primary bg-primary/5' : ''}`}
-                        >
-                          <span>📍 {c}</span>
-                          {city === c && <span className="material-symbols-outlined text-[16px]">check</span>}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      onClick={() => {
-                        setShowMapModal(true);
-                        setLocationDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-on-surface hover:bg-surface-container-highest transition-colors text-left text-xs font-bold"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">map</span>
-                      🗺️ Interactive Map
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
 
           </div>
@@ -879,6 +840,7 @@ export function TopNav({
         </div>
       )}
       <UtilityDrawer isOpen={utilityDrawerOpen} onClose={() => setUtilityDrawerOpen(false)} activeTab={activeUtilityTab} setActiveTab={setActiveUtilityTab} />
+      <LocationSelectorModal isOpen={isLocationModalOpen} onClose={() => setIsLocationModalOpen(false)} />
     </>
   );
 }
