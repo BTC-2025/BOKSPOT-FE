@@ -23,9 +23,27 @@ export default function VenueProfilePage() {
     // We are passing the merchantId to filter services belonging to this merchant
     api.services.list({}).then(res => {
       if (res && res.data) {
-        const merchantServices = res.data.filter((s: any) => 
-          (s.merchantObj?.id === merchantId) || (s.merchant === merchantId) || (s.merchantObj?.name === merchantId) || (s.merchant === decodeURIComponent(merchantId))
-        );
+        const bType = bookingType.toLowerCase();
+        // Keywords mapping based on bookingType URL segment
+        const typeKeywords = bType.includes('stay') ? ['hotel', 'room', 'resort', 'accommodation'] :
+                             bType.includes('sports') ? ['turf', 'cricket', 'football', 'badminton', 'tennis'] :
+                             bType.includes('health') ? ['doctor', 'clinic', 'dental', 'medical', 'appointment'] :
+                             bType.includes('dine') ? ['restaurant', 'dining', 'food', 'table'] : [];
+
+        const merchantServices = res.data.filter((s: any) => {
+          const isMatchMerchant = (s.merchantObj?.id === merchantId) || (s.merchant === merchantId) || (s.merchantObj?.name === merchantId) || (s.merchant === decodeURIComponent(merchantId));
+          
+          let isMatchType = true;
+          if (typeKeywords.length > 0) {
+            const catName = (s.category || '').toLowerCase();
+            const svcName = (s.name || '').toLowerCase();
+            isMatchType = typeKeywords.some(kw => catName.includes(kw) || svcName.includes(kw));
+          }
+          
+          // In the demo DB, all services share the same merchant ID.
+          // This ensures a hotel page doesn't show turf services.
+          return isMatchMerchant && isMatchType;
+        });
         setLiveServices(merchantServices);
       }
       setLoading(false);
