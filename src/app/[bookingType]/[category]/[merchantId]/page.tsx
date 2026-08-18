@@ -23,25 +23,29 @@ export default function VenueProfilePage() {
     // We are passing the merchantId to filter services belonging to this merchant
     api.services.list({}).then(res => {
       if (res && res.data) {
-        const bType = bookingType.toLowerCase();
-        // Keywords mapping based on bookingType URL segment
-        const typeKeywords = bType.includes('stay') ? ['hotel', 'room', 'resort', 'accommodation'] :
-                             bType.includes('sports') ? ['turf', 'cricket', 'football', 'badminton', 'tennis'] :
-                             bType.includes('health') ? ['doctor', 'clinic', 'dental', 'medical', 'appointment'] :
-                             bType.includes('dine') ? ['restaurant', 'dining', 'food', 'table'] : [];
-
         const merchantServices = res.data.filter((s: any) => {
           const isMatchMerchant = (s.merchantObj?.id === merchantId) || (s.merchant === merchantId) || (s.merchantObj?.name === merchantId) || (s.merchant === decodeURIComponent(merchantId));
           
           let isMatchType = true;
-          if (typeKeywords.length > 0) {
-            const catName = (s.category || '').toLowerCase();
-            const svcName = (s.name || '').toLowerCase();
-            isMatchType = typeKeywords.some(kw => catName.includes(kw) || svcName.includes(kw));
+          // IMPORTANT: Only apply category filtering to the mega dummy merchant (which has 36 mixed services).
+          // For real merchants, we WANT to show all their services across categories on their venue page.
+          if (merchantId === '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e') {
+            const bType = bookingType.toLowerCase();
+            const typeKeywords = (bType.includes('stay') || bType.includes('hotel') || bType.includes('accommodation') || bType.includes('room')) ? ['hotel', 'room', 'resort', 'accommodation', 'stay'] :
+                                 (bType.includes('sports') || bType.includes('turf') || bType.includes('play')) ? ['turf', 'cricket', 'football', 'badminton', 'tennis', 'court', 'sport', 'ground', 'ball'] :
+                                 (bType.includes('health') || bType.includes('doctor') || bType.includes('clinic') || bType.includes('medical')) ? ['doctor', 'clinic', 'dental', 'medical', 'appointment', 'health'] :
+                                 (bType.includes('dine') || bType.includes('food') || bType.includes('restaurant')) ? ['restaurant', 'dining', 'food', 'table', 'dine'] : 
+                                 (bType.includes('salon') || bType.includes('spa') || bType.includes('beauty') || bType.includes('care')) ? ['salon', 'spa', 'beauty', 'hair', 'massage', 'care'] :
+                                 (bType.includes('event') || bType.includes('party') || bType.includes('hall')) ? ['event', 'party', 'hall', 'wedding', 'banquet'] : [];
+                                 
+            if (typeKeywords.length > 0) {
+              const catName = (s.category || '').toLowerCase();
+              const svcName = (s.name || '').toLowerCase();
+              const catSlug = (s.categoryObj?.slug || '').toLowerCase();
+              isMatchType = typeKeywords.some(kw => catName.includes(kw) || svcName.includes(kw) || catSlug.includes(kw));
+            }
           }
           
-          // In the demo DB, all services share the same merchant ID.
-          // This ensures a hotel page doesn't show turf services.
           return isMatchMerchant && isMatchType;
         });
         setLiveServices(merchantServices);

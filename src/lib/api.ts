@@ -236,7 +236,8 @@ export const api = {
               reviewCount: srv.merchant.reviewCount || 10,
               images: srv.images && srv.images.length > 0 ? srv.images : [],
               tags: [],
-              amenities: []
+              amenities: [],
+              allCategories: srv.merchant.allCategories || []
             } : undefined,
             categoryObj: srv.category ? {
               id: srv.category.id,
@@ -249,10 +250,13 @@ export const api = {
             rawConfig: srv 
           }));
           
-          return {
-            data: mappedServices,
-            meta: { total: body.data?.meta?.total || mappedServices.length, page: 1, limit: 100, totalPages: 1 }
-          };
+          // If the backend has actual data, use it. Otherwise, fall through to mock data to prevent an empty/broken UI.
+          if (mappedServices.length > 0) {
+            return {
+              data: mappedServices,
+              meta: { total: body.data?.meta?.total || mappedServices.length, page: 1, limit: 100, totalPages: 1 }
+            };
+          }
         }
       } catch (err) {
         console.warn('Backend services list error:', err);
