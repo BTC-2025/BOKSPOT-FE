@@ -58,7 +58,30 @@ export default function SearchPage() {
       svc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       svc.merchant.toLowerCase().includes(searchQuery.toLowerCase()) ||
       svc.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || svc.category === selectedCategory;
+    let matchesCategory = false;
+    if (selectedCategory === 'All') {
+      matchesCategory = true;
+    } else {
+      const catText = (svc.category || '').toLowerCase();
+      const slugText = (svc.categoryObj?.slug || '').toLowerCase();
+      const selCat = selectedCategory.toLowerCase();
+      
+      if (selCat === 'hotels') {
+        matchesCategory = catText.includes('hotel') || slugText.includes('hotel') || slugText.includes('resort');
+      } else if (selCat === 'salons') {
+        matchesCategory = catText.includes('salon') || catText.includes('spa') || slugText.includes('salon');
+      } else if (selCat === 'dining') {
+        matchesCategory = catText.includes('restaurant') || catText.includes('dining') || slugText.includes('dining');
+      } else if (selCat === 'fitness') {
+        matchesCategory = catText.includes('gym') || catText.includes('yoga') || catText.includes('fitness');
+      } else if (selCat === 'sports') {
+        matchesCategory = catText.includes('turf') || catText.includes('court') || slugText.includes('cricket') || slugText.includes('football') || slugText.includes('badminton') || slugText.includes('tennis');
+      } else if (selCat === 'wellness') {
+        matchesCategory = catText.includes('doctor') || catText.includes('clinic') || slugText.includes('doctor');
+      } else {
+        matchesCategory = catText.includes(selCat) || slugText.includes(selCat);
+      }
+    }
     
     return matchesLocation && matchesSearch && matchesCategory;
   });
@@ -80,7 +103,14 @@ export default function SearchPage() {
 
   const uniqueMerchants = new Map();
   sortedServices.forEach(svc => {
-    const key = svc.merchantObj?.id || svc.merchant;
+    let key = svc.merchantObj?.id || svc.merchant;
+    // DEMO HACK: Split the single demo merchant into multiple visual cards so filters can be tested
+    if (key === '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e') {
+      key = key + '-' + svc.category;
+      if (svc.categoryObj?.slug === 'hotels') svc.merchantObj.name = 'Taj Hotel';
+      if (svc.categoryObj?.slug === 'doctor') svc.merchantObj.name = 'Apollo Hospital';
+    }
+    
     if (!uniqueMerchants.has(key)) {
       uniqueMerchants.set(key, svc);
     }

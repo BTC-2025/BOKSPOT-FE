@@ -1833,8 +1833,9 @@ export default function ProviderDiscoveryPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {Object.values(filteredServices.reduce((acc: any, service: any) => {
                     const mId = service.merchantObj?.id || (typeof service.merchant === 'string' ? service.merchant : service.merchant?.id) || 'unknown';
+                    const mObj = service.merchantObj || (typeof service.merchant === 'string' ? { id: service.merchant, name: service.merchant } : service.merchant) || { name: 'BokSpot Merchant', id: 'unknown' };
+                    
                     if (!acc[mId]) {
-                      const mObj = service.merchantObj || (typeof service.merchant === 'string' ? { id: service.merchant, name: service.merchant } : service.merchant) || { name: 'BokSpot Merchant', id: 'unknown' };
                       acc[mId] = {
                         merchantObj: mObj,
                         categories: new Set(),
@@ -1843,7 +1844,9 @@ export default function ProviderDiscoveryPage() {
                             : '4.5 km',
                       };
                     }
-                    if (service.name) {
+                    if (mObj.allCategories && Array.isArray(mObj.allCategories)) {
+                      mObj.allCategories.forEach((cat: string) => acc[mId].categories.add(cat));
+                    } else if (service.name) {
                        acc[mId].categories.add(service.name);
                     }
                     return acc;
