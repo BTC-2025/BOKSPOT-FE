@@ -1829,6 +1829,16 @@ export default function ProviderDiscoveryPage() {
                     }))}
                   />
                 </div>
+              ) : filteredServices.length === 0 ? (
+                <div className="col-span-full py-16 px-6 rounded-3xl border-2 border-dashed border-[var(--border-subtle)] bg-[var(--bg-surface)] flex flex-col items-center justify-center text-center">
+                  <div className="h-16 w-16 bg-[var(--bg-base)] rounded-2xl flex items-center justify-center mb-4 text-[var(--text-secondary)]">
+                    <Search size={32} />
+                  </div>
+                  <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">No {categoryName} found</h3>
+                  <p className="text-[var(--text-secondary)] max-w-md mx-auto">
+                    There are no services available for this category in the selected location right now. Please check back later.
+                  </p>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {Object.values(filteredServices.reduce((acc: any, service: any) => {

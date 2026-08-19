@@ -249,34 +249,20 @@ export const api = {
             // Pass the dynamic configurations straight to UI
             rawConfig: srv 
           }));
-          
-          // If the backend has actual data, use it. Otherwise, fall through to mock data to prevent an empty/broken UI.
-          if (mappedServices.length > 0) {
-            return {
-              data: mappedServices,
-              meta: { total: body.data?.meta?.total || mappedServices.length, page: 1, limit: 100, totalPages: 1 }
-            };
-          }
+          // Return actual data, even if empty, so the UI can show an empty state instead of dummy cards
+          return {
+            data: mappedServices,
+            meta: { total: body.data?.meta?.total || mappedServices.length, page: 1, limit: 100, totalPages: 1 }
+          };
         }
       } catch (err) {
         console.warn('Backend services list error:', err);
       }
       
-      // Fallback to mock data if backend fails or is sleeping
-      let mockData: any[] = [];
-      if (params?.categorySlug) {
-        mockData = getMockServicesByCategory(params.categorySlug, params.city);
-      } else {
-        // Just return a mix of mocks if no category is specified
-        mockData = [
-          ...getMockServicesByCategory('hotels'),
-          ...getMockServicesByCategory('salons')
-        ];
-      }
-      
+      // If backend fails completely, return empty
       return {
-        data: mockData,
-        meta: { total: mockData.length, page: 1, limit: 10, totalPages: 1 }
+        data: [],
+        meta: { total: 0, page: 1, limit: 10, totalPages: 1 }
       };
     },
     byId: async (id: string) => {

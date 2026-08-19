@@ -75,6 +75,7 @@ export function LocationSelectorModal({ isOpen, onClose }: LocationSelectorModal
         },
         (error) => {
           console.error('GPS Geolocation error:', error);
+          alert('Could not access your location automatically. Please allow location permissions in your browser or search for your city manually.');
           setStatus('error');
         }
       );
@@ -203,7 +204,15 @@ export function LocationSelectorModal({ isOpen, onClose }: LocationSelectorModal
                     </div>
                   ))}
                   {Object.keys(groupedCities).length === 0 && (
-                    <p className="text-center text-[color:var(--color-outline)] text-sm py-8">No cities found matching "{searchQuery}"</p>
+                    <div className="flex flex-col items-center justify-center py-8">
+                      <p className="text-center text-[color:var(--color-outline)] text-sm mb-4">No predefined cities found matching "{searchQuery}"</p>
+                      <button
+                        onClick={() => handleCitySelect(searchQuery)}
+                        className="px-6 py-2 bg-[color:var(--color-primary)] text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition-opacity"
+                      >
+                        Use "{searchQuery}" anyway
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
