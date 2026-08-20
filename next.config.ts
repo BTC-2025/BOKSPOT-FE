@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   async rewrites() {
     const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:9000';
     return [

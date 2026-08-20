@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MapPin, CalendarDays, Plus, Minus, ChevronRight, Info, AlertTriangle, Sparkles, Clock } from 'lucide-react';
-import { useBookingFlowStore } from '../../../lib/store';
+import { useBookingFlowStore } from '@/lib/store';
 
 interface EventTemplateProps {
   service: any;
