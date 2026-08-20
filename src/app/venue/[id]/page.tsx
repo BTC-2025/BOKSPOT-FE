@@ -22,8 +22,8 @@ export default function VenuePage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch services for this merchant (mocked)
-        const res = await api.services.list({ limit: '10' });
+        // Fetch services for this specific merchant
+        const res = await api.services.list({ merchantId: id, limit: '50' });
         if (res && res.data) {
           setServices(res.data);
           // For demo, we just use the merchant data from the first service
