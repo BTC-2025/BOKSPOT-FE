@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Clock, Plus, Minus, Info, AlertTriangle } from 'lucide-react';
 import { api } from '../../../lib/api';
 import { useBookingFlowStore } from '../../../lib/store';
+import EventTemplate from '../../../components/archetypes/EventTemplate';
 
 const DUMMY_SLOTS = Array.from({ length: 8 }, (_, i) => ({
   id: `slot-${i}`,
@@ -95,10 +96,52 @@ export default function DistrictServiceDetailPage() {
     return <div className="min-h-screen flex items-center justify-center bg-[color:var(--color-surface)]"><p className="text-[color:var(--color-error)] font-bold">{error || 'Service not found.'}</p></div>;
   }
 
-  const listings = service.rawConfig?.metadata?.listings || [
+  const listings = service.rawConfig?.metadata?.listings || service.metadata?.listings || [
     { id: '1', name: 'Standard Option 1', price: service.price, description: 'Indoor | Standard' },
     { id: '2', name: 'Standard Option 2', price: service.price, description: 'Indoor | Standard' }
   ];
+
+  const currentDayNameLong = dates[selectedDateIdx].dateObj.toLocaleString('en-US', { weekday: 'long' });
+
+  const availableSlotsMap = new Map<string, any>();
+  listings.forEach((l: any) => {
+    if (l.schedule && Array.isArray(l.schedule)) {
+      l.schedule.forEach((s: any) => {
+        if (s.dayOfWeek === currentDayNameLong) {
+          const timeStr = `${s.startTime} - ${s.endTime}`;
+          if (!availableSlotsMap.has(timeStr)) {
+            availableSlotsMap.set(timeStr, {
+              id: `slot-${timeStr.replace(/\s+/g, '-')}`,
+              timeStr,
+              price: s.price,
+              available: true,
+              remaining: 1,
+            });
+          } else {
+            availableSlotsMap.get(timeStr)!.remaining += 1;
+          }
+        }
+      });
+    }
+  });
+
+  let slotsToDisplay = Array.from(availableSlotsMap.values());
+  if (slotsToDisplay.length === 0) {
+    slotsToDisplay = DUMMY_SLOTS;
+  }
+
+  // 0. Archetype Router
+  const archetype = service.metadata?.archetype || service.rawConfig?.metadata?.archetype;
+  const catLower = (service.category?.name || service.category || '').toLowerCase();
+  
+  if (
+    archetype === 'Event' || 
+    catLower.includes('event') || 
+    catLower.includes('show') ||
+    catLower.includes('concert')
+  ) {
+    return <EventTemplate service={service} />;
+  }
 
   return (
     <div className="min-h-screen bg-[color:var(--color-surface)] flex flex-col pb-32">
@@ -158,7 +201,7 @@ export default function DistrictServiceDetailPage() {
         <div className="mb-8">
           <h3 className="text-sm font-bold mb-4">Time slots available</h3>
           <div className="flex overflow-x-auto hide-scrollbar gap-3 pb-4 px-1">
-            {DUMMY_SLOTS.map(slot => {
+            {slotsToDisplay.map(slot => {
               const isSelected = selectedSlotId === slot.id;
               if (!slot.available) return null;
               return (
@@ -224,7 +267,7 @@ export default function DistrictServiceDetailPage() {
             <p className="text-sm font-bold">{selectedListings.length} option{selectedListings.length !== 1 ? 's' : ''} reserved</p>
             {selectedSlotId && (
               <p className="text-xs text-[color:var(--color-on-surface-variant)] mt-0.5">
-                {DUMMY_SLOTS.find(s => s.id === selectedSlotId)?.timeStr}
+                {slotsToDisplay.find(s => s.id === selectedSlotId)?.timeStr}
               </p>
             )}
           </div>

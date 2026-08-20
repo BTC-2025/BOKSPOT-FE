@@ -107,12 +107,17 @@ export default function SearchPage() {
     // DEMO HACK: Split the single demo merchant into multiple visual cards so filters can be tested
     if (key === '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e') {
       key = key + '-' + svc.category;
-      if (svc.categoryObj?.slug === 'hotels') svc.merchantObj.name = 'Taj Hotel';
+      if (svc.categoryObj?.slug === 'hotels') svc.merchantObj.name = 'Grand Hotel';
       if (svc.categoryObj?.slug === 'doctor') svc.merchantObj.name = 'Apollo Hospital';
     }
     
     if (!uniqueMerchants.has(key)) {
       uniqueMerchants.set(key, svc);
+    } else {
+      // Collect all unique categories/features this merchant offers
+      const existing = uniqueMerchants.get(key);
+      if (!existing.merchantFeatures) existing.merchantFeatures = new Set([existing.categoryObj?.name || existing.category]);
+      existing.merchantFeatures.add(svc.categoryObj?.name || svc.category);
     }
   });
   const merchantResults = Array.from(uniqueMerchants.values());
@@ -185,7 +190,7 @@ export default function SearchPage() {
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <p className="text-sm font-bold text-[color:var(--color-on-surface)]">
-              {merchantResults.length} {merchantResults.length === 1 ? 'business' : 'businesses'} found in {city}
+              {merchantResults.length} {merchantResults.length === 1 ? 'venue' : 'venues'} found in {city}
             </p>
             <div className="flex items-center gap-2 text-sm text-[color:var(--color-on-surface-variant)]">
               <span>Sort by:</span>
@@ -202,10 +207,10 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {merchantResults.length === 0 ? (
+          {sortedServices.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <span className="material-symbols-outlined text-[64px] text-[color:var(--color-outline)]/40 mb-4">search_off</span>
-              <h3 className="text-lg font-bold text-[color:var(--color-on-surface)]">No businesses found</h3>
+              <h3 className="text-lg font-bold text-[color:var(--color-on-surface)]">No services found</h3>
               <p className="text-sm text-[color:var(--color-on-surface-variant)] mt-1">Try checking your spelling or selecting another category.</p>
               <button
                 onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }}
@@ -215,55 +220,57 @@ export default function SearchPage() {
               </button>
             </div>
           ) : (
-            <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
-              {merchantResults.map((service, i) => {
-                const slugify = (text: string) => text.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                const bType = slugify(service.serviceType || 'stay');
-                const cat = slugify(service.category || 'hotels');
-                const mSlug = service.merchantObj?.slug || service.merchantObj?.id || slugify(service.merchant || 'merchant');
-                const mHref = `/${bType}/${cat}/${mSlug}`;
-                
+            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5' : 'grid-cols-1'}`}>
+              {merchantResults.map((svc: any, i) => {
+                // Determine tags
+                let tags = [svc.categoryObj?.name || svc.category];
+                if (svc.merchantFeatures) tags = Array.from(svc.merchantFeatures);
+                const slugify = (text: string) => (text||'').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                const bType = slugify(svc.serviceType || 'stay');
+                const cat = slugify(svc.category || 'hotels');
+                const mSlug = svc.merchantObj?.slug || svc.merchantObj?.id || slugify(svc.merchant || 'merchant');
+
                 return (
                 <motion.div
-                  key={service.id}
+                  key={svc.id || i}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(i * 0.03, 0.4) }}
+                  transition={{ delay: Math.min(i * 0.05, 0.4) }}
                 >
-                  <Link
-                    href={mHref}
-                    className={`block rounded-2xl border border-[color:var(--color-outline-variant)]/30 bg-[color:var(--color-surface-container)]/80 overflow-hidden card-glass ${viewMode === 'list' ? 'sm:flex sm:h-44' : ''}`}
-                  >
-                    <div className={`relative ${viewMode === 'list' ? 'sm:w-48 shrink-0 h-44 sm:h-full' : 'h-48'}`}>
-                      <img src={service.merchantObj?.images?.[0] || service.image} alt={service.merchant} className="w-full h-full object-cover" />
-                      <span className="absolute top-3 left-3 rounded-full bg-[color:var(--color-surface-container-high)]/90 px-2.5 py-0.5 text-xs font-semibold backdrop-blur-sm border border-[color:var(--color-outline-variant)]/25 text-[color:var(--color-on-surface)]">
-                        {service.category}
-                      </span>
-                    </div>
-                    <div className="p-4 flex flex-col justify-between flex-1">
-                      <div>
-                        <h3 className="font-bold text-base text-[color:var(--color-on-surface)] line-clamp-1 group-hover:text-[color:var(--color-primary)] transition-colors">{service.merchant}</h3>
-                        <p className="text-xs text-[color:var(--color-on-surface-variant)] mt-1.5 flex items-center gap-1">
-                          <MapPin className="h-3.5 w-3.5 text-[color:var(--color-primary)] shrink-0" /> {service.merchant} · {(() => {
-                            const dist = getServiceDistance(service);
-                            return dist !== null ? `${dist} km away` : service.city;
-                          })()}
-                        </p>
+                  <Link href={`/${bType}/${cat}/${mSlug}`}>
+                    <div className={`group flex flex-col h-full bg-[color:var(--color-surface)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/30 hover:border-[color:var(--color-outline-variant)] transition-all cursor-pointer shadow-sm ${viewMode === 'list' ? 'sm:flex-row' : ''}`}>
+                      {/* Image Header */}
+                      <div className={`relative bg-gray-100 shrink-0 ${viewMode === 'list' ? 'sm:w-64 h-48 sm:h-auto' : 'h-48 w-full'}`}>
+                        <img 
+                          src={svc.images?.[0] || svc.merchantObj?.images?.[0] || `https://images.unsplash.com/photo-1540039155732-68bebc6894b9?w=800&q=80`} 
+                          alt={svc.merchantObj?.name || svc.merchant || svc.name} 
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      <div className="mt-4">
-                        <div className="flex items-center justify-between text-xs text-[color:var(--color-on-surface-variant)]">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
-                            <span className="font-bold text-[color:var(--color-on-surface)]">{service.rating}</span>
-                            <span>({service.reviews})</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" /> {service.durationMinutes} min
-                          </div>
+
+                      {/* Info Body */}
+                      <div className="p-4 flex flex-col flex-1">
+                        <h3 className="font-bold text-[15px] text-[color:var(--color-on-surface)] truncate leading-tight mb-1">
+                          {svc.merchantObj?.name || svc.merchant}
+                        </h3>
+                        
+                        <div className="flex items-center text-[11px] font-medium text-[color:var(--color-on-surface-variant)] mb-3">
+                          <span className="truncate max-w-[140px]">{svc.merchantObj?.city || svc.city || city || 'Chennai'}</span>
+                          {getServiceDistance(svc) && (
+                            <>
+                              <span className="mx-1.5 text-[color:var(--color-outline-variant)]">•</span>
+                              <span className="shrink-0">{getServiceDistance(svc)} km</span>
+                            </>
+                          )}
                         </div>
-                        <div className="mt-3 pt-3 border-t border-[color:var(--color-outline-variant)]/20 flex items-center justify-between">
-                          <span className="text-sm font-semibold text-[color:var(--color-on-surface-variant)]">From <span className="text-base font-black text-[color:var(--color-primary)]">₹{service.basePrice}</span></span>
-                          <span className="rounded-lg bg-[color:var(--color-primary)]/10 px-3 py-1.5 text-xs font-semibold text-[color:var(--color-primary)] border border-[color:var(--color-primary)]/20">View Options</span>
+
+                        {/* Tags/Chips */}
+                        <div className="flex flex-wrap gap-1.5 mt-auto">
+                          {tags.slice(0, 3).map((feat: string, idx: number) => (
+                            <span key={idx} className="bg-[color:var(--color-surface-container)] border border-[color:var(--color-outline-variant)]/40 px-2 py-0.5 rounded text-[9px] font-semibold text-[color:var(--color-on-surface)]">
+                              {feat}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     </div>

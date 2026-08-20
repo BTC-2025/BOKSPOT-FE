@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, ChevronRight, MapPin, Star, Clock, Shield, Search, SlidersHorizontal,
-  List, Map, AlertCircle, Plane, Train, Bus, Car, Compass, Sparkles, QrCode, Ticket,
+  List, Map, AlertCircle, Plane, Train, Bus, Car, Compass, Sparkles, QrCode, Ticket, Grid,
   Luggage, X, RotateCw, CheckCircle2, ShieldCheck, Heart, User, Phone, Check, RefreshCw,
   Navigation, HelpCircle, Activity, AlertTriangle
 } from 'lucide-react';
@@ -1530,7 +1530,7 @@ export default function ProviderDiscoveryPage() {
   const category = params?.category as string;
   const { city, latitude, longitude } = useLocationStore();
   const [sortBy, setSortBy] = useState('distance');
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [servicesList, setServicesList] = useState<Service[]>([]);
@@ -1785,6 +1785,17 @@ export default function ProviderDiscoveryPage() {
                   {/* Segmented view mode control */}
                   <div className="flex rounded-lg border border-[color:var(--color-outline-variant)]/30 p-0.5 bg-[color:var(--color-surface-dim)]">
                     <button
+                      onClick={() => setViewMode('grid')}
+                      className={`flex items-center gap-1 px-3 py-1 rounded-md text-[10px] font-bold uppercase cursor-pointer transition-colors ${
+                        viewMode === 'grid'
+                          ? 'bg-[color:var(--color-primary)] text-[color:var(--color-on-primary)]'
+                          : 'text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)]'
+                      }`}
+                    >
+                      <Grid size={12} />
+                      Grid
+                    </button>
+                    <button
                       onClick={() => setViewMode('list')}
                       className={`flex items-center gap-1 px-3 py-1 rounded-md text-[10px] font-bold uppercase cursor-pointer transition-colors ${
                         viewMode === 'list'
@@ -1840,7 +1851,7 @@ export default function ProviderDiscoveryPage() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5' : 'grid-cols-1'}`}>
                   {Object.values(filteredServices.reduce((acc: any, service: any) => {
                     const mId = service.merchantObj?.id || (typeof service.merchant === 'string' ? service.merchant : service.merchant?.id) || 'unknown';
                     const mObj = service.merchantObj || (typeof service.merchant === 'string' ? { id: service.merchant, name: service.merchant } : service.merchant) || { name: 'BokSpot Merchant', id: 'unknown' };
@@ -1848,6 +1859,7 @@ export default function ProviderDiscoveryPage() {
                     if (!acc[mId]) {
                       acc[mId] = {
                         merchantObj: mObj,
+                        service: service,
                         categories: new Set(),
                         dist: (latitude !== null && longitude !== null && mObj.latitude && mObj.longitude)
                             ? `${calculateDistance(latitude, longitude, mObj.latitude, mObj.longitude)} km`
@@ -1860,42 +1872,49 @@ export default function ProviderDiscoveryPage() {
                        acc[mId].categories.add(service.name);
                     }
                     return acc;
-                  }, {})).map((group: any, i) => {
+                  }, {})).map((group: any, i: number) => {
                     const m = group.merchantObj;
+                    const s = group.service;
                     const chips = Array.from(group.categories).slice(0, 3);
                     return (
                       <motion.div
                         key={m.id || m.name || i}
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.06 }}
+                        transition={{ delay: Math.min(i * 0.05, 0.4) }}
                       >
-                        <Link href={`/${bookingType}/${category}/${m.id}`}>
-                          <div className="group flex flex-col h-full bg-[var(--bg-surface)] rounded-2xl overflow-hidden border border-[var(--border-subtle)] hover:border-[var(--border-strong)] transition-all cursor-pointer shadow-sm hover:shadow-md">
-                            {/* Card Image */}
-                            <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-indigo-500/20 to-purple-500/20 shrink-0">
+                        <Link href={`/${bookingType}/${category}/${m.id || m.slug || 'merchant'}`}>
+                          <div className={`group flex flex-col h-full bg-[color:var(--color-surface)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/30 hover:border-[color:var(--color-outline-variant)] transition-all cursor-pointer shadow-sm ${viewMode === 'list' ? 'sm:flex-row' : ''}`}>
+                            {/* Image Header */}
+                            <div className={`relative bg-gray-100 shrink-0 ${viewMode === 'list' ? 'sm:w-64 h-48 sm:h-auto' : 'h-48 w-full'}`}>
                               <img 
-                                src={m.images && m.images[0] ? m.images[0] : `https://picsum.photos/seed/${m.id}/600/400`} 
+                                src={s?.images?.[0] || m.images?.[0] || `https://images.unsplash.com/photo-1540039155732-68bebc6894b9?w=800&q=80`} 
                                 alt={m.name} 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                                className="w-full h-full object-cover"
                               />
                             </div>
 
-                            {/* Card Body */}
+                            {/* Info Body */}
                             <div className="p-4 flex flex-col flex-1">
-                              <h3 className="font-bold text-lg text-[var(--text-primary)] truncate mb-1">{m.name}</h3>
+                              <h3 className="font-bold text-[15px] text-[color:var(--color-on-surface)] truncate leading-tight mb-1">
+                                {m.name}
+                              </h3>
                               
-                              <div className="flex items-center text-xs text-[var(--text-secondary)] font-semibold mb-4">
-                                <span>{group.dist}</span>
-                                <span className="mx-1.5 text-[var(--border-strong)]">•</span>
-                                <span className="truncate">{city || 'Chennai'}</span>
+                              <div className="flex items-center text-[11px] font-medium text-[color:var(--color-on-surface-variant)] mb-3">
+                                <span className="truncate max-w-[140px]">{city || 'Chennai'}</span>
+                                {group.dist && (
+                                  <>
+                                    <span className="mx-1.5 text-[color:var(--color-outline-variant)]">•</span>
+                                    <span className="shrink-0">{group.dist}</span>
+                                  </>
+                                )}
                               </div>
 
                               {/* Tags/Chips */}
                               {chips.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-auto">
+                                <div className="flex flex-wrap gap-1.5 mt-auto">
                                   {chips.map((chip: any, idx: number) => (
-                                    <span key={idx} className="bg-[var(--bg-base)] border border-[var(--border-subtle)] px-2.5 py-1 rounded-full text-[10px] font-bold text-[var(--text-secondary)] truncate max-w-[120px]">
+                                    <span key={idx} className="bg-[color:var(--color-surface-container)] border border-[color:var(--color-outline-variant)]/40 px-2 py-0.5 rounded text-[9px] font-semibold text-[color:var(--color-on-surface)]">
                                       {chip}
                                     </span>
                                   ))}
@@ -1907,16 +1926,6 @@ export default function ProviderDiscoveryPage() {
                       </motion.div>
                     );
                   })}
-
-                  {filteredServices.length === 0 && (
-                    <div className="text-center py-12 glass-card rounded-3xl border border-dashed border-[var(--border-subtle)]">
-                      <AlertCircle className="mx-auto h-12 w-12 text-[var(--text-muted)] mb-3" />
-                      <h3 className="text-lg font-bold mb-1">No services found</h3>
-                      <p className="text-sm text-[var(--text-secondary)] max-w-sm mx-auto">
-                        We couldn't find any services matching "{categoryName}" in {city}.
-                      </p>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
