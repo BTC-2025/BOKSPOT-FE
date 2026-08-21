@@ -210,7 +210,7 @@ export const api = {
         if (res.ok) {
           const body = await res.json();
           // Map Prisma Backend output to the frontend interface
-          const servicesArray = body.data?.data || [];
+          const servicesArray = Array.isArray(body.data) ? body.data : [];
           const mappedServices = servicesArray.map((srv: any) => ({
             id: srv.id,
             name: srv.name,
@@ -252,7 +252,7 @@ export const api = {
           // Return actual data, even if empty, so the UI can show an empty state instead of dummy cards
           return {
             data: mappedServices,
-            meta: { total: body.data?.meta?.total || mappedServices.length, page: 1, limit: 100, totalPages: 1 }
+            meta: { total: body.meta?.total || mappedServices.length, page: 1, limit: 100, totalPages: 1 }
           };
         }
       } catch (err) {
