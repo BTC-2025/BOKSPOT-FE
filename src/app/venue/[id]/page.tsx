@@ -22,28 +22,31 @@ export default function VenuePage() {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Fetch real merchant details first
+        const merchantRes = await api.merchants.get(id);
+        const realMerchant = merchantRes; // apiFetch returns the data directly if it doesn't wrap in { data } but let's assume it does if it matches list. Actually apiFetch<Merchant> returns Merchant.
+        
         // Fetch services for this specific merchant
         const res = await api.services.list({ merchantId: id, limit: '50' });
         if (res && res.data) {
           setServices(res.data);
-          // For demo, we just use the merchant data from the first service
-          if (res.data.length > 0) {
-            setMerchant({
-              id: id,
-              name: 'H101 Premium Hotels', // Fallback
-              description: 'Welcome to our luxurious property. Enjoy your stay with premium amenities.',
-              gallery: [
-                'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
-                'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80',
-                'https://images.unsplash.com/photo-1522771731478-44bc10b49cb3?w=800&q=80'
-              ],
-              thingsToKnow: ['Free WiFi', 'Swimming Pool', '24/7 Room Service', 'Valet Parking', 'No Smoking'],
-              rating: 4.8,
-              reviewCount: 342,
-              location: 'Chennai Central',
-              ...res.data[0].merchant // override with real data if exists
-            });
-          }
+        }
+
+        if (realMerchant) {
+          setMerchant({
+            id: id,
+            name: realMerchant.name || 'Venue Name',
+            description: realMerchant.description || 'Welcome to our luxurious property. Enjoy your stay with premium amenities.',
+            gallery: (realMerchant.images && realMerchant.images.length > 0) ? realMerchant.images : [
+              'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
+              'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80',
+              'https://images.unsplash.com/photo-1522771731478-44bc10b49cb3?w=800&q=80'
+            ],
+            thingsToKnow: (realMerchant.amenities && realMerchant.amenities.length > 0) ? realMerchant.amenities : ['Free WiFi', 'Parking', 'Air Conditioning'],
+            rating: realMerchant.rating || 4.8,
+            reviewCount: realMerchant.reviewCount || 0,
+            location: `${realMerchant.city || 'City'}, ${realMerchant.state || ''}`,
+          });
         }
       } catch (err) {
         console.error(err);

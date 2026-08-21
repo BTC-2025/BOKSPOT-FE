@@ -390,6 +390,7 @@ export const api = {
       return apiFetch<Merchant[]>(`/geo/nearby?${qs}`);
     },
     bySlug: (slug: string) => apiFetch<Merchant>(`/merchants/slug/${slug}`),
+    get: (id: string) => apiFetch<Merchant>(`/merchants/${id}`),
   },
 };
 

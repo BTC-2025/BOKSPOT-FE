@@ -1570,17 +1570,6 @@ export default function ProviderDiscoveryPage() {
         let response = await api.services.list(params);
         let list = Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : []);
         
-        // --- DEMO FALLBACK: If empty, fetch from general-service to show newly created unmapped businesses ---
-        if (list.length === 0 && category !== 'general-service') {
-          const fallbackParams = { ...params };
-          fallbackParams.categorySlug = 'general-service';
-          const fallbackResponse = await api.services.list(fallbackParams);
-          const fallbackList = Array.isArray(fallbackResponse?.data) ? fallbackResponse.data : (Array.isArray(fallbackResponse) ? fallbackResponse : []);
-          // Only show newly created services (from last 24h) to avoid cluttering with old fallback data
-          list = fallbackList;
-        }
-        // -------------------------------------------------------------------------------------------------
-
         if (active) {
           setServicesList(list);
         }
