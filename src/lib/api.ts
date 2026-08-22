@@ -2,7 +2,7 @@
 // API Client — BETA Universal Service Marketplace
 // ============================================================
 
-const isProd = false;
+const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'));
 const API_BASE = isProd ? 'https://bokspot-be.onrender.com/api/v1' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1');
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
