@@ -179,22 +179,38 @@ export default function VenuePage() {
                 <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#8b6508] to-yellow-400" />
                 <h3 className="text-xl font-black text-slate-900 mb-6">Available Options</h3>
                 
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                  {services.map((service, idx) => (
-                    <div key={idx} className="group bg-slate-50 rounded-2xl p-4 border border-slate-100 hover:border-[#8b6508]/30 hover:shadow-md transition-all cursor-pointer" onClick={() => handleBookService(service)}>
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-bold text-slate-900 group-hover:text-[#8b6508] transition-colors">{service.name}</h4>
-                        <span className="font-black text-slate-900">₹{service.basePrice}</span>
-                      </div>
-                      <p className="text-sm text-slate-500 mb-4 line-clamp-2">{service.shortDescription || service.description}</p>
-                      <button className="w-full py-2.5 bg-slate-900 hover:bg-[#8b6508] text-white rounded-xl font-bold transition-colors shadow-sm">
-                        Select Option
-                      </button>
+                <div className="space-y-6 max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
+                  {services.map((categoryService, idx) => (
+                    <div key={idx} className="space-y-4">
+                      {/* Category Header */}
+                      <h4 className="font-extrabold text-lg text-slate-800 pb-2 border-b-2 border-slate-100 inline-block">
+                        {categoryService.name}
+                      </h4>
+                      
+                      {/* Listings under Category */}
+                      {(categoryService.metadata?.listings || []).length > 0 ? (
+                        <div className="space-y-4">
+                          {(categoryService.metadata?.listings || []).map((listing: any, lIdx: number) => (
+                            <div key={lIdx} className="group bg-slate-50 rounded-2xl p-4 border border-slate-100 hover:border-[#8b6508]/30 hover:shadow-md transition-all cursor-pointer" onClick={() => handleBookService(listing)}>
+                              <div className="flex justify-between items-start mb-2">
+                                <h5 className="font-bold text-slate-900 group-hover:text-[#8b6508] transition-colors">{listing.name}</h5>
+                                <span className="font-black text-slate-900">₹{listing.basePrice || listing.price || 0}</span>
+                              </div>
+                              <p className="text-sm text-slate-500 mb-4 line-clamp-2">{listing.description}</p>
+                              <button className="w-full py-2.5 bg-slate-900 hover:bg-[#8b6508] text-white rounded-xl font-bold transition-colors shadow-sm">
+                                Book {listing.name}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-slate-400 italic">No options added yet in this category.</p>
+                      )}
                     </div>
                   ))}
                   
                   {services.length === 0 && (
-                    <p className="text-slate-500 text-center py-4">No options available at the moment.</p>
+                    <p className="text-slate-500 text-center py-4">No categories or options available at the moment.</p>
                   )}
                 </div>
               </div>

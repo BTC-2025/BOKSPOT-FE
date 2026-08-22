@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Map, Clock, CheckCircle2, ChevronRight, Info, ShieldCheck, Search, Users, Utensils, X } from 'lucide-react';
+import { ArrowLeft, Map, Clock, CheckCircle2, ChevronRight, ChevronLeft, Info, ShieldCheck, Search, Users, Utensils, X } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useLocationStore } from '@/lib/store';
 
@@ -16,43 +16,69 @@ export default function VenueProfilePage() {
   const { city } = useLocationStore();
 
   const [liveServices, setLiveServices] = useState<any[]>([]);
+  const [merchantData, setMerchantData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
   useEffect(() => {
-    // We are passing the merchantId to filter services belonging to this merchant
-    api.services.list({}).then(res => {
-      if (res && res.data) {
-        const merchantServices = res.data.filter((s: any) => {
-          const isMatchMerchant = (s.merchantObj?.id === merchantId) || (s.merchant === merchantId) || (s.merchantObj?.name === merchantId) || (s.merchant === decodeURIComponent(merchantId));
-          
-          let isMatchType = true;
-          // IMPORTANT: Only apply category filtering to the mega dummy merchant (which has 36 mixed services).
-          // For real merchants, we WANT to show all their services across categories on their venue page.
-          if (merchantId === '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e') {
-            const bType = bookingType.toLowerCase();
-            const typeKeywords = (bType.includes('stay') || bType.includes('hotel') || bType.includes('accommodation') || bType.includes('room')) ? ['hotel', 'room', 'resort', 'accommodation', 'stay'] :
-                                 (bType.includes('sports') || bType.includes('turf') || bType.includes('play')) ? ['turf', 'cricket', 'football', 'badminton', 'tennis', 'court', 'sport', 'ground', 'ball'] :
-                                 (bType.includes('health') || bType.includes('doctor') || bType.includes('clinic') || bType.includes('medical')) ? ['doctor', 'clinic', 'dental', 'medical', 'appointment', 'health'] :
-                                 (bType.includes('dine') || bType.includes('food') || bType.includes('restaurant')) ? ['restaurant', 'dining', 'food', 'table', 'dine'] : 
-                                 (bType.includes('salon') || bType.includes('spa') || bType.includes('beauty') || bType.includes('care')) ? ['salon', 'spa', 'beauty', 'hair', 'massage', 'care'] :
-                                 (bType.includes('event') || bType.includes('party') || bType.includes('hall')) ? ['event', 'party', 'hall', 'wedding', 'banquet'] : [];
-                                 
-            if (typeKeywords.length > 0) {
-              const catName = (s.category || '').toLowerCase();
-              const svcName = (s.name || '').toLowerCase();
-              const catSlug = (s.categoryObj?.slug || '').toLowerCase();
-              isMatchType = typeKeywords.some(kw => catName.includes(kw) || svcName.includes(kw) || catSlug.includes(kw));
-            }
+    let active = true;
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch full merchant details for the Venue Profile (About, Gallery, Amenities)
+        // If merchantId is the dummy megamerchant, we just fall back, but for real merchants this will get the filled details.
+        let mData = null;
+        if (merchantId !== '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e') {
+          try {
+            mData = await api.merchants.get(merchantId);
+          } catch (e) {
+            console.warn('Could not fetch merchant:', e);
           }
-          
-          return isMatchMerchant && isMatchType;
-        });
-        setLiveServices(merchantServices);
+        }
+        
+        const res = await api.services.list({});
+        if (active && res && res.data) {
+          const merchantServices = res.data.filter((s: any) => {
+            const isMatchMerchant = (s.merchantObj?.id === merchantId) || (s.merchant === merchantId) || (s.merchantObj?.name === merchantId) || (s.merchant === decodeURIComponent(merchantId));
+            
+            let isMatchType = true;
+            if (merchantId === '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e') {
+              const bType = bookingType.toLowerCase();
+              const typeKeywords = (bType.includes('stay') || bType.includes('hotel') || bType.includes('accommodation') || bType.includes('room')) ? ['hotel', 'room', 'resort', 'accommodation', 'stay'] :
+                                   (bType.includes('sports') || bType.includes('turf') || bType.includes('play')) ? ['turf', 'cricket', 'football', 'badminton', 'tennis', 'court', 'sport', 'ground', 'ball'] :
+                                   (bType.includes('health') || bType.includes('doctor') || bType.includes('clinic') || bType.includes('medical')) ? ['doctor', 'clinic', 'dental', 'medical', 'appointment', 'health'] :
+                                   (bType.includes('dine') || bType.includes('food') || bType.includes('restaurant')) ? ['restaurant', 'dining', 'food', 'table', 'dine'] : 
+                                   (bType.includes('salon') || bType.includes('spa') || bType.includes('beauty') || bType.includes('care')) ? ['salon', 'spa', 'beauty', 'hair', 'massage', 'care'] :
+                                   (bType.includes('event') || bType.includes('party') || bType.includes('hall')) ? ['event', 'party', 'hall', 'wedding', 'banquet'] : [];
+                                   
+              if (typeKeywords.length > 0) {
+                const catName = (s.category || '').toLowerCase();
+                const svcName = (s.name || '').toLowerCase();
+                const catSlug = (s.categoryObj?.slug || '').toLowerCase();
+                isMatchType = typeKeywords.some(kw => catName.includes(kw) || svcName.includes(kw) || catSlug.includes(kw));
+              }
+            }
+            return isMatchMerchant && isMatchType;
+          });
+          setLiveServices(merchantServices);
+          if (mData) {
+            setMerchantData(mData.data || mData);
+          } else if (merchantServices.length > 0) {
+            setMerchantData(merchantServices[0].merchantObj || {});
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (active) setLoading(false);
       }
-      setLoading(false);
-    });
-  }, [merchantId]);
+    };
+    
+    fetchData();
+    return () => { active = false; };
+  }, [merchantId, bookingType]);
 
   const venueName = liveServices.length > 0 ? (liveServices[0].merchantObj?.name || liveServices[0].merchant || 'Venue') : 'Loading...';
   const address = liveServices.length > 0 ? (liveServices[0].merchantObj?.address || `${city || 'Chennai'}`) : '';
@@ -64,6 +90,18 @@ export default function VenueProfilePage() {
   if (liveServices.length === 0) {
     return <div className="min-h-screen flex items-center justify-center"><p>Venue not found or has no services.</p></div>;
   }
+
+  const finalMerchantObj = merchantData || liveServices[0]?.merchantObj || {};
+  const validImages = (finalMerchantObj.images || []).filter((img: any) => typeof img === 'string' && img.trim() !== '');
+  const galleryImages = validImages.length > 0 ? validImages : [
+    `https://picsum.photos/seed/${merchantId}1/800/600`,
+    `https://picsum.photos/seed/${merchantId}2/400/300`,
+    `https://picsum.photos/seed/${merchantId}3/400/300`,
+    `https://picsum.photos/seed/${merchantId}4/400/300`,
+    `https://picsum.photos/seed/${merchantId}5/400/300`
+  ];
+  const aboutText = finalMerchantObj.description || liveServices[0]?.rawConfig?.description;
+  const amenities = finalMerchantObj.amenities || [];
 
   return (
     <div className="min-h-screen bg-[color:var(--color-surface)] pb-32">
@@ -83,15 +121,21 @@ export default function VenueProfilePage() {
 
         {/* Hero Image Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 rounded-3xl overflow-hidden mb-8 h-[300px] md:h-[400px]">
-          <div className="relative h-full w-full">
-            <img src={`https://picsum.photos/seed/${merchantId}1/800/600`} alt="Venue" className="w-full h-full object-cover" />
+          <div className="relative h-full w-full cursor-pointer" onClick={() => { setCurrentImageIdx(0); setIsGalleryOpen(true); }}>
+            <img src={galleryImages[0] || `https://picsum.photos/seed/${merchantId}1/800/600`} alt="Venue" className="w-full h-full object-cover" />
           </div>
           <div className="hidden md:grid grid-cols-2 grid-rows-2 gap-4 h-full">
-            <img src={`https://picsum.photos/seed/${merchantId}2/400/300`} alt="Detail" className="w-full h-full object-cover rounded-xl" />
-            <img src={`https://picsum.photos/seed/${merchantId}3/400/300`} alt="Detail" className="w-full h-full object-cover rounded-xl" />
-            <img src={`https://picsum.photos/seed/${merchantId}4/400/300`} alt="Detail" className="w-full h-full object-cover rounded-xl" />
-            <div className="relative w-full h-full rounded-xl overflow-hidden">
-              <img src={`https://picsum.photos/seed/${merchantId}5/400/300`} alt="Detail" className="w-full h-full object-cover brightness-50" />
+            <div className="relative cursor-pointer" onClick={() => { setCurrentImageIdx(1); setIsGalleryOpen(true); }}>
+              <img src={galleryImages[1] || galleryImages[0] || `https://picsum.photos/seed/${merchantId}2/400/300`} alt="Detail" className="w-full h-full object-cover rounded-xl" />
+            </div>
+            <div className="relative cursor-pointer" onClick={() => { setCurrentImageIdx(2); setIsGalleryOpen(true); }}>
+              <img src={galleryImages[2] || galleryImages[0] || `https://picsum.photos/seed/${merchantId}3/400/300`} alt="Detail" className="w-full h-full object-cover rounded-xl" />
+            </div>
+            <div className="relative cursor-pointer" onClick={() => { setCurrentImageIdx(3); setIsGalleryOpen(true); }}>
+              <img src={galleryImages[3] || galleryImages[0] || `https://picsum.photos/seed/${merchantId}4/400/300`} alt="Detail" className="w-full h-full object-cover rounded-xl" />
+            </div>
+            <div className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer" onClick={() => { setCurrentImageIdx(4); setIsGalleryOpen(true); }}>
+              <img src={galleryImages[4] || galleryImages[0] || `https://picsum.photos/seed/${merchantId}5/400/300`} alt="Detail" className="w-full h-full object-cover brightness-50" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <button className="bg-white text-black px-4 py-2 rounded-full font-bold text-sm shadow-lg hover:scale-105 transition-transform">Show all photos</button>
               </div>
@@ -122,12 +166,12 @@ export default function VenueProfilePage() {
             <hr className="border-[color:var(--color-outline-variant)]/20" />
 
             {/* About */}
-            {liveServices[0]?.rawConfig?.description && (
+            {aboutText && (
               <>
                 <div>
                   <h2 className="text-xl font-bold mb-4">About</h2>
                   <p className="text-[color:var(--color-on-surface-variant)] text-sm leading-relaxed mb-3">
-                    {liveServices[0].rawConfig.description}
+                    {aboutText}
                   </p>
                 </div>
                 <hr className="border-[color:var(--color-outline-variant)]/20" />
@@ -138,6 +182,11 @@ export default function VenueProfilePage() {
             <div>
               <h2 className="text-xl font-bold mb-6">Things to know</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
+                {amenities.map((amenity: string, idx: number) => (
+                  <div key={idx} className="flex items-center gap-3 text-sm font-medium">
+                    <CheckCircle2 size={20} className="text-[color:var(--color-outline)]" /> {amenity}
+                  </div>
+                ))}
                 {liveServices[0]?.rawConfig?.isTimingEnabled && (
                   <div className="flex items-center gap-3 text-sm font-medium">
                     <Clock size={20} className="text-[color:var(--color-outline)]" /> {liveServices[0].rawConfig.timingDetails || '24/7 Check-in available'}
@@ -273,6 +322,78 @@ export default function VenueProfilePage() {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Fullscreen Image Gallery Modal */}
+      <AnimatePresence>
+        {isGalleryOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col"
+          >
+            {/* Gallery Header */}
+            <div className="flex items-center justify-between p-4 md:p-6 text-white absolute top-0 left-0 right-0 z-10">
+              <div className="flex items-center gap-4">
+                <button onClick={() => setIsGalleryOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                  <ArrowLeft size={24} />
+                </button>
+                <div>
+                  <h3 className="font-bold">{venueName}</h3>
+                  <p className="text-xs text-white/60">{currentImageIdx + 1} / {galleryImages.length}</p>
+                </div>
+              </div>
+              <button onClick={() => setIsGalleryOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Main Image Viewer */}
+            <div className="flex-1 flex items-center justify-center relative px-4 md:px-12 mt-16 md:mt-0">
+              <button 
+                onClick={(e) => { e.stopPropagation(); setCurrentImageIdx(prev => prev === 0 ? galleryImages.length - 1 : prev - 1); }}
+                className="absolute left-2 md:left-6 p-3 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors border border-white/10 z-10"
+              >
+                <ChevronLeft size={24} />
+              </button>
+              
+              <div className="w-full max-w-5xl max-h-[70vh] flex items-center justify-center">
+                <motion.img 
+                  key={currentImageIdx}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.2 }}
+                  src={galleryImages[currentImageIdx]} 
+                  alt="Gallery image" 
+                  className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl"
+                />
+              </div>
+
+              <button 
+                onClick={(e) => { e.stopPropagation(); setCurrentImageIdx(prev => prev === galleryImages.length - 1 ? 0 : prev + 1); }}
+                className="absolute right-2 md:right-6 p-3 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors border border-white/10 z-10"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </div>
+
+            {/* Thumbnails */}
+            <div className="p-4 md:p-6 bg-black/50 border-t border-white/10 overflow-x-auto">
+              <div className="flex items-center gap-3 w-max mx-auto px-4">
+                {galleryImages.map((img: string, idx: number) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentImageIdx(idx)}
+                    className={`relative w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden flex-shrink-0 transition-all ${currentImageIdx === idx ? 'ring-2 ring-white scale-105 opacity-100' : 'opacity-50 hover:opacity-100'}`}
+                  >
+                    <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
