@@ -1594,21 +1594,19 @@ export default function ProviderDiscoveryPage() {
   if (!mounted) {
     return (
       <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-300">
-        <nav className="fixed top-0 left-0 right-0 z-50 custom-navbar border-b border-[var(--border-subtle)]">
-          <div className="container-main flex items-center justify-between h-16">
-            <div className="flex items-center gap-4 min-w-0">
-              <Link href={`/${bookingType}`} className="btn-ghost p-2 shrink-0">
-                <ArrowLeft size={20} />
-              </Link>
-              <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] min-w-0">
-                <Link href="/" className="hover:text-[var(--text-primary)] transition-colors shrink-0">Home</Link>
-                <ChevronRight size={14} className="shrink-0" />
-                <span className="text-[var(--text-primary)] font-bold truncate">Loading...</span>
-              </div>
+        <div className="container-main flex items-center justify-between pt-6 pb-2">
+          <div className="flex items-center gap-4 min-w-0">
+            <Link href={`/${bookingType}`} className="btn-ghost p-2 shrink-0 border border-[var(--border-subtle)] rounded-full hover:bg-[var(--bg-surface)]">
+              <ArrowLeft size={20} />
+            </Link>
+            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] min-w-0">
+              <Link href="/" className="hover:text-[var(--text-primary)] transition-colors shrink-0">Home</Link>
+              <ChevronRight size={14} className="shrink-0" />
+              <span className="text-[var(--text-primary)] font-bold truncate">Loading...</span>
             </div>
           </div>
-        </nav>
-        <div className="pt-24 container-main py-8">
+        </div>
+        <div className="container-main py-6">
           <div className="animate-pulse space-y-6">
             <div className="h-8 w-64 bg-slate-300/20 rounded-lg"></div>
             <div className="h-4 w-48 bg-slate-300/20 rounded-lg"></div>
@@ -1668,21 +1666,19 @@ export default function ProviderDiscoveryPage() {
   if (loading && !isCustomBooking) {
     return (
       <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-300">
-        <nav className="fixed top-0 left-0 right-0 z-50 custom-navbar border-b border-[var(--border-subtle)]">
-          <div className="container-main flex items-center justify-between h-16">
-            <div className="flex items-center gap-4 min-w-0">
-              <Link href={`/${bookingType}`} className="btn-ghost p-2 shrink-0">
-                <ArrowLeft size={20} />
-              </Link>
-              <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] min-w-0">
-                <Link href="/" className="hover:text-[var(--text-primary)] transition-colors shrink-0">Home</Link>
-                <ChevronRight size={14} className="shrink-0" />
-                <span className="text-[var(--text-primary)] font-bold truncate">Loading...</span>
-              </div>
+        <div className="container-main flex items-center justify-between pt-6 pb-2">
+          <div className="flex items-center gap-4 min-w-0">
+            <Link href={`/${bookingType}`} className="btn-ghost p-2 shrink-0 border border-[var(--border-subtle)] rounded-full hover:bg-[var(--bg-surface)]">
+              <ArrowLeft size={20} />
+            </Link>
+            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] min-w-0">
+              <Link href="/" className="hover:text-[var(--text-primary)] transition-colors shrink-0">Home</Link>
+              <ChevronRight size={14} className="shrink-0" />
+              <span className="text-[var(--text-primary)] font-bold truncate">Loading...</span>
             </div>
           </div>
-        </nav>
-        <div className="pt-28 container-main py-8">
+        </div>
+        <div className="container-main py-6">
           <div className="animate-pulse space-y-6">
             <div className="h-8 w-64 bg-slate-300/20 rounded-lg"></div>
             <div className="h-4 w-48 bg-slate-300/20 rounded-lg"></div>
@@ -1706,25 +1702,23 @@ export default function ProviderDiscoveryPage() {
 
   return (
     <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-300">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 custom-navbar border-b border-[var(--border-subtle)]">
-        <div className="container-main flex items-center justify-between h-16">
-          <div className="flex items-center gap-4 min-w-0">
-            <Link href={`/${bookingType}`} className="btn-ghost p-2 shrink-0">
-              <ArrowLeft size={20} />
-            </Link>
-            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] min-w-0">
-              <Link href="/" className="hover:text-[var(--text-primary)] transition-colors shrink-0">Home</Link>
-              <ChevronRight size={14} className="shrink-0" />
-              <Link href={`/${bookingType}`} className="hover:text-[var(--text-primary)] transition-colors truncate shrink-0">{bookingType}</Link>
-              <ChevronRight size={14} className="shrink-0" />
-              <span className="text-[var(--text-primary)] truncate">{categoryName}</span>
-            </div>
+      {/* Inline Breadcrumb */}
+      <div className="container-main flex items-center justify-between pt-6 pb-2">
+        <div className="flex items-center gap-4 min-w-0">
+          <Link href={`/${bookingType}`} className="btn-ghost p-2 shrink-0 border border-[var(--border-subtle)] rounded-full hover:bg-[var(--bg-surface)]">
+            <ArrowLeft size={20} />
+          </Link>
+          <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] min-w-0">
+            <Link href="/" className="hover:text-[var(--text-primary)] transition-colors shrink-0">Home</Link>
+            <ChevronRight size={14} className="shrink-0" />
+            <Link href={`/${bookingType}`} className="hover:text-[var(--text-primary)] transition-colors truncate shrink-0">{bookingType}</Link>
+            <ChevronRight size={14} className="shrink-0" />
+            <span className="text-[var(--text-primary)] font-bold truncate">{categoryName}</span>
           </div>
         </div>
-      </nav>
+      </div>
 
-      <div className="pt-28 container-main py-8 max-w-4xl mx-auto">
+      <div className="container-main py-6 max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}

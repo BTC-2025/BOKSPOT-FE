@@ -273,7 +273,7 @@ export function TopNav({
 
   return (
     <>
-      <header className="custom-navbar">
+      <header className="fixed top-0 left-0 right-0 z-[100] custom-navbar transition-all duration-300">
         <div className="flex justify-between items-center w-full pl-6 lg:pl-12 pr-0 py-1.5 lg:py-2 max-w-full">
           {/* Left Column: Logo & Brand + Location Selector (Desktop) */}
           <div className="flex-1 flex justify-start items-center gap-6">
@@ -291,7 +291,7 @@ export function TopNav({
               >
                 <MapPin size={14} className={status === 'detecting' ? 'animate-bounce' : ''} />
                 <span className="!text-white">{mounted ? (city || 'Select Location') : 'Chennai'}</span>
-                <span className="material-symbols-outlined text-[16px] transition-transform duration-200" style={{ transform: isLocationModalOpen ? 'rotate(180deg)' : 'none' }}>keyboard_arrow_down</span>
+                <span className="material-symbols-outlined text-[16px] !text-white transition-transform duration-200" style={{ transform: isLocationModalOpen ? 'rotate(180deg)' : 'none' }}>keyboard_arrow_down</span>
               </button>
             </div>
 
@@ -488,7 +488,7 @@ export function TopNav({
 
                   {/* Chevron pointing down/up on the right */}
                   <span 
-                    className="material-symbols-outlined text-[15px] text-inherit transition-transform duration-200" 
+                    className="material-symbols-outlined text-[15px] !text-white transition-transform duration-200" 
                     style={{ transform: profileOpen ? 'rotate(180deg)' : 'none' }}
                   >
                     keyboard_arrow_down
@@ -543,48 +543,8 @@ export function TopNav({
                       </Link>
                     </div>
 
-                    {/* Divider */}
-                    <div className="w-full border-b border-slate-200 dark:border-slate-800/80 my-3.5" />
-
-                    {/* Secondary Account Row */}
-                    <div 
-                      onClick={() => {
-                        setUser({
-                          username: 'beta',
-                          fullName: 'beta',
-                          email: 'beta@beta-softnet.com',
-                          phone: '+91 98765 43210',
-                          emoji: '💼',
-                          avatarColor: 'from-blue-600 to-indigo-700',
-                          profilePhoto: null
-                        });
-                        setProfileOpen(false);
-                      }}
-                      className="w-full px-3 py-2 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-3 transition-colors cursor-pointer group"
-                    >
-                      <div className="w-9 h-9 rounded-full bg-[#0d47a1] text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
-                        B
-                      </div>
-                      <div className="flex flex-col min-w-0 text-left flex-1">
-                        <span className="text-[13px] font-bold text-slate-800 dark:text-slate-200 leading-tight">beta</span>
-                        <span className="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5">beta@beta-softnet.com</span>
-                      </div>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="w-full border-b border-slate-200 dark:border-slate-800/80 my-2" />
-
-                    {/* Action buttons */}
-                    <div className="flex flex-col gap-0.5">
-                      
-                      <Link
-                        href="/support"
-                        onClick={() => setProfileOpen(false)}
-                        className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 flex items-center gap-3 text-[13px] font-semibold text-slate-700 dark:text-slate-300 transition-colors text-left cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[19px] text-slate-500 dark:text-slate-400">help</span>
-                        <span>Help & Support</span>
-                      </Link>
+                      {/* Action buttons */}
+                      <div className="flex flex-col gap-0.5">
 
                       <button
                         onClick={() => {
@@ -603,22 +563,10 @@ export function TopNav({
                           logout();
                           router.push('/');
                         }}
-                        className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 flex items-center gap-3 text-[13px] font-semibold text-slate-700 dark:text-slate-300 transition-colors text-left cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[19px] text-slate-500 dark:text-slate-400">logout</span>
-                        <span>Sign out of this account</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setProfileOpen(false);
-                          logout();
-                          router.push('/');
-                        }}
                         className="w-full px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-3 text-[13px] font-bold text-[#e53935] hover:text-[#d32f2f] transition-colors text-left cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[19px] text-[#e53935]">logout</span>
-                        <span>Sign out of all accounts</span>
+                        <span>Sign out of this account</span>
                       </button>
                     </div>
                   </div>
@@ -672,10 +620,10 @@ export function TopNav({
           <div className="w-[50px] shrink-0 h-full flex items-center justify-center border-l border-white/10">
             <button
               onClick={() => setUtilityDrawerOpen(!utilityDrawerOpen)}
-              className={`w-8 h-8 flex items-center justify-center hover:scale-110 active:scale-90 cursor-pointer transition-all ${
+              className={`relative w-9 h-9 flex items-center justify-center rounded-xl bg-[#5a4409] hover:bg-[#72560c] border border-[#fceea7]/30 transition-all cursor-pointer shadow-md ${
                 utilityDrawerOpen 
-                  ? 'opacity-100 scale-105'
-                  : 'opacity-85 hover:opacity-100'
+                  ? 'opacity-100 scale-105 shadow-[0_0_10px_rgba(252,238,167,0.3)]'
+                  : 'opacity-85 hover:opacity-100 hover:scale-105'
               }`}
               title="Bokspot Utilities"
             >

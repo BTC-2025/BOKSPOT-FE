@@ -83,15 +83,33 @@ export const AVAILABLE_SHORTCUTS: Shortcut[] = [
   { id: 'event-organizer', label: 'Event Organizer Booking', icon: 'cake', actionType: 'link', actionTarget: '/personal-misc/event-organizer' },
 ];
 
+export const SUBNAV_CATEGORIES = [
+  { id: 'travel-transport', label: 'Travel & Transport', emoji: '✈️', href: '/travel-transport' },
+  { id: 'stay-accommodation', label: 'Stay & Accommodation', emoji: '🏨', href: '/stay-accommodation' },
+  { id: 'entertainment-events', label: 'Entertainment & Events', emoji: '🎥', href: '/entertainment-events' },
+  { id: 'sports-turf', label: 'Sports & Turf', emoji: '⚽', href: '/sports-turf' },
+  { id: 'lifestyle-local', label: 'Lifestyle Services', emoji: '💇', href: '/lifestyle-local' },
+  { id: 'business-professional', label: 'Business & Professional', emoji: '🏢', href: '/business-professional' },
+  { id: 'religious-government', label: 'Religious Services', emoji: '🛕', href: '/religious-government' },
+  { id: 'rental-equipment', label: 'Equipment Rentals', emoji: '🛍️', href: '/rental-equipment' },
+  { id: 'personal-misc', label: 'Personal Services', emoji: '🐶', href: '/personal-misc' }
+];
+
 interface ShortcutState {
   activeShortcuts: string[]; // Store only the IDs
   shortcutModalOpen: boolean;
   activeActionModal: string | null;
   
+  subnavCategories: string[]; // Store category IDs
+  subnavModalOpen: boolean;
+  
   toggleShortcut: (id: string) => void;
   setShortcutModalOpen: (isOpen: boolean) => void;
   openActionModal: (modalId: string) => void;
   closeActionModal: () => void;
+  
+  toggleSubnavCategory: (id: string) => void;
+  setSubnavModalOpen: (isOpen: boolean) => void;
 }
 
 export const useShortcutStore = create<ShortcutState>()(
@@ -100,6 +118,9 @@ export const useShortcutStore = create<ShortcutState>()(
       activeShortcuts: ['flights', 'hotels', 'buses'], // Default starting shortcuts
       shortcutModalOpen: false,
       activeActionModal: null,
+      
+      subnavCategories: ['travel-transport', 'stay-accommodation', 'entertainment-events'], // Default
+      subnavModalOpen: false,
 
       toggleShortcut: (id) => set((state) => {
         const isActive = state.activeShortcuts.includes(id);
@@ -116,10 +137,26 @@ export const useShortcutStore = create<ShortcutState>()(
       setShortcutModalOpen: (isOpen) => set({ shortcutModalOpen: isOpen }),
       openActionModal: (modalId) => set({ activeActionModal: modalId }),
       closeActionModal: () => set({ activeActionModal: null }),
+      
+      toggleSubnavCategory: (id) => set((state) => {
+        const isActive = state.subnavCategories.includes(id);
+        if (isActive) {
+          return { subnavCategories: state.subnavCategories.filter(s => s !== id) };
+        } else {
+          if (state.subnavCategories.length >= 3) {
+            return {}; // Max 3
+          }
+          return { subnavCategories: [...state.subnavCategories, id] };
+        }
+      }),
+      setSubnavModalOpen: (isOpen) => set({ subnavModalOpen: isOpen }),
     }),
     {
       name: 'lumina-shortcuts', // key in local storage
-      partialize: (state) => ({ activeShortcuts: state.activeShortcuts }), // only persist the shortcuts
+      partialize: (state) => ({ 
+        activeShortcuts: state.activeShortcuts,
+        subnavCategories: state.subnavCategories 
+      }), // persist both
     }
   )
 );

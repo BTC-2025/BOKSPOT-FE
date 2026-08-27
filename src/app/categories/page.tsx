@@ -360,7 +360,7 @@ export default function CategoriesPage() {
                       )}
                       
                       {/* Grid of Service Cards */}
-                      <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                      <div className="grid gap-3 sm:gap-4 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
                         {subcat.items.map((item) => {
                           const serviceHref = getHrefForCategoryItem(group.title, item.name);
                           const theme = CATEGORY_THEMES[group.title] || CATEGORY_THEMES['Travel'];
@@ -368,45 +368,21 @@ export default function CategoriesPage() {
                             <Link
                               key={item.name}
                               href={serviceHref}
-                              className={`relative flex flex-col justify-between rounded-[28px] border border-[color:var(--color-outline-variant)]/20 bg-[color:var(--color-surface-container)]/30 backdrop-blur-md overflow-hidden aspect-[4/3.3] min-h-[200px] shadow-lg transition-all duration-500 ease-out hover:scale-[1.04] active:scale-[0.98] ${theme.border} ${theme.glow} group text-left`}
+                              className={`relative flex flex-col items-center justify-between rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0c0c10] overflow-hidden aspect-[3/4] shadow-[0_4px_15px_-6px_rgba(0,0,0,0.05)] transition-all duration-400 ease-out hover:-translate-y-1.5 hover:shadow-[0_10px_25px_-8px_rgba(0,0,0,0.12)] group`}
                             >
-                              {/* Background Image with Hover Zoom */}
-                              <div className="absolute inset-0 z-0 overflow-hidden">
-                                <img 
-                                  src={getServiceImage(item.name)} 
-                                  alt={item.name} 
-                                  className="w-full h-full object-cover transition-all duration-700 ease-out scale-100 group-hover:scale-110 brightness-[0.4] group-hover:brightness-[0.48]"
-                                  loading="lazy"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90 transition-opacity duration-500" />
-                                <div className={`absolute inset-0 bg-gradient-to-tr ${theme.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                              </div>
+                              {/* Faint Theme Gradient (for turf/floor effect) */}
+                              <div className={`absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t ${theme.gradient || 'from-slate-200 dark:from-slate-800'} to-transparent opacity-40 dark:opacity-20 z-0 transition-opacity duration-500 group-hover:opacity-60`} />
 
-                              {/* Card Top: Floating Emoji & Price Tag */}
-                              <div className="flex items-start justify-between gap-3 relative z-10 w-full p-4.5">
-                                <div className="text-xl h-10 w-10 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:bg-white/20 group-hover:rotate-[4deg]">
+                              {/* Top Title */}
+                              <h3 className="w-full text-center font-extrabold text-[11px] sm:text-[12px] text-slate-800 dark:text-slate-100 pt-3 px-1.5 tracking-tight z-10 leading-tight line-clamp-2">
+                                {item.name}
+                              </h3>
+
+                              {/* Center Emoji / 3D Icon substitute */}
+                              <div className="flex-1 flex items-center justify-center w-full relative z-10 pb-2">
+                                <span className="text-[65px] sm:text-[75px] leading-none drop-shadow-[0_10px_10px_rgba(0,0,0,0.15)] group-hover:scale-[1.12] group-hover:-rotate-3 group-active:scale-95 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
                                   {item.emoji}
-                                </div>
-                                <span className={`backdrop-blur-md px-2.5 py-1 rounded-lg text-[9px] font-black shadow-sm uppercase tracking-wider transition-all duration-300 border ${theme.badge} group-hover:scale-105`}>
-                                  {getServicePrice(item.name)}
                                 </span>
-                              </div>
-
-                              {/* Card Bottom: Text Content & Floating Action Button */}
-                              <div className="p-4.5 pt-0 relative z-10 w-full">
-                                <div className="bg-black/40 backdrop-blur-md border border-white/10 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-inner transition-all duration-300 group-hover:bg-black/55 group-hover:border-white/15">
-                                  <div className="min-w-0 flex-1">
-                                    <h3 className={`text-[13px] font-black text-white leading-snug truncate transition-colors duration-300 ${theme.text}`}>
-                                      {item.name}
-                                    </h3>
-                                    <p className="text-[9.5px] text-gray-300 font-medium mt-0.5 line-clamp-1 opacity-85 group-hover:opacity-100 transition-opacity">
-                                      {getServiceSubtitle(item.name)}
-                                    </p>
-                                  </div>
-                                  <div className="h-7 w-7 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-white/20 group-hover:text-white group-hover:scale-110 group-hover:translate-x-0.5">
-                                    <span className="material-symbols-outlined text-sm text-white font-bold">arrow_forward</span>
-                                  </div>
-                                </div>
                               </div>
                             </Link>
                           );
@@ -420,20 +396,6 @@ export default function CategoriesPage() {
           })}
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/"
-            className="rounded-xl bg-[color:var(--color-primary)] px-4 py-3 text-sm font-bold text-[color:var(--color-on-primary)]"
-          >
-            Back to Home
-          </Link>
-          <Link
-            href="/tracks"
-            className="rounded-xl border border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-container)] px-4 py-3 text-sm font-semibold text-[color:var(--color-on-surface)]"
-          >
-            Open Track
-          </Link>
-        </div>
         </div>
       </main>
     </>

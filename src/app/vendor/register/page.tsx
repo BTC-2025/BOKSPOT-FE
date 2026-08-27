@@ -112,7 +112,7 @@ export default function VendorRegisterPage() {
                 <div className="h-12 w-12 rounded-2xl bg-[color:var(--color-primary)]/10 border border-[color:var(--color-primary)]/20 flex items-center justify-center mx-auto mb-4 text-[color:var(--color-primary)]">
                   <Store size={22} />
                 </div>
-                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Become a Partner Vendor</h1>
+                <h1 className="text-2xl md:text-3xl font-black text-[color:var(--color-on-surface)] tracking-tight">Become a Partner Vendor</h1>
                 <p className="text-xs text-[color:var(--color-on-surface-variant)] mt-1.5 leading-relaxed max-w-md mx-auto">
                   Submit an onboarding request to list your services on Bokspot. Our sales team will verify your business details to complete the setup.
                 </p>
@@ -135,7 +135,7 @@ export default function VendorRegisterPage() {
                       placeholder="e.g. Lavender Spa Center"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-white placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
+                      className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-[color:var(--color-on-surface)] placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -143,9 +143,9 @@ export default function VendorRegisterPage() {
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-[color:var(--color-surface-dim)] px-4 py-3 text-xs text-white outline-none focus:border-[color:var(--color-primary)] transition-all cursor-pointer"
+                      className="w-full rounded-xl border border-white/10 bg-[color:var(--color-surface-dim)] px-4 py-3 text-xs text-[color:var(--color-on-surface)] outline-none focus:border-[color:var(--color-primary)] transition-all cursor-pointer"
                     >
-                      {CATEGORIES.map(c => <option key={c} value={c} className="bg-[color:var(--color-surface-container)] text-white">{c}</option>)}
+                      {CATEGORIES.map(c => <option key={c} value={c} className="bg-[color:var(--color-surface-container)] text-[color:var(--color-on-surface)]">{c}</option>)}
                     </select>
                   </div>
                 </div>
@@ -159,7 +159,7 @@ export default function VendorRegisterPage() {
                       placeholder="e.g. contact@lavenderspa.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-white placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
+                      className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-[color:var(--color-on-surface)] placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -170,7 +170,7 @@ export default function VendorRegisterPage() {
                       placeholder="e.g. +91 99887 76655"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-white placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
+                      className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-[color:var(--color-on-surface)] placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
                     />
                   </div>
                 </div>
@@ -181,9 +181,9 @@ export default function VendorRegisterPage() {
                     <select
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-[color:var(--color-surface-dim)] px-4 py-3 text-xs text-white outline-none focus:border-[color:var(--color-primary)] transition-all cursor-pointer"
+                      className="w-full rounded-xl border border-white/10 bg-[color:var(--color-surface-dim)] px-4 py-3 text-xs text-[color:var(--color-on-surface)] outline-none focus:border-[color:var(--color-primary)] transition-all cursor-pointer"
                     >
-                      {CITIES.map(c => <option key={c} value={c} className="bg-[color:var(--color-surface-container)] text-white">{c}</option>)}
+                      {CITIES.map(c => <option key={c} value={c} className="bg-[color:var(--color-surface-container)] text-[color:var(--color-on-surface)]">{c}</option>)}
                     </select>
                   </div>
                   <div className="space-y-1.5 sm:col-span-2">
@@ -194,7 +194,7 @@ export default function VendorRegisterPage() {
                       placeholder="e.g. Shop 42, Green Plaza, Anna Nagar"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-white placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
+                      className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-[color:var(--color-on-surface)] placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
                     />
                   </div>
                 </div>
@@ -207,7 +207,7 @@ export default function VendorRegisterPage() {
                     placeholder="Provide details about the services you plan to offer, pricing, facilities, etc."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-white placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all resize-none"
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-[color:var(--color-on-surface)] placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all resize-none"
                   />
                 </div>
 
@@ -220,7 +220,7 @@ export default function VendorRegisterPage() {
                       onChange={(e) => setAssignSupervisor(e.target.checked)}
                       className="rounded border-white/20 bg-white/[0.02] text-[color:var(--color-primary)] focus:ring-0 focus:ring-offset-0 cursor-pointer h-4 w-4"
                     />
-                    <span className="text-xs font-bold text-white uppercase tracking-wider">Assign Supervisor to this Business</span>
+                    <span className="text-xs font-bold text-[color:var(--color-on-surface)] uppercase tracking-wider">Assign Supervisor to this Business</span>
                   </label>
                   <p className="text-[10px] text-[color:var(--color-on-surface-variant)] mt-1">
                     Toggle this if you want to assign a dedicated supervisor to manage services and bookings.
@@ -241,7 +241,7 @@ export default function VendorRegisterPage() {
                         placeholder="e.g. Arun Kumar"
                         value={supervisorName}
                         onChange={(e) => setSupervisorName(e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-white placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-[color:var(--color-on-surface)] placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
                       />
                     </div>
 
@@ -253,7 +253,7 @@ export default function VendorRegisterPage() {
                         placeholder="e.g. +91 98765 12345"
                         value={supervisorPhone}
                         onChange={(e) => setSupervisorPhone(e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-white placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-[color:var(--color-on-surface)] placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
                       />
                     </div>
 
@@ -265,7 +265,7 @@ export default function VendorRegisterPage() {
                         placeholder="e.g. arun.kumar@gmail.com"
                         value={supervisorEmail}
                         onChange={(e) => setSupervisorEmail(e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-white placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-[color:var(--color-on-surface)] placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
                       />
                     </div>
 
@@ -277,7 +277,7 @@ export default function VendorRegisterPage() {
                         placeholder="e.g. Flat 3B, Sunshine Apartments, Chennai"
                         value={supervisorAddress}
                         onChange={(e) => setSupervisorAddress(e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-white placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.05] px-4 py-3 text-xs text-[color:var(--color-on-surface)] placeholder-slate-600 outline-none focus:border-[color:var(--color-primary)] transition-all"
                       />
                     </div>
                   </div>
@@ -299,9 +299,9 @@ export default function VendorRegisterPage() {
                 <Building size={32} className="animate-pulse" />
               </div>
 
-              <h2 className="text-2xl font-black text-white tracking-tight">Request Successfully Submitted!</h2>
+              <h2 className="text-2xl font-black text-[color:var(--color-on-surface)] tracking-tight">Request Successfully Submitted!</h2>
               <p className="text-xs text-[color:var(--color-on-surface-variant)] mt-3 leading-relaxed max-w-md mx-auto">
-                Thank you for applying to become a partner vendor. Your registration request for <strong className="text-white">"{name}"</strong> has been successfully forwarded to our sales team.
+                Thank you for applying to become a partner vendor. Your registration request for <strong className="text-[color:var(--color-on-surface)]">"{name}"</strong> has been successfully forwarded to our sales team.
               </p>
 
               <div className="my-8 p-5 bg-[color:var(--color-surface-dim)]/50 rounded-2xl border border-white/5 max-w-md mx-auto text-left text-xs space-y-2.5 font-medium">
@@ -311,19 +311,19 @@ export default function VendorRegisterPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[color:var(--color-on-surface-variant)]">Business Name:</span>
-                  <span className="text-white font-bold">{name}</span>
+                  <span className="text-[color:var(--color-on-surface)] font-bold">{name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[color:var(--color-on-surface-variant)]">Category:</span>
-                  <span className="text-white font-bold">{category}</span>
+                  <span className="text-[color:var(--color-on-surface)] font-bold">{category}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[color:var(--color-on-surface-variant)]">Operating City:</span>
-                  <span className="text-white font-bold">{city}</span>
+                  <span className="text-[color:var(--color-on-surface)] font-bold">{city}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[color:var(--color-on-surface-variant)]">Email:</span>
-                  <span className="text-white font-bold">{email}</span>
+                  <span className="text-[color:var(--color-on-surface)] font-bold">{email}</span>
                 </div>
 
                 {assignSupervisor && (
@@ -333,11 +333,11 @@ export default function VendorRegisterPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[color:var(--color-on-surface-variant)]">Supervisor Name:</span>
-                      <span className="text-white font-bold">{supervisorName}</span>
+                      <span className="text-[color:var(--color-on-surface)] font-bold">{supervisorName}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[color:var(--color-on-surface-variant)]">Supervisor Email:</span>
-                      <span className="text-white font-bold">{supervisorEmail}</span>
+                      <span className="text-[color:var(--color-on-surface)] font-bold">{supervisorEmail}</span>
                     </div>
                   </>
                 )}
@@ -346,7 +346,7 @@ export default function VendorRegisterPage() {
               <div className="flex justify-center mt-6">
                 <button
                   onClick={() => router.push('/')}
-                  className="px-8 py-3 text-xs font-bold rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 transition-all cursor-pointer shadow-lg"
+                  className="px-8 py-3 text-xs font-bold rounded-xl bg-indigo-600 text-[color:var(--color-on-surface)] hover:bg-indigo-500 transition-all cursor-pointer shadow-lg"
                 >
                   Return to Home
                 </button>

@@ -81,9 +81,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <div className={`transition-all duration-300 ${
-      utilityDrawerOpen ? (activeUtilityTab ? 'lg:pr-[370px]' : 'lg:pr-[50px]') : ''
-    }`}>
+    <div 
+      className={`transition-all duration-300 ${
+        utilityDrawerOpen ? (activeUtilityTab ? 'lg:pr-[370px]' : 'lg:pr-[50px]') : ''
+      }`}
+      style={{ '--drawer-width': utilityDrawerOpen ? (activeUtilityTab ? '370px' : '50px') : '0px' } as React.CSSProperties}
+    >
       <TopNav 
         utilityDrawerOpen={utilityDrawerOpen}
         setUtilityDrawerOpen={setUtilityDrawerOpen}

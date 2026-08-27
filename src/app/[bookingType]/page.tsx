@@ -245,35 +245,35 @@ export default function CategoryPage() {
 
   return (
     <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-300">
-      {/* Sticky header */}
-      <nav className="fixed top-0 left-0 right-0 z-50 custom-navbar border-b border-white/5">
-        <div className="container-main flex items-center justify-between h-16">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="btn-ghost p-2">
-              <ArrowLeft size={20} />
-            </Link>
-            <div className="flex items-center gap-2 text-sm text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <ChevronRight size={14} />
-              <span className="text-white">{data.name}</span>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero banner */}
-      <section className="pt-16">
+      <section>
         <div className={`bg-gradient-to-br ${data.gradient} relative overflow-hidden`}>
           <div className="absolute inset-0 bg-black/40" />
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
-          <div className="container-main relative z-10 py-16">
+          
+          {/* Inline Breadcrumb */}
+          <div className="container-main relative z-10 pt-6 pb-2 flex items-center gap-4">
+            <Link href="/categories" className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer">
+              <ArrowLeft size={20} />
+            </Link>
+            <div className="flex items-center gap-2 text-sm text-slate-300">
+              <Link href="/categories" className="hover:text-white transition-colors">Categories</Link>
+              <ChevronRight size={14} opacity={0.6} />
+              <span className="text-white font-bold">{data.name}</span>
+            </div>
+          </div>
+
+          <div className="container-main relative z-10 py-6">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div className="text-5xl mb-4">{data.emoji}</div>
-              <h1 className="text-4xl md:text-5xl font-black text-white mb-3">{data.name}</h1>
-              <p className="text-white/70 text-lg max-w-xl">{data.desc}</p>
-              <div className="flex items-center gap-2 mt-4 text-white/60 text-sm">
-                <MapPin size={14} />
-                <span>Showing providers near {city}</span>
+              <div className="flex items-start gap-4 mb-2">
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-none mb-3">{data.name}</h1>
+                  <p className="text-white/80 text-sm md:text-base max-w-xl leading-snug">{data.desc}</p>
+                  <div className="flex items-center gap-1.5 mt-3 text-white/70 text-xs font-semibold">
+                    <MapPin size={12} />
+                    <span>Showing providers near {city}</span>
+                  </div>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -284,8 +284,8 @@ export default function CategoryPage() {
       <section className="py-12">
         <div className="container-main space-y-12">
           {data.sections.map((section, sIdx) => (
-            <div key={section.subheading} className="space-y-6">
-              <h2 className="text-lg font-extrabold text-slate-200 border-b border-white/5 pb-2 flex items-center gap-2">
+            <div key={section.subheading} className="space-y-5">
+              <h2 className="text-lg font-black text-[color:var(--color-on-surface)] border-b border-[color:var(--color-outline-variant)]/20 pb-2 flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
                 {section.subheading}
               </h2>
@@ -298,17 +298,21 @@ export default function CategoryPage() {
                     transition={{ delay: (sIdx * 4 + i) * 0.05 }}
                   >
                     <Link href={`/${bookingType}/${cat.slug}`}>
-                      <div className="group glass-card p-6 cursor-pointer hover:scale-[1.03] transition-all duration-300 hover:border-white/20 h-full flex flex-col justify-between">
+                      <div className="group flex flex-col justify-between rounded-2xl border border-[color:var(--color-outline-variant)]/30 bg-[color:var(--color-surface-container)]/30 hover:bg-[color:var(--color-surface-container-high)] p-5 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[color:var(--color-primary)]/30 w-full h-full">
                         <div>
-                          <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">
+                          <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300 drop-shadow-sm origin-bottom-left">
                             {cat.emoji}
                           </div>
-                          <h3 className="font-bold text-sm mb-1">{cat.name}</h3>
-                          <p className="text-xs text-slate-500 leading-snug">{cat.desc}</p>
+                          <h3 className="font-extrabold text-[14px] text-[color:var(--color-on-surface)] group-hover:text-[color:var(--color-primary)] transition-colors mb-1">
+                            {cat.name}
+                          </h3>
+                          <p className="text-[12px] text-[color:var(--color-on-surface-variant)] leading-snug">
+                            {cat.desc}
+                          </p>
                         </div>
-                        <div className="mt-4 flex items-center gap-1 text-xs text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-[color:var(--color-primary)] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
                           <span>Find nearby</span>
-                          <ChevronRight size={12} />
+                          <ChevronRight size={12} strokeWidth={3} />
                         </div>
                       </div>
                     </Link>

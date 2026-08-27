@@ -6,9 +6,10 @@ import dynamic from 'next/dynamic';
 import { MapPin, Star, Compass, ArrowRight, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShortcutManagerModal } from '../components/shortcuts/ShortcutManagerModal';
+import { SubnavManagerModal } from '../components/shortcuts/SubnavManagerModal';
 import { ActionModalManager } from '../components/shortcuts/ActionModalManager';
 import { useBookingFlowStore, useLocationStore } from '../lib/store';
-import { useShortcutStore, AVAILABLE_SHORTCUTS } from '../store/useShortcutStore';
+import { useShortcutStore, AVAILABLE_SHORTCUTS, SUBNAV_CATEGORIES } from '../store/useShortcutStore';
 import { calculateDistance, getProvidersByCategory } from '../lib/mockData';
 import { api } from '../lib/api';
 
@@ -45,11 +46,11 @@ const EXPLORE_SECTIONS = [
     glow: 'rgba(248,113,113,0.30)',
     href: '/search?q=trending',
     items: [
-      { id: 't1', title: 'Delhi to Goa Flight', subtitle: 'IndiGo Indigo-603', tag: '₹5,499', rating: '4.9', emoji: '✈️', link: '/travel-transport/flights' },
-      { id: 't2', title: 'Taj Palace Luxury Suite', subtitle: 'Mumbai stay reservation', tag: '₹14,500', rating: '4.9', emoji: '🏨', link: '/stay-accommodation/hotels' },
-      { id: 't3', title: 'Style Studio Styling', subtitle: 'Haircut & Styling in T Nagar', tag: '₹599', rating: '4.8', emoji: '💇', link: '/service/3' },
-      { id: 't4', title: 'Apollo Dental Care', subtitle: 'Oral scaling & checkup', tag: '₹899', rating: '4.8', emoji: '🦷', link: '/service/1' },
-      { id: 't5', title: 'Zen Sports Turf', subtitle: '9-a-side football turf slot', tag: '₹1,500/hr', rating: '4.9', emoji: '⚽', link: '/sports-turf/football-turf' }
+      { id: 't1', title: 'Delhi to Goa Flight', location: 'IndiGo Indigo-603', price: '₹5,499', ratingScore: '4.9', ratingText: 'Excellent', usersCount: '1k+ Users', stars: 5, emoji: '✈️', image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=500&auto=format&fit=crop&q=60', badge: 'Selling Fast', badgeBg: 'bg-red-500', link: '/travel-transport/flights' },
+      { id: 't2', title: 'Taj Palace Luxury Suite', location: 'Mumbai stay reservation', price: '₹14,500', ratingScore: '4.9', ratingText: 'Exceptional', usersCount: '800+ Users', stars: 5, emoji: '🏨', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&auto=format&fit=crop&q=60', badge: 'Top Rated', badgeBg: 'bg-emerald-500', link: '/stay-accommodation/hotels' },
+      { id: 't3', title: 'Style Studio Styling', location: 'Haircut & Styling in T Nagar', price: '₹599', ratingScore: '4.8', ratingText: 'Excellent', usersCount: '2k+ Users', stars: 4, emoji: '💇', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=500&auto=format&fit=crop&q=60', badge: 'Popular', badgeBg: 'bg-blue-500', link: '/service/3' },
+      { id: 't4', title: 'Apollo Dental Care', location: 'Oral scaling & checkup', price: '₹899', ratingScore: '4.8', ratingText: 'Excellent', usersCount: '5k+ Users', stars: 4, emoji: '🦷', image: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=500&auto=format&fit=crop&q=60', badge: 'Certified', badgeBg: 'bg-emerald-600', link: '/service/1' },
+      { id: 't5', title: 'Zen Sports Turf', location: '9-a-side football turf slot', price: '₹1,500/hr', ratingScore: '4.9', ratingText: 'Exceptional', usersCount: '400+ Users', stars: 5, emoji: '⚽', image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=500&auto=format&fit=crop&q=60', badge: 'Discount', badgeBg: 'bg-amber-500', link: '/sports-turf/football-turf' }
     ]
   },
   {
@@ -94,10 +95,10 @@ const EXPLORE_SECTIONS = [
     glow: 'rgba(52,211,153,0.30)',
     href: '/search?q=events',
     items: [
-      { id: 'e1', title: 'Clay Pottery Class', subtitle: 'Weekend workshop in Chennai', tag: 'Sat 4 PM', rating: 'Class', emoji: '🎨', link: '/entertainment-events/workshops' },
-      { id: 'e2', title: 'IPL Live Turf Screening', subtitle: 'Match screening at Zen Arena', tag: 'Sun 7 PM', rating: 'Screening', emoji: '⚽', link: '/entertainment-events/events' },
-      { id: 'e3', title: 'Corporate Badminton League', subtitle: 'Trophies and cash prizes', tag: 'June 15', rating: 'League', emoji: '🏸', link: '/sports-turf/badminton' },
-      { id: 'e4', title: 'Sunburn Arena EDM concert', subtitle: 'Early bird tickets live now', tag: 'June 20', rating: 'Concert', emoji: '🎵', link: '/entertainment-events/concerts' }
+      { id: 'e1', title: 'Clay Pottery Class', location: 'Weekend workshop in Chennai', price: '₹400', ratingScore: '4.7', ratingText: 'Great', usersCount: '50+ Users', stars: 4, emoji: '🎨', image: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=500&auto=format&fit=crop&q=60', badge: 'Workshop', badgeBg: 'bg-purple-500', link: '/entertainment-events/workshops' },
+      { id: 'e2', title: 'IPL Live Turf Screening', location: 'Match screening at Zen Arena', price: '₹299', ratingScore: '4.8', ratingText: 'Awesome', usersCount: '200+ Users', stars: 5, emoji: '⚽', image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=500&auto=format&fit=crop&q=60', badge: 'Live', badgeBg: 'bg-red-500', link: '/entertainment-events/events' },
+      { id: 'e3', title: 'Corporate Badminton League', location: 'Trophies and cash prizes', price: '₹999', ratingScore: '4.9', ratingText: 'Exceptional', usersCount: '500+ Users', stars: 5, emoji: '🏸', image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=500&auto=format&fit=crop&q=60', badge: 'Tournament', badgeBg: 'bg-blue-600', link: '/sports-turf/badminton' },
+      { id: 'e4', title: 'Sunburn Arena EDM concert', location: 'Early bird tickets live now', price: '₹1,200', ratingScore: '4.9', ratingText: 'Exceptional', usersCount: '1k+ Users', stars: 5, emoji: '🎵', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&auto=format&fit=crop&q=60', badge: 'Selling Fast', badgeBg: 'bg-pink-500', link: '/entertainment-events/concerts' }
     ]
   },
   {
@@ -217,57 +218,72 @@ const RECOMMENDED_ITEMS = [
   {
     id: 'r1',
     title: 'Avengers: Secret Wars',
-    category: 'Avengers Movie',
-    emoji: '🎬',
-    rating: '4.9',
-    price: 'From ₹190',
+    location: 'Inox: Forum Mall',
+    image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '9.8',
+    ratingText: 'Exceptional',
+    usersCount: '1k+ Users',
+    price: '₹190',
+    badge: 'Selling Fast',
+    badgeBg: 'bg-red-500',
+    stars: 5,
     link: '/entertainment-events/movies',
-    bgGradient: 'from-red-950/50 to-black/85',
-    borderColor: 'border-red-500/20'
   },
   {
     id: 'r2',
     title: 'Grand Palace Resorts',
-    category: 'Stay & Accomm',
-    emoji: '🏨',
-    rating: '4.8',
-    price: 'From ₹4,500',
+    location: 'ECR, Chennai',
+    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '9.2',
+    ratingText: 'Exceptional',
+    usersCount: '163 Users',
+    price: '₹4,500',
+    badge: '11% off',
+    badgeBg: 'bg-emerald-500',
+    stars: 4,
     link: '/stay-accommodation/hotels',
-    bgGradient: 'from-amber-950/50 to-black/85',
-    borderColor: 'border-amber-500/20'
   },
   {
     id: 'r3',
     title: 'Vande Bharat Express',
-    category: 'Your Next Train',
-    emoji: '🚆',
-    rating: '4.9',
-    price: 'From ₹850',
+    location: 'Chennai Central',
+    image: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '8.8',
+    ratingText: 'Excellent',
+    usersCount: '441 Users',
+    price: '₹850',
+    badge: 'Best Price Guarantee',
+    badgeBg: 'bg-blue-600',
+    stars: 4,
     link: '/travel-transport/trains',
-    bgGradient: 'from-blue-950/50 to-black/85',
-    borderColor: 'border-blue-500/20'
   },
   {
     id: 'r4',
     title: 'Sunburn EDM Festival',
-    category: 'Events',
-    emoji: '🎪',
-    rating: '4.7',
-    price: 'From ₹1,200',
+    location: 'Goa',
+    image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '8.7',
+    ratingText: 'Excellent',
+    usersCount: '523 Users',
+    price: '₹1,200',
+    badge: 'Limited Passes',
+    badgeBg: 'bg-purple-500',
+    stars: 5,
     link: '/entertainment-events/events',
-    bgGradient: 'from-purple-950/50 to-black/85',
-    borderColor: 'border-purple-500/20'
   },
   {
     id: 'r5',
     title: 'Zen Strike Play Arena',
-    category: 'Play Time',
-    emoji: '🎮',
-    rating: '4.9',
-    price: 'From ₹400',
+    location: 'Anna Nagar',
+    image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '9.0',
+    ratingText: 'Exceptional',
+    usersCount: '1k+ Users',
+    price: '₹400',
+    badge: '25% off',
+    badgeBg: 'bg-emerald-500',
+    stars: 4,
     link: '/sports-turf/play-arena',
-    bgGradient: 'from-emerald-950/50 to-black/85',
-    borderColor: 'border-emerald-500/20'
   }
 ];
 
@@ -278,7 +294,12 @@ const CONCIERGE_JOURNEYS_POOL = [
     destination: 'MAS (Chennai)',
     platform: 'Expected PF 7',
     icon: '🚆',
-    iconColor: '#ff6325'
+    iconColor: '#ff6325',
+    image: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '8.8',
+    ratingText: 'Excellent',
+    usersCount: '441 Users',
+    stars: 4
   },
   {
     trainName: 'Avengers: Secret Wars',
@@ -286,7 +307,12 @@ const CONCIERGE_JOURNEYS_POOL = [
     destination: 'Premium Audi 3',
     platform: 'Seat H-14, H-15',
     icon: '🍿',
-    iconColor: '#eab308'
+    iconColor: '#eab308',
+    image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '9.8',
+    ratingText: 'Exceptional',
+    usersCount: '1k+ Users',
+    stars: 5
   },
   {
     trainName: 'Metro High-Speed Rail',
@@ -294,7 +320,12 @@ const CONCIERGE_JOURNEYS_POOL = [
     destination: 'Airport Terminal 2',
     platform: 'Platform 2 (South)',
     icon: '🚇',
-    iconColor: '#3b82f6'
+    iconColor: '#3b82f6',
+    image: 'https://images.unsplash.com/photo-1548689816-c399f954f3dd?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '9.0',
+    ratingText: 'Exceptional',
+    usersCount: '800+ Users',
+    stars: 4
   },
   {
     trainName: 'Sunburn EDM Festival',
@@ -302,7 +333,12 @@ const CONCIERGE_JOURNEYS_POOL = [
     destination: 'VIP Arena Zone A',
     platform: 'Pass #SB-8920',
     icon: '🎸',
-    iconColor: '#ec4899'
+    iconColor: '#ec4899',
+    image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '8.7',
+    ratingText: 'Excellent',
+    usersCount: '523 Users',
+    stars: 5
   },
   {
     trainName: 'ZenFit Yoga Session',
@@ -310,7 +346,12 @@ const CONCIERGE_JOURNEYS_POOL = [
     destination: 'Studio Room B',
     platform: 'Starts 07:00 AM',
     icon: '🧘',
-    iconColor: '#10b981'
+    iconColor: '#10b981',
+    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '9.2',
+    ratingText: 'Exceptional',
+    usersCount: '120 Users',
+    stars: 5
   },
   {
     trainName: 'Kapaleeshwarar Darshan',
@@ -318,7 +359,12 @@ const CONCIERGE_JOURNEYS_POOL = [
     destination: 'Inner Sanctum Queue',
     platform: 'Special Entry Pass',
     icon: '🛕',
-    iconColor: '#f97316'
+    iconColor: '#f97316',
+    image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '4.9',
+    ratingText: 'Exceptional',
+    usersCount: '2k+ Users',
+    stars: 5
   },
   {
     trainName: 'IndiGo Flight 6E-204',
@@ -326,7 +372,12 @@ const CONCIERGE_JOURNEYS_POOL = [
     destination: 'DEL (New Delhi)',
     platform: 'Boarding Gate 4',
     icon: '✈️',
-    iconColor: '#2563eb'
+    iconColor: '#2563eb',
+    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '8.5',
+    ratingText: 'Excellent',
+    usersCount: '300+ Users',
+    stars: 4
   },
   {
     trainName: 'The Grand Temple Dine',
@@ -334,7 +385,12 @@ const CONCIERGE_JOURNEYS_POOL = [
     destination: 'Rooftop Table 12',
     platform: 'Confirmed Booking',
     icon: '🍴',
-    iconColor: '#14b8a6'
+    iconColor: '#14b8a6',
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&auto=format&fit=crop&q=60',
+    ratingScore: '9.5',
+    ratingText: 'Exceptional',
+    usersCount: '600+ Users',
+    stars: 5
   }
 ];
 
@@ -406,7 +462,12 @@ const mapExploreItemToConcierge = (item: any, sectionId: string) => {
       destination: mapped.destination,
       platform: mapped.platform,
       icon: mapped.icon,
-      iconColor: mapped.iconColor
+      iconColor: mapped.iconColor,
+      image: item.image || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=500&auto=format&fit=crop&q=60',
+      ratingScore: item.ratingScore || '4.5',
+      ratingText: item.ratingText || 'Good',
+      usersCount: item.usersCount || '100+ Users',
+      stars: item.stars || 4
     };
   }
 
@@ -416,7 +477,12 @@ const mapExploreItemToConcierge = (item: any, sectionId: string) => {
     destination: item.subtitle,
     platform: item.tag || 'Live Info',
     icon: item.emoji || (sectionId === 'news' ? '📰' : '📅'),
-    iconColor: sectionId === 'news' ? '#3b82f6' : '#10b981'
+    iconColor: sectionId === 'news' ? '#3b82f6' : '#10b981',
+    image: item.image || 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&auto=format&fit=crop&q=60',
+    ratingScore: item.ratingScore || '4.5',
+    ratingText: item.ratingText || 'Good',
+    usersCount: item.usersCount || '100+ Users',
+    stars: item.stars || 4
   };
 };
 
@@ -433,33 +499,33 @@ const getCombinedConciergePool = () => {
 const MOCK_ADS = [
   {
     id: 1,
-    title: "Summer Resort Getaway",
-    desc: "Luxury beachfront, hill, and forest resorts.",
-    image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1000&auto=format&fit=crop&q=80",
-    tag: "STAY OFFER",
-    tagBg: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    actionText: "Book Stay",
-    href: "/stay-accommodation/resorts"
+    title: "International Flights Sale",
+    desc: "Book your flights now and get up to 30% off.",
+    image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1000&auto=format&fit=crop&q=80",
+    tag: "FLIGHT OFFER",
+    tagBg: "bg-sky-500/20 text-sky-400 border-sky-500/30",
+    actionText: "Book Flight",
+    href: "/travel-transport/flights",
   },
   {
     id: 2,
     title: "Vande Bharat Express",
     desc: "Experience high-speed, premium train travel.",
-    image: "https://images.unsplash.com/photo-1517999144091-3d9dca6d1e43?w=1000&auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=1000&auto=format&fit=crop&q=80",
     tag: "TRAIN UPDATE",
     tagBg: "bg-blue-500/20 text-blue-400 border-blue-500/30",
     actionText: "Check Slots",
-    href: "/travel-transport/trains"
+    href: "/travel-transport/trains",
   },
   {
     id: 3,
     title: "Elite Turf Booking",
     desc: "Reserve premium football turfs and cricket nets.",
-    image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1000&auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=1000&auto=format&fit=crop&q=80",
     tag: "SPORTS EVENT",
     tagBg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
     actionText: "Reserve Turf",
-    href: "/sports-turf/play-arena"
+    href: "/sports-turf/play-arena",
   },
   {
     id: 4,
@@ -469,17 +535,17 @@ const MOCK_ADS = [
     tag: "CONCERT PASSES",
     tagBg: "bg-purple-500/20 text-purple-400 border-purple-500/30",
     actionText: "Buy Tickets",
-    href: "/entertainment-events/concerts"
+    href: "/entertainment-events/concerts",
   },
   {
     id: 5,
-    title: "Luxury Spa & Wellness",
-    desc: "Rejuvenate your body with premium spa therapies.",
-    image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1000&auto=format&fit=crop&q=80",
-    tag: "WELLNESS OFFER",
-    tagBg: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-    actionText: "Book Session",
-    href: "/lifestyle-local/beauty-wellness"
+    title: "Summer Resort Getaway",
+    desc: "Luxury beachfront, hill, and forest resorts.",
+    image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1000&auto=format&fit=crop&q=80",
+    tag: "STAY OFFER",
+    tagBg: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    actionText: "Book Stay",
+    href: "/stay-accommodation/resorts",
   }
 ];
 
@@ -496,13 +562,12 @@ const MOCK_ACTIVITIES = [
 export default function HomePage() {
   const { bookings } = useBookingFlowStore();
   const { city, latitude, longitude } = useLocationStore();
-  const { activeShortcuts, setShortcutModalOpen, openActionModal } = useShortcutStore();
+  const { activeShortcuts, setShortcutModalOpen, openActionModal, subnavCategories, setSubnavModalOpen } = useShortcutStore();
   const [mounted, setMounted] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [selectedNearbyService, setSelectedNearbyService] = useState<any | null>(null);
   const [userPannedCenter, setUserPannedCenter] = useState<[number, number] | null>(null);
   const [realServices, setRealServices] = useState<any[]>([]);
-  const [activeExploreTab, setActiveExploreTab] = useState('news');
   const [adIndex, setAdIndex] = useState(0);
 
   // Real-time active Concierge Journeys
@@ -569,8 +634,8 @@ export default function HomePage() {
           departedIds.forEach(() => {
             const activeNames = remaining.map(r => r.trainName);
             const candidates = combinedPool.filter(p => !activeNames.includes(p.trainName));
-            const poolItem = candidates.length > 0 
-              ? candidates[Math.floor(Math.random() * candidates.length)] 
+            const poolItem = candidates.length > 0
+              ? candidates[Math.floor(Math.random() * candidates.length)]
               : combinedPool[Math.floor(Math.random() * combinedPool.length)];
 
             remaining.push({
@@ -711,7 +776,7 @@ export default function HomePage() {
         address: s.merchant.address || 'Premium verified venue',
         distance: calculateDistance(activeMapCenter[0], activeMapCenter[1], s.merchant.latitude, s.merchant.longitude),
       }));
-    
+
     list.push(...mappedReal);
 
     // 2. Next, generate dynamic mock providers (avoiding duplicates)
@@ -792,40 +857,39 @@ export default function HomePage() {
   return (
     <>
       <ShortcutManagerModal />
+      <SubnavManagerModal />
       <ActionModalManager />
 
       <main className="page-content px-4 md:px-8 lg:pr-8">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto w-full">
           {/* Row 1: Main Categories & Dashboard pill */}
           <div className="flex items-center justify-between flex-wrap gap-4 mb-2 pt-3.5">
-            <div className="flex items-center gap-5 overflow-x-auto py-1 custom-scrollbar shrink-0 max-w-full lg:max-w-[70%] scroll-smooth">
-              {[
-                { label: 'Travel', emoji: '✈️', href: '/travel-transport' },
-                { label: 'Stay & Accomodation', emoji: '🏨', href: '/stay-accommodation' },
-                { label: 'Entertainment', emoji: '🎥', href: '/entertainment-events' },
-                { label: 'Sports', emoji: '⚽', href: '/sports-turf' },
-                { label: 'Lifestyle Services', emoji: '💇', href: '/lifestyle-local' },
-              ].map((cat) => (
-                <Link
-                  key={cat.label}
-                  href={cat.href}
-                  className="text-[12px] font-bold text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-primary)] transition-all flex items-center gap-1.5 shrink-0 hover:scale-[1.02] active:scale-[0.98] py-1 px-0.5"
-                >
-                  <span>{cat.emoji}</span>
-                  <span>{cat.label}</span>
-                </Link>
-              ))}
+            <div className="flex items-center gap-4 overflow-x-auto py-2 pr-4 custom-scrollbar shrink-0 max-w-full lg:max-w-[75%] scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              {Array.isArray(subnavCategories) && subnavCategories.map(catId => {
+                const category = SUBNAV_CATEGORIES.find(c => c.id === catId);
+                if (!category) return null;
+                return (
+                  <Link
+                    key={category.id}
+                    href={category.href}
+                    className="h-9 px-4 rounded-xl border border-[color:var(--color-outline-variant)]/20 bg-[color:var(--color-surface-container)]/40 hover:bg-[color:var(--color-surface-container-high)]/60 hover:border-[color:var(--color-outline-variant)]/40 transition-all flex items-center gap-2 cursor-pointer text-xs font-extrabold text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)] shadow-sm backdrop-blur-md shrink-0"
+                  >
+                    <span className="text-[14px] leading-none">{category.emoji}</span>
+                    <span>{category.label}</span>
+                  </Link>
+                );
+              })}
+
+              {/* Shortcut Button (opens Categories Modal) */}
+              <button
+                onClick={() => setSubnavModalOpen(true)}
+                className="h-9 px-4 rounded-xl border border-dashed border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-container)]/20 hover:bg-[color:var(--color-surface-container-high)]/40 hover:border-[color:var(--color-outline-variant)]/60 transition-all flex items-center gap-1.5 cursor-pointer text-xs font-extrabold text-[color:var(--color-on-surface)] shrink-0 ml-1"
+              >
+                <span className="text-[14px] leading-none font-black">+</span>
+                <span>Shortcut</span>
+              </button>
             </div>
             <div className="flex items-center gap-3 px-1">
-              <button
-                onClick={() => setDashboardOpen(true)}
-                className="custom-nav-btn pl-1.5 pr-4 h-8 rounded-full flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-[11px] font-bold cursor-pointer shrink-0"
-              >
-                <div className="h-5.5 w-5.5 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
-                  <span className="material-symbols-outlined text-[13px] text-[#0a3161]">dashboard</span>
-                </div>
-                <span className="text-inherit text-[11px] font-bold tracking-wide select-none">DASHBOARD</span>
-              </button>
               <Link
                 href="/vendor/register"
                 className="custom-nav-btn pl-1.5 pr-4 h-8 rounded-full flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-[11px] font-bold cursor-pointer shrink-0"
@@ -835,121 +899,82 @@ export default function HomePage() {
                 </div>
                 <span className="text-inherit text-[11px] font-bold tracking-wide select-none">VENDOR</span>
               </Link>
+              <Link href="/support" className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors shrink-0" aria-label="Help & Support">
+                <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">help</span>
+              </Link>
+              <Link href="/profile" className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors shrink-0" aria-label="Settings">
+                <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">settings</span>
+              </Link>
             </div>
           </div>
 
           {/* Divider line between services and ad banner */}
-          <div className="w-screen relative left-1/2 -translate-x-1/2 border-b border-[color:var(--color-outline-variant)]/20 mb-2" />
+          <div className="w-full relative border-b border-[color:var(--color-outline-variant)]/20 mb-2" />
 
           {/* Row 2: Ad Banner */}
           <section
             id="ad-banner-hero"
             data-ad-slot=""
             aria-label="Advertisement"
-            className="ad-block mb-1 flex flex-col items-center gap-2 w-screen relative left-1/2 -translate-x-1/2 overflow-hidden"
+            className="ad-block mb-4 w-full relative overflow-hidden rounded-2xl md:rounded-3xl shadow-lg border border-[color:var(--color-outline-variant)]/30 bg-[color:var(--color-surface-container)]"
           >
-            {/* Carousel Container */}
             <div className="w-full h-[180px] sm:h-[220px] md:h-[250px] lg:h-[270px] relative flex items-center justify-center">
               {MOCK_ADS.map((ad, idx) => {
-                const diff = getDiff(idx);
+                const isActive = adIndex === idx;
                 
-                // Position and styling depending on diff
-                let transformStr = "";
-                let opacityClass = "";
-                let zIndexClass = "";
-                let pointerEventsClass = "";
-                
-                if (diff === 0) {
-                  // Center / Active Card
-                  transformStr = "translate3d(0, 0, 0) scale(1)";
-                  opacityClass = "opacity-100";
-                  zIndexClass = "z-20";
-                  pointerEventsClass = "pointer-events-auto";
-                } else if (diff === -1) {
-                  // Left peeking card
-                  transformStr = "translate3d(-94%, 0, 0) scale(0.92)";
-                  opacityClass = "opacity-45 hover:opacity-75";
-                  zIndexClass = "z-10";
-                  pointerEventsClass = "pointer-events-auto cursor-pointer";
-                } else if (diff === 1) {
-                  // Right peeking card
-                  transformStr = "translate3d(94%, 0, 0) scale(0.92)";
-                  opacityClass = "opacity-45 hover:opacity-75";
-                  zIndexClass = "z-10";
-                  pointerEventsClass = "pointer-events-auto cursor-pointer";
-                } else {
-                  // Hidden cards (diff <= -2 or diff >= 2)
-                  transformStr = diff < 0 
-                    ? "translate3d(-180%, 0, 0) scale(0.85)" 
-                    : "translate3d(180%, 0, 0) scale(0.85)";
-                  opacityClass = "opacity-0";
-                  zIndexClass = "z-0";
-                  pointerEventsClass = "pointer-events-none";
-                }
-
                 return (
                   <div
                     key={ad.id}
-                    onClick={() => {
-                      if (diff !== 0) {
-                        setAdIndex(idx);
-                      }
-                    }}
-                    className={`absolute w-[92vw] sm:w-[90vw] md:w-[88vw] lg:w-[86vw] h-full left-[4vw] sm:left-[5vw] md:left-[6vw] lg:left-[7vw] rounded-3xl overflow-hidden border border-[color:var(--color-outline-variant)]/30 bg-[color:var(--color-surface-container)] card-glass transition-all duration-700 ease-in-out select-none ${opacityClass} ${zIndexClass} ${pointerEventsClass}`}
-                    style={{
-                      transform: transformStr,
-                      boxShadow: 'none'
-                    }}
+                    className={`absolute inset-0 w-full h-full transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${isActive ? 'opacity-100 z-20 scale-100' : 'opacity-0 z-0 scale-105 pointer-events-none'}`}
                   >
                     {/* Background Image & Overlay */}
                     <div className="absolute inset-0 z-0">
-                      <img 
-                        src={ad.image} 
-                        alt={ad.title} 
+                      <img
+                        src={ad.image}
+                        alt={ad.title}
                         className="w-full h-full object-cover brightness-50"
                         loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
                     </div>
 
+
+
                     {/* Ad Content */}
-                    <div className="absolute inset-0 z-10 p-5 md:p-7 flex flex-col justify-end text-left">
+                    <div className="absolute inset-0 z-20 p-5 md:p-8 flex flex-col justify-end text-left">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider border ${ad.tagBg}`}>
                           {ad.tag}
                         </span>
                       </div>
-                      <h4 className="text-base md:text-lg lg:text-xl font-black text-white mb-1.5 tracking-wide leading-tight">
+                      <h4 className="text-xl md:text-2xl lg:text-3xl font-black text-white mb-2 tracking-wide leading-tight">
                         {ad.title}
                       </h4>
-                      <p className="text-[11px] md:text-xs text-slate-300 font-medium max-w-xl mb-3.5 line-clamp-1 sm:line-clamp-2 leading-relaxed">
+                      <p className="text-xs md:text-sm text-slate-200 font-medium max-w-xl mb-4 line-clamp-1 sm:line-clamp-2 leading-relaxed">
                         {ad.desc}
                       </p>
-                      {diff === 0 && (
-                        <Link 
-                          href={ad.href}
-                          className="self-start px-4.5 py-2 rounded-full text-[9px] font-black tracking-widest bg-[color:var(--color-primary)] text-black hover:scale-105 transition-transform shadow-lg active:scale-98"
-                        >
-                          {ad.actionText.toUpperCase()}
-                        </Link>
-                      )}
+                      <Link
+                        href={ad.href}
+                        className="self-start px-5 py-2.5 rounded-full text-[10px] md:text-[11px] font-black tracking-widest bg-[color:var(--color-primary)] text-black hover:scale-105 transition-transform shadow-[0_4px_12px_rgba(212,175,55,0.4)] active:scale-98"
+                      >
+                        {ad.actionText.toUpperCase()}
+                      </Link>
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Dots Indicator */}
-            <div className="flex items-center justify-center gap-2 mt-0">
+            {/* Dots Indicator inside Banner */}
+            <div className="absolute bottom-4 left-0 w-full flex items-center justify-center gap-2 z-30">
               {MOCK_ADS.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setAdIndex(idx)}
-                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    adIndex === idx 
-                      ? 'w-5 bg-[color:var(--color-primary)]' 
-                      : 'w-1.5 bg-[color:var(--color-outline-variant)]/60 hover:bg-[color:var(--color-outline)]'
-                  }`}
+                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${adIndex === idx
+                      ? 'w-5 bg-[color:var(--color-primary)]'
+                      : 'w-1.5 bg-white/50 hover:bg-white'
+                    }`}
                   aria-label={`Go to ad slide ${idx + 1}`}
                 />
               ))}
@@ -958,7 +983,7 @@ export default function HomePage() {
 
           {/* Row 3: Shortcuts Dock */}
           <section className="mb-6 mt-6 md:mt-8">
-            
+
             <div className="flex flex-wrap items-center gap-3">
               {Array.isArray(activeShortcuts) && activeShortcuts.length > 0 ? (
                 activeShortcuts.slice(0, 6).map(id => AVAILABLE_SHORTCUTS.find(s => s.id === id)).filter(Boolean).map(shortcut => {
@@ -984,7 +1009,8 @@ export default function HomePage() {
               ) : (
                 <span className="text-xs text-[color:var(--color-outline)] italic mr-2">No shortcuts added yet.</span>
               )}
-              
+
+              {/* Manage Dock Shortcuts Button */}
               <button
                 onClick={() => setShortcutModalOpen(true)}
                 className="h-10 px-4 rounded-2xl border border-dashed border-[color:var(--color-primary)]/40 bg-[color:var(--color-primary)]/[0.03] hover:border-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/10 hover:scale-[1.03] transition-all flex items-center gap-1.5 cursor-pointer text-xs font-extrabold text-[color:var(--color-primary)]"
@@ -1009,44 +1035,59 @@ export default function HomePage() {
                 <Link
                   key={item.id}
                   href={item.link}
-                  className="w-[215px] sm:w-[235px] shrink-0 snap-start group"
+                  className="w-[280px] shrink-0 snap-start group flex flex-col self-stretch"
                 >
-                  <div
-                    className={`relative h-[290px] rounded-3xl p-5 overflow-hidden flex flex-col justify-between border ${item.borderColor} bg-gradient-to-b ${item.bgGradient} hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 card-glass shadow-lg`}
-                  >
-                    {/* Top category label & rating */}
-                    <div className="flex items-center justify-between gap-2 z-10">
-                      <span className="text-[9px] uppercase font-black tracking-widest text-[#FFD700] bg-black/65 px-2 py-0.5 rounded-md border border-[#FFD700]/30 backdrop-blur-md">
-                        {item.category}
-                      </span>
-                      <div className="flex items-center gap-0.5 text-[9px] font-black text-yellow-500 bg-black/45 px-2 py-0.5 rounded-md border border-white/5 backdrop-blur-md">
-                        <Star className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
-                        <span>{item.rating}</span>
+                  <div className="bg-[color:var(--color-surface-container)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/20 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                    {/* Image Section */}
+                    <div className="relative h-[160px] w-full shrink-0 overflow-hidden">
+                      <img 
+                        src={item.image} 
+                        alt={item.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      {/* Badge */}
+                      {item.badge && (
+                        <div className={`absolute top-2 left-2 ${item.badgeBg} text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm flex items-center gap-1`}>
+                          <span className="material-symbols-outlined text-[10px]">sell</span>
+                          {item.badge}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Content Section */}
+                    <div className="p-3 flex-1 flex flex-col">
+                      <div className="flex items-start justify-between mb-1">
+                        <h3 className="font-bold text-sm text-[color:var(--color-on-surface)] truncate pr-2">
+                          {item.title}
+                        </h3>
+                        <div className="flex text-yellow-500 shrink-0">
+                          {[...Array(item.stars)].map((_, i) => (
+                            <Star key={i} className="w-3 h-3 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <p className="text-[11px] text-[color:var(--color-outline)] mb-3">{item.location}</p>
+                      
+                      <div className="flex items-end justify-between mt-auto">
+                        <div className="flex items-center gap-1.5">
+                          <div className="bg-[#20274d] text-white text-[11px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                            {item.ratingScore}
+                          </div>
+                          <div className="text-[10px] text-[color:var(--color-on-surface)]">
+                            <span className="font-bold">{item.ratingText}</span>
+                            <span className="text-[color:var(--color-outline)] mx-1">•</span>
+                            <span className="text-[color:var(--color-outline)]">{item.usersCount}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="text-right">
+                          <div className="text-sm font-extrabold text-[color:var(--color-on-surface)]">
+                            {item.price}
+                          </div>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Big center emoji / illustration */}
-                    <div className="flex items-center justify-center my-4 z-10 transition-transform duration-300 group-hover:scale-110">
-                      <span className="text-6xl drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)] select-none">
-                        {item.emoji}
-                      </span>
-                    </div>
-
-                    {/* Bottom title & price info */}
-                    <div className="z-10 text-left">
-                      <h3 className="font-extrabold text-xs text-white leading-tight group-hover:text-[#FFD700] transition-colors truncate">
-                        {item.title}
-                      </h3>
-                      <div className="flex items-center justify-between mt-2.5">
-                        <span className="text-[10px] font-bold text-gray-300">{item.price}</span>
-                        <span className="flex items-center gap-0.5 text-[9px] font-black uppercase text-[#FFD700] opacity-0 group-hover:opacity-100 transition-opacity">
-                          Book <span className="material-symbols-outlined text-[10px]">arrow_forward</span>
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Ambient Glow */}
-                    <div className="absolute inset-0 bg-radial-gradient from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                   </div>
                 </Link>
               ))}
@@ -1063,47 +1104,65 @@ export default function HomePage() {
 
             <div className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x">
               {activeJourneys.map((journey) => (
-                <div 
-                  key={journey.id}
-                  className="w-[280px] sm:w-[325px] shrink-0 snap-start rounded-2xl border border-white/10 bg-[#0e0e11] p-5 shadow-lg relative overflow-hidden flex flex-col justify-between"
-                >
-                  {/* Header row */}
-                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-4 shrink-0">
-                    <div className="flex items-center gap-2 max-w-[70%]">
-                      {/* Train Icon */}
-                      <span className="text-xl" style={{ color: journey.iconColor }}>{journey.icon}</span>
-                      <span className="text-xs font-bold text-gray-300 truncate font-sans">
-                        {journey.trainName}
-                      </span>
-                    </div>
-                    {/* Confirmed badge */}
-                    <div className="px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-[9px] font-bold text-emerald-400 uppercase tracking-wide shrink-0">
-                      {journey.status}
-                    </div>
-                  </div>
-
-                  {/* Station routing row */}
-                  <div className="flex items-center justify-between flex-1">
-                    {/* Source station */}
-                    <div className="text-left">
-                      <div className="text-sm font-extrabold text-white">{journey.source}</div>
-                      <div className="text-[10px] text-gray-400 mt-1 font-mono font-medium">
-                        {formatSecondsLeft(journey.secondsLeft)}
+                  <Link
+                    href="#"
+                    key={journey.id}
+                    className="w-[280px] shrink-0 snap-start group flex flex-col self-stretch"
+                  >
+                    <div className="bg-[color:var(--color-surface-container)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/20 shadow-sm hover:shadow-xl transition-all duration-300 relative flex flex-col h-full">
+                      {/* Live Ticket top indicator */}
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-teal-500 z-20" />
+                      
+                      {/* Image Section */}
+                      <div className="relative h-[160px] w-full shrink-0 overflow-hidden">
+                        <img 
+                          src={journey.image} 
+                          alt={journey.trainName} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        {/* Live Timer Badge */}
+                        <div className={`absolute top-2 left-2 bg-black/60 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm flex items-center gap-1 backdrop-blur-md`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Starts in {formatSecondsLeft(journey.secondsLeft)}
+                        </div>
+                      </div>
+                      
+                      {/* Content Section */}
+                      <div className="p-3 flex-1 flex flex-col">
+                        <div className="flex items-start justify-between mb-1">
+                          <h3 className="font-bold text-sm text-[color:var(--color-on-surface)] truncate pr-2">
+                            {journey.trainName}
+                          </h3>
+                          <div className="flex text-yellow-500 shrink-0">
+                            {[...Array(journey.stars || 4)].map((_, i) => (
+                              <Star key={i} className="w-3 h-3 fill-current" />
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <p className="text-[11px] text-[color:var(--color-outline)] mb-3">{journey.source} → {journey.destination}</p>
+                        
+                        <div className="flex items-end justify-between mt-auto">
+                          <div className="flex items-center gap-1.5">
+                            <div className="bg-[#20274d] text-white text-[11px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                              {journey.ratingScore || '9.0'}
+                            </div>
+                            <div className="text-[10px] text-[color:var(--color-on-surface)]">
+                              <span className="font-bold">{journey.ratingText || 'Excellent'}</span>
+                              <span className="text-[color:var(--color-outline)] mx-1">•</span>
+                              <span className="text-[color:var(--color-outline)]">{journey.usersCount || '200+ Users'}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="text-right">
+                            <div className="text-xs font-extrabold text-[color:var(--color-primary)]">
+                              {journey.platform}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Arrow */}
-                    <div className="text-lg font-black text-[#d4af37] px-3">
-                      →
-                    </div>
-
-                    {/* Destination station */}
-                    <div className="text-right">
-                      <div className="text-sm font-extrabold text-white">{journey.destination}</div>
-                      <div className="text-[10px] text-[#d4af37] font-semibold mt-1 font-sans">{journey.platform}</div>
-                    </div>
-                  </div>
-                </div>
+                  </Link>
               ))}
             </div>
           </section>
@@ -1133,44 +1192,59 @@ export default function HomePage() {
                     <Link
                       key={item.id}
                       href={item.link}
-                      className="w-[215px] sm:w-[235px] shrink-0 snap-start group"
+                      className="w-[280px] shrink-0 snap-start group flex flex-col self-stretch"
                     >
-                      <div
-                        className="relative h-[290px] rounded-3xl p-5 overflow-hidden flex flex-col justify-between border border-[#F87171]/20 bg-gradient-to-b from-[#F87171]/20 to-black/85 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 card-glass shadow-lg"
-                      >
-                        {/* Top category label & rating */}
-                        <div className="flex items-center justify-between gap-2 z-10">
-                          <span className="text-[9px] uppercase font-black tracking-widest text-[#FFD700] bg-black/65 px-2 py-0.5 rounded-md border border-[#FFD700]/30 backdrop-blur-md truncate max-w-[110px]" title={item.subtitle}>
-                            {item.subtitle}
-                          </span>
-                          <div className="flex items-center gap-0.5 text-[9px] font-black text-yellow-500 bg-black/45 px-2 py-0.5 rounded-md border border-white/5 backdrop-blur-md shrink-0">
-                            <Star className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
-                            <span>{item.rating}</span>
+                      <div className="bg-[color:var(--color-surface-container)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/20 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                        {/* Image Section */}
+                        <div className="relative h-[160px] w-full shrink-0 overflow-hidden">
+                          <img 
+                            src={item.image} 
+                            alt={item.title} 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          {/* Badge */}
+                          {item.badge && (
+                            <div className={`absolute top-2 left-2 ${item.badgeBg} text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm flex items-center gap-1`}>
+                              <span className="material-symbols-outlined text-[10px]">sell</span>
+                              {item.badge}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Content Section */}
+                        <div className="p-3 flex-1 flex flex-col">
+                          <div className="flex items-start justify-between mb-1">
+                            <h3 className="font-bold text-sm text-[color:var(--color-on-surface)] truncate pr-2">
+                              {item.title}
+                            </h3>
+                            <div className="flex text-yellow-500 shrink-0">
+                              {[...Array(item.stars || 4)].map((_, i) => (
+                                <Star key={i} className="w-3 h-3 fill-current" />
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <p className="text-[11px] text-[color:var(--color-outline)] mb-3">{item.location}</p>
+                          
+                          <div className="flex items-end justify-between mt-auto">
+                            <div className="flex items-center gap-1.5">
+                              <div className="bg-[#20274d] text-white text-[11px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                                {item.ratingScore}
+                              </div>
+                              <div className="text-[10px] text-[color:var(--color-on-surface)]">
+                                <span className="font-bold">{item.ratingText}</span>
+                                <span className="text-[color:var(--color-outline)] mx-1">•</span>
+                                <span className="text-[color:var(--color-outline)]">{item.usersCount}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="text-right">
+                              <div className="text-sm font-extrabold text-[color:var(--color-on-surface)]">
+                                {item.price}
+                              </div>
+                            </div>
                           </div>
                         </div>
-
-                        {/* Big center emoji */}
-                        <div className="flex items-center justify-center my-4 z-10 transition-transform duration-300 group-hover:scale-110">
-                          <span className="text-6xl drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)] select-none">
-                            {item.emoji}
-                          </span>
-                        </div>
-
-                        {/* Bottom title & price info */}
-                        <div className="z-10 text-left">
-                          <h3 className="font-extrabold text-xs text-white leading-tight group-hover:text-[#FFD700] transition-colors truncate">
-                            {item.title}
-                          </h3>
-                          <div className="flex items-center justify-between mt-2.5">
-                            <span className="text-[10px] font-bold text-gray-300">{item.tag}</span>
-                            <span className="flex items-center gap-0.5 text-[9px] font-black uppercase text-[#FFD700] opacity-0 group-hover:opacity-100 transition-opacity">
-                              Book <span className="material-symbols-outlined text-[10px]">arrow_forward</span>
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Ambient Glow */}
-                        <div className="absolute inset-0 bg-radial-gradient from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                       </div>
                     </Link>
                   ))}
@@ -1204,44 +1278,59 @@ export default function HomePage() {
                     <Link
                       key={item.id}
                       href={item.link}
-                      className="w-[280px] sm:w-[320px] shrink-0 snap-start group"
+                      className="w-[280px] shrink-0 snap-start group flex flex-col self-stretch"
                     >
-                      <div
-                        className="relative h-[210px] rounded-3xl p-5 overflow-hidden flex flex-col justify-between border border-[#34D399]/20 bg-gradient-to-b from-[#34D399]/20 to-black/85 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 card-glass shadow-lg"
-                      >
-                        {/* Top category label & rating */}
-                        <div className="flex items-center justify-between gap-2 z-10">
-                          <span className="text-[9px] uppercase font-black tracking-widest text-[#FFD700] bg-black/65 px-2 py-0.5 rounded-md border border-[#FFD700]/30 backdrop-blur-md truncate max-w-[150px]" title={item.subtitle}>
-                            {item.subtitle}
-                          </span>
-                          <div className="flex items-center gap-0.5 text-[9px] font-black text-yellow-500 bg-black/45 px-2 py-0.5 rounded-md border border-white/5 backdrop-blur-md shrink-0">
-                            <Star className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
-                            <span>{item.rating}</span>
+                      <div className="bg-[color:var(--color-surface-container)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/20 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                        {/* Image Section */}
+                        <div className="relative h-[160px] w-full shrink-0 overflow-hidden">
+                          <img 
+                            src={item.image} 
+                            alt={item.title} 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          {/* Badge */}
+                          {item.badge && (
+                            <div className={`absolute top-2 left-2 ${item.badgeBg} text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm flex items-center gap-1`}>
+                              <span className="material-symbols-outlined text-[10px]">sell</span>
+                              {item.badge}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Content Section */}
+                        <div className="p-3 flex-1 flex flex-col">
+                          <div className="flex items-start justify-between mb-1">
+                            <h3 className="font-bold text-sm text-[color:var(--color-on-surface)] truncate pr-2">
+                              {item.title}
+                            </h3>
+                            <div className="flex text-yellow-500 shrink-0">
+                              {[...Array(item.stars || 4)].map((_, i) => (
+                                <Star key={i} className="w-3 h-3 fill-current" />
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <p className="text-[11px] text-[color:var(--color-outline)] mb-3">{item.location}</p>
+                          
+                          <div className="flex items-end justify-between mt-auto">
+                            <div className="flex items-center gap-1.5">
+                              <div className="bg-[#20274d] text-white text-[11px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                                {item.ratingScore}
+                              </div>
+                              <div className="text-[10px] text-[color:var(--color-on-surface)]">
+                                <span className="font-bold">{item.ratingText}</span>
+                                <span className="text-[color:var(--color-outline)] mx-1">•</span>
+                                <span className="text-[color:var(--color-outline)]">{item.usersCount}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="text-right">
+                              <div className="text-sm font-extrabold text-[color:var(--color-on-surface)]">
+                                {item.price}
+                              </div>
+                            </div>
                           </div>
                         </div>
-
-                        {/* Big center emoji */}
-                        <div className="flex items-center justify-center my-1.5 z-10 transition-transform duration-300 group-hover:scale-110">
-                          <span className="text-5xl drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)] select-none">
-                            {item.emoji}
-                          </span>
-                        </div>
-
-                        {/* Bottom title & price info */}
-                        <div className="z-10 text-left">
-                          <h3 className="font-extrabold text-xs text-white leading-tight group-hover:text-[#FFD700] transition-colors truncate">
-                            {item.title}
-                          </h3>
-                          <div className="flex items-center justify-between mt-2.5">
-                            <span className="text-[10px] font-bold text-gray-300">{item.tag}</span>
-                            <span className="flex items-center gap-0.5 text-[9px] font-black uppercase text-[#FFD700] opacity-0 group-hover:opacity-100 transition-opacity">
-                              Book <span className="material-symbols-outlined text-[10px]">arrow_forward</span>
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Ambient Glow */}
-                        <div className="absolute inset-0 bg-radial-gradient from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                       </div>
                     </Link>
                   ))}
@@ -1250,104 +1339,77 @@ export default function HomePage() {
             );
           })()}
 
-          {/* Row 7: Explore More (News, Offers, Featured in tab switcher layout) */}
-          <section className="mb-10 text-left">
-            <h2 className="text-[18px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight mb-4">Explore More</h2>
-            
-            {/* Custom Horizontal Tabs Switcher Bar */}
-            <div className="flex items-center justify-between mb-5 border-b border-[color:var(--color-outline-variant)]/15 pb-2.5">
-              <div className="flex items-center gap-5 sm:gap-7 overflow-x-auto scrollbar-none scroll-smooth snap-x">
-                {EXPLORE_SECTIONS.filter(s => s.id !== 'trending' && s.id !== 'events').map((sec) => {
-                  const isActive = activeExploreTab === sec.id;
-                  return (
-                    <button
-                      key={sec.id}
-                      onClick={() => setActiveExploreTab(sec.id)}
-                      className={`text-[13.5px] font-black tracking-wide pb-2.5 relative z-10 transition-colors duration-200 cursor-pointer whitespace-nowrap ${
-                        isActive
-                          ? 'text-[color:var(--color-primary)]'
-                          : 'text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 px-1">
-                        <span className="text-base select-none">{sec.emoji}</span>
-                        <span>{sec.title}</span>
-                      </div>
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeExploreTabIndicator"
-                          className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[color:var(--color-primary)] rounded-full shadow-[0_0_8px_rgba(255,215,0,0.6)]"
-                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              
-              {/* Dynamic View All button pointing to active category */}
-              {(() => {
-                const activeSec = EXPLORE_SECTIONS.find(s => s.id === activeExploreTab);
-                if (!activeSec) return null;
-                return (
-                  <Link href={activeSec.href} className="flex items-center gap-1 text-[11px] font-bold text-[color:var(--color-primary)] hover:gap-1.5 transition-all duration-300 shrink-0 ml-4 pb-2.5">
-                    View All
-                    <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
-                  </Link>
-                );
-              })()}
-            </div>
-
-            {/* Display active tab content */}
-            {(() => {
-              const activeSec = EXPLORE_SECTIONS.find(s => s.id === activeExploreTab);
-              if (!activeSec) return null;
-              return (
-                <div className="flex flex-col text-left animate-fade-up">
-                  {/* Category Description */}
-                  <p className="text-[11px] text-[color:var(--color-on-surface-variant)] font-medium mb-4">— {activeSec.description}</p>
-
-                  {/* Content Box (Glass Card) */}
-                  <div className="rounded-3xl border border-[color:var(--color-outline-variant)]/30 bg-[color:var(--color-surface-container)]/25 backdrop-blur-md p-5 card-glass shadow-lg relative overflow-hidden">
-                    {/* Subtle themed gradient background glow */}
-                    <div 
-                      className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-                      style={{ background: `linear-gradient(135deg, ${activeSec.from}, ${activeSec.to})` }}
-                    />
-                    
-                    {/* Vertical list of items (placed down one after another, filling the space) */}
-                    <div className="flex flex-col gap-2.5">
-                      {activeSec.items.map((item) => (
-                        <Link
-                          key={item.id}
-                          href={item.link}
-                          className="p-3.5 rounded-2xl border border-[color:var(--color-outline-variant)]/15 bg-[color:var(--color-surface-dim)]/20 hover:bg-[color:var(--color-surface-dim)]/50 hover:border-[color:var(--color-primary)]/20 transition-all flex items-center justify-between gap-4 group w-full relative overflow-hidden"
-                        >
-                          <div className="flex items-center gap-3.5 min-w-0">
-                            <div className="h-9 w-9 shrink-0 rounded-xl bg-[color:var(--color-surface-container-high)] border border-[color:var(--color-outline-variant)]/30 flex items-center justify-center text-lg select-none group-hover:scale-105 transition-transform">
-                              {item.emoji}
-                            </div>
-                            <div className="min-w-0 text-left">
-                              <h4 className="font-extrabold text-[12.5px] text-[color:var(--color-on-surface)] group-hover:text-[color:var(--color-primary)] transition-colors truncate leading-tight">{item.title}</h4>
-                              <p className="text-[10px] text-[color:var(--color-on-surface-variant)] truncate mt-0.5">{item.subtitle}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-3 shrink-0">
-                            <span className="text-[9px] text-[color:var(--color-primary)] font-extrabold bg-[color:var(--color-primary)]/10 px-2.5 py-0.5 rounded-md border border-[color:var(--color-primary)]/20">{item.tag}</span>
-                            <div className="flex items-center gap-0.5 text-[9px] font-bold text-[color:var(--color-on-surface-variant)] bg-[color:var(--color-surface-container-highest)] px-2.5 py-0.5 rounded-md border border-[color:var(--color-outline-variant)]/20">
-                              <Star className="h-2.5 w-2.5 text-yellow-500 fill-yellow-500" />
-                              <span>{item.rating}</span>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
+          {/* Row 7, 8, 9: Explore More Sections (News, Offers, Featured in Banner format) */}
+          {EXPLORE_SECTIONS.filter(s => s.id !== 'trending' && s.id !== 'events').map((sec) => (
+            <section key={sec.id} className="mb-10 text-left">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-[18px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight flex items-center gap-2">
+                    <span className="select-none text-xl">{sec.emoji}</span>
+                    <span>{sec.title}</span>
+                  </h2>
+                  <p className="text-[11px] mt-0.5 text-[color:var(--color-outline)]">{sec.description}</p>
                 </div>
-              );
-            })()}
-          </section>
+                <Link href={sec.href} className="flex items-center gap-1 text-[11px] font-bold text-[color:var(--color-primary)] hover:gap-1.5 transition-all duration-300">
+                  View All
+                  <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
+                </Link>
+              </div>
+
+              <div className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x">
+                {sec.items.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.link}
+                    className="w-[320px] shrink-0 snap-start group block"
+                  >
+                    <div 
+                      className="relative h-[150px] rounded-[24px] p-4 overflow-hidden flex flex-col justify-between shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                      style={{
+                        background: `linear-gradient(135deg, ${sec.from}, ${sec.to})`,
+                      }}
+                    >
+                      {/* Decorative Background Elements */}
+                      <div className="absolute -right-4 -bottom-4 text-[100px] opacity-[0.15] rotate-12 select-none group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 pointer-events-none">
+                        {item.emoji}
+                      </div>
+                      <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none" />
+
+                      {/* Content (Z-index above background) */}
+                      <div className="relative z-10 flex flex-col h-full justify-between">
+                        {/* Top Row: Badge & Rating */}
+                        <div className="flex items-start justify-between">
+                          <span className="text-[9px] uppercase font-black tracking-wider text-[#0e0e11] bg-white/95 px-2.5 py-1 rounded-full shadow-sm">
+                            {item.tag}
+                          </span>
+                          
+                          <div className="flex items-center gap-1 text-[10px] font-bold text-white bg-black/25 px-2.5 py-1 rounded-full backdrop-blur-md">
+                            <Star className="h-2.5 w-2.5 text-yellow-400 fill-yellow-400" />
+                            <span>{item.rating}</span>
+                          </div>
+                        </div>
+
+                        {/* Bottom Row: Title & Action */}
+                        <div className="mt-auto flex items-end justify-between gap-4">
+                          <div className="min-w-0">
+                            <h3 className="font-extrabold text-[15.5px] text-white leading-tight mb-1 truncate">
+                              {item.title}
+                            </h3>
+                            <p className="text-[11px] font-medium text-white/80 truncate">
+                              {item.subtitle}
+                            </p>
+                          </div>
+                          <div className="w-8 h-8 shrink-0 rounded-full bg-white/20 flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-colors backdrop-blur-md shadow-sm border border-white/20">
+                            <span className="material-symbols-outlined text-[15px] font-bold">arrow_forward</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))}
 
           {/* Row 6: Nearby Services */}
           <section className="mb-12">
@@ -1406,11 +1468,10 @@ export default function HomePage() {
                       <div
                         key={svc.id}
                         onClick={() => setSelectedNearbyService(svc)}
-                        className={`p-3 rounded-2xl cursor-pointer border transition-all flex items-center gap-3 ${
-                          isSelected
+                        className={`p-3 rounded-2xl cursor-pointer border transition-all flex items-center gap-3 ${isSelected
                             ? 'bg-[color:var(--color-primary)]/10 border-[color:var(--color-primary)]'
                             : 'bg-[color:var(--color-surface-dim)]/30 border-[color:var(--color-outline-variant)]/20 hover:bg-[color:var(--color-surface-dim)]/50'
-                        }`}
+                          }`}
                       >
                         <div className="h-10 w-10 shrink-0 rounded-xl bg-[color:var(--color-surface-container-high)] border border-[color:var(--color-outline-variant)]/30 flex items-center justify-center text-xl">
                           {svc.emoji}
@@ -1453,7 +1514,7 @@ export default function HomePage() {
 
             {/* Top Row: Customer Support Socials & Newsletter */}
             <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pb-8 border-b border-[color:var(--color-outline-variant)]/10 z-10 relative">
-              
+
               {/* Left: Customer Support Social Handles */}
               <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left w-full lg:w-auto">
                 <span className="text-[10px] uppercase tracking-[0.25em] font-extrabold text-[color:var(--color-outline)]">
@@ -1516,7 +1577,7 @@ export default function HomePage() {
 
             {/* Center Row: 4 Columns */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-10 z-10 relative">
-              
+
               {/* Column 1: Exclusive Bookings */}
               <div className="text-left space-y-3">
                 <h4 className="text-[11px] uppercase tracking-wider font-extrabold text-[color:var(--color-primary)]">
@@ -1624,7 +1685,7 @@ export default function HomePage() {
       {dashboardOpen && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in">
           <div className="bg-[color:var(--color-surface-container)]/90 border border-[color:var(--color-outline-variant)]/30 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-fade-up card-glass">
-            
+
             {/* Drawer Header */}
             <div className="flex justify-between items-center px-6 py-5 border-b border-[color:var(--color-outline-variant)]/20">
               <div className="flex items-center gap-2">

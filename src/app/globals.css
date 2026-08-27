@@ -1,12 +1,44 @@
 @import "tailwindcss";
 
-/* ================================================================
- * BETA — DESIGN SYSTEM
- * Palette: Neon Gold × Deep Black × Clean White
- * Dark mode: default. Light mode via system preference or .light class.
- * ================================================================ */
+@keyframes vehicleDrive {
+  0% { transform: translateX(150%); }
+  100% { transform: translateX(-150%); }
+}
+
+@keyframes diagonalFly {
+  0% { transform: translate(150%, 150%) scale(0.8); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translate(-150%, -150%) scale(1.2); opacity: 0; }
+}
+
+@keyframes rollBounce {
+  0% { transform: translateX(150%) translateY(0) rotate(0deg); }
+  25% { transform: translateX(75%) translateY(-40px) rotate(-90deg); }
+  50% { transform: translateX(0%) translateY(0) rotate(-180deg); }
+  75% { transform: translateX(-75%) translateY(-40px) rotate(-270deg); }
+  100% { transform: translateX(-150%) translateY(0) rotate(-360deg); }
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(100px) scale(0.5); opacity: 0; }
+  50% { transform: translateY(0) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+}
+
+@keyframes slowSail {
+  0% { transform: translateX(120%); }
+  50% { transform: translateX(0%) translateY(-10px); }
+  100% { transform: translateX(-120%); }
+}
 
 @theme {
+  --animate-vehicle-drive: vehicleDrive 4.5s linear infinite;
+  --animate-diagonal-fly: diagonalFly 5s ease-in-out infinite;
+  --animate-roll-bounce: rollBounce 4s linear infinite;
+  --animate-float-up: floatUp 6s ease-in-out infinite;
+  --animate-slow-sail: slowSail 8s ease-in-out infinite;
+
   /* ── Brand Theme Colors (New Palette) ───────────────────────── */
   --color-primary:              #d4af37;   /* gold/yellow       */
   --color-primary-fixed:        #fceea7;   /* pale gold tint    */
