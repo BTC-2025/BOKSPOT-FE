@@ -38,79 +38,143 @@ const ALL_SEARCHABLE_SERVICES: SearchableService[] = SERVICE_GROUPS.flatMap((gro
   )
 );
 
-function getServiceImage(name: string): string {
-  const n = name.toLowerCase();
+const SERVICE_IMAGE_MAP: Record<string, string> = {
   // Travel
-  if (n.includes('bus')) return 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('train')) return 'https://images.unsplash.com/photo-1515162305285-0293e4767cc2?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('flight')) return 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('ferry') || n.includes('boat')) return 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('shuttle')) return 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('helicopter')) return 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('cab') || n.includes('taxi')) return 'https://images.unsplash.com/photo-1492664738948-2ec93a5c0942?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('bike rental') || n.includes('bike')) return 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('car rental') || n.includes('self-drive')) return 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&auto=format&fit=crop&q=80';
+  'Bus Booking': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+  'Train Booking': 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&auto=format&fit=crop&q=80',
+  'Flight Booking': 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&auto=format&fit=crop&q=80',
+  'Ferry / Boat Booking': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80',
+  'Shuttle / Van Booking': 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&auto=format&fit=crop&q=80',
+  'Helicopter Booking (Premium)': 'https://loremflickr.com/600/600/helicopter?lock=1',
+  'Cab / Taxi Booking': '/images/taxi_booking.jpg',
+  'Bike Rental': 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&auto=format&fit=crop&q=80',
+  'Self-Drive Car Rental': 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&auto=format&fit=crop&q=80',
   
   // Stay
-  if (n.includes('hotel')) return 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('resort')) return 'https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('villa') || n.includes('homestay')) return 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('hostel')) return 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('camping')) return 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=600&auto=format&fit=crop&q=80';
+  'Hotel Booking': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&auto=format&fit=crop&q=80',
+  'Resort Booking': 'https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=600&auto=format&fit=crop&q=80',
+  'Homestay / Villa': 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600&auto=format&fit=crop&q=80',
+  'Hostel Booking': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&auto=format&fit=crop&q=80',
+  'Camping Booking': 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=600&auto=format&fit=crop&q=80',
   
   // Entertainment
-  if (n.includes('cinema') || n.includes('movie')) return 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('theatre')) return 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('concert')) return 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('event') || n.includes('festival')) return 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('exhibition')) return 'https://images.unsplash.com/photo-1531058020387-3be344559be6?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('workshop') || n.includes('class')) return 'https://images.unsplash.com/photo-1513258496099-48168024aec0?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('gaming')) return 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=600&auto=format&fit=crop&q=80';
+  'Cinema / Movie Tickets': 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80',
+  'Theatre Shows': 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=600&auto=format&fit=crop&q=80',
+  'Concert Tickets': 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80',
+  'Events & Festivals': 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80',
+  'Exhibition Entry': '/images/exhibition.jpg',
+  'Workshops / Classes': 'https://images.unsplash.com/photo-1513258496099-48168024aec0?w=600&auto=format&fit=crop&q=80',
+  'Gaming Arena Booking': 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=600&auto=format&fit=crop&q=80',
   
   // Sports
-  if (n.includes('football') || n.includes('turf')) return 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('cricket')) return 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('badminton')) return 'https://images.unsplash.com/photo-1521537634581-0dcc2fee2371?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('tennis')) return 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('basketball')) return 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('swimming') || n.includes('pool')) return 'https://images.unsplash.com/photo-1519766304817-4f37bda74a27?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('play arena') || n.includes('indoor play')) return 'https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=600&auto=format&fit=crop&q=80';
+  'Football Turf': '/images/football.jpg',
+  'Cricket Ground': 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&auto=format&fit=crop&q=80',
+  'Badminton Court': 'https://loremflickr.com/600/600/badminton,court?lock=1',
+  'Tennis Court': 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=600&auto=format&fit=crop&q=80',
+  'Basketball Court': 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&auto=format&fit=crop&q=80',
+  'Swimming Pool Slots': '/images/swimming.jpg',
+  'Indoor Play Arena': 'https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=600&auto=format&fit=crop&q=80',
   
   // Lifestyle
-  if (n.includes('restaurant') || n.includes('dining')) return 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('salon') || n.includes('spa')) return 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('gym') || n.includes('yoga')) return 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('doctor') || n.includes('health')) return 'https://images.unsplash.com/photo-1584515901407-d8f46f38df83?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('electrician')) return 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('plumber')) return 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('cleaning')) return 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('technician')) return 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('studio') && !n.includes('podcast')) return 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&auto=format&fit=crop&q=80';
+  'Restaurant Table Reservation': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80',
+  'Salon / Spa Appointment': 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&auto=format&fit=crop&q=80',
+  'Gym / Yoga Slot Booking': 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop&q=80',
+  'Doctor Appointment': 'https://images.unsplash.com/photo-1638202993928-7267aad84c31?w=600&auto=format&fit=crop&q=80',
+  'Electrician Booking': 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80',
+  'Plumber Booking': 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&auto=format&fit=crop&q=80',
+  'Cleaning Service': 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&auto=format&fit=crop&q=80',
+  'Technician Service': 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=600&auto=format&fit=crop&q=80',
+  'Studio Booking': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&auto=format&fit=crop&q=80',
   
   // Business
-  if (n.includes('co-working') || n.includes('coworking')) return 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('meeting')) return 'https://images.unsplash.com/photo-1517502884422-41eaaced0168?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('podcast')) return 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('conference')) return 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('training')) return 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80';
+  'Co-working Space': 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&auto=format&fit=crop&q=80',
+  'Meeting Room': 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=600&auto=format&fit=crop&q=80',
+  'Podcast Studio': 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&auto=format&fit=crop&q=80',
+  'Conference Hall': 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=80',
+  'Training Sessions': 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80',
   
   // Religious
-  if (n.includes('darshan') || n.includes('temple')) return 'https://images.unsplash.com/photo-1561361058-c24cecae35ca?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('pooja')) return 'https://images.unsplash.com/photo-1609137144813-f9250ff51d18?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('pilgrimage')) return 'https://images.unsplash.com/photo-1545232979-8bf34eb9757b?w=600&auto=format&fit=crop&q=80';
+  'Temple Darshan Booking': 'https://images.unsplash.com/photo-1561361058-c24cecae35ca?w=600&auto=format&fit=crop&q=80',
+  'Pooja Slot Booking': 'https://loremflickr.com/600/600/pooja,hindu?lock=1',
+  'Pilgrimage Packages': 'https://loremflickr.com/600/600/temple,india?lock=1',
   
   // Equipment Rentals
-  if (n.includes('cycle')) return 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('sound')) return 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('equipment')) return 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80';
+  'Cycle Rental': 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&auto=format&fit=crop&q=80',
+  'Sports Bike Rental': 'https://images.unsplash.com/photo-1558981285-6f0c94958bb6?w=600&auto=format&fit=crop&q=80',
+  'Camera Rental': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&auto=format&fit=crop&q=80',
+  'Sound System Rental': 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=600&auto=format&fit=crop&q=80',
+  'Event Equipment Rental': 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80',
   
-  // Personal
-  if (n.includes('pet')) return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('babysitting')) return 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('elder')) return 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=600&auto=format&fit=crop&q=80';
-  if (n.includes('organizer')) return 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=600&auto=format&fit=crop&q=80';
+  // Personal Services
+  'Pet Grooming Appointment': 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=600&auto=format&fit=crop&q=80',
+  'Babysitting Service': 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=600&auto=format&fit=crop&q=80',
+  'Elder Care Service': 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=600&auto=format&fit=crop&q=80',
+  'Event Organizer Booking': 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=600&auto=format&fit=crop&q=80'
+};
 
+function getServiceImage(name: string): string {
+  if (SERVICE_IMAGE_MAP[name]) {
+    return SERVICE_IMAGE_MAP[name];
+  }
   return 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&auto=format&fit=crop&q=80';
+}
+
+function getServiceIcon(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes('bus')) return 'directions_bus';
+  if (n.includes('train')) return 'train';
+  if (n.includes('flight')) return 'flight';
+  if (n.includes('ferry') || n.includes('boat')) return 'directions_boat';
+  if (n.includes('shuttle')) return 'airport_shuttle';
+  if (n.includes('helicopter')) return 'flight_takeoff';
+  if (n.includes('cab') || n.includes('taxi')) return 'local_taxi';
+  if (n.includes('bike')) return 'two_wheeler';
+  if (n.includes('car rental') || n.includes('self-drive')) return 'directions_car';
+  if (n.includes('hotel')) return 'hotel';
+  if (n.includes('resort')) return 'beach_access';
+  if (n.includes('villa') || n.includes('homestay')) return 'holiday_village';
+  if (n.includes('hostel')) return 'bed';
+  if (n.includes('camping')) return 'deck';
+  if (n.includes('cinema') || n.includes('movie')) return 'movie';
+  if (n.includes('theatre')) return 'theater_comedy';
+  if (n.includes('concert')) return 'music_note';
+  if (n.includes('event') || n.includes('festival')) return 'festival';
+  if (n.includes('exhibition')) return 'museum';
+  if (n.includes('workshop')) return 'palette';
+  if (n.includes('gaming')) return 'sports_esports';
+  if (n.includes('football') || n.includes('turf')) return 'sports_soccer';
+  if (n.includes('cricket')) return 'sports_cricket';
+  if (n.includes('badminton')) return 'sports_tennis';
+  if (n.includes('tennis')) return 'sports_tennis';
+  if (n.includes('basketball')) return 'sports_basketball';
+  if (n.includes('swimming')) return 'pool';
+  if (n.includes('play arena')) return 'toys';
+  if (n.includes('restaurant') || n.includes('dining')) return 'restaurant';
+  if (n.includes('salon') || n.includes('spa')) return 'spa';
+  if (n.includes('gym') || n.includes('yoga')) return 'fitness_center';
+  if (n.includes('doctor')) return 'medical_services';
+  if (n.includes('electrician')) return 'electrical_services';
+  if (n.includes('plumber')) return 'plumbing';
+  if (n.includes('cleaning')) return 'cleaning_services';
+  if (n.includes('technician')) return 'build';
+  if (n.includes('studio') && !n.includes('podcast')) return 'camera_alt';
+  if (n.includes('co-working') || n.includes('coworking')) return 'laptop_mac';
+  if (n.includes('meeting')) return 'meeting_room';
+  if (n.includes('podcast')) return 'mic';
+  if (n.includes('conference')) return 'groups';
+  if (n.includes('training')) return 'model_training';
+  if (n.includes('darshan') || n.includes('temple')) return 'temple_hindu';
+  if (n.includes('pooja')) return 'self_improvement';
+  if (n.includes('pilgrimage')) return 'directions_walk';
+  if (n.includes('cycle')) return 'directions_bike';
+  if (n.includes('camera')) return 'photo_camera';
+  if (n.includes('sound')) return 'speaker';
+  if (n.includes('equipment')) return 'construction';
+  if (n.includes('pet')) return 'pets';
+  if (n.includes('babysitting')) return 'child_care';
+  if (n.includes('elder')) return 'elderly';
+  if (n.includes('organizer')) return 'event';
+  return 'category';
 }
 
 function getServicePrice(name: string): string {
@@ -317,8 +381,8 @@ export default function CategoriesPage() {
                 onClick={() => scrollToSection(id)}
                 className="px-4 py-2.5 rounded-full text-[11.5px] font-bold bg-[color:var(--color-surface-container)]/40 border border-[color:var(--color-outline-variant)]/20 text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)] hover:border-[color:var(--color-primary)]/30 hover:scale-[1.03] active:scale-95 transition-all cursor-pointer flex items-center gap-2 shrink-0 shadow-sm backdrop-blur-md"
               >
-                <span className="text-sm">{GROUP_EMOJIS[group.title] || '📍'}</span>
-                <span>{group.title}</span>
+                <span className="text-sm shrink-0">{GROUP_EMOJIS[group.title] || '📍'}</span>
+                <span className="whitespace-nowrap">{group.title}</span>
               </button>
             );
           })}
@@ -350,40 +414,33 @@ export default function CategoriesPage() {
                 </div>
 
                 {/* Subcategories & Service Cards */}
-                <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {group.subcategories.map((subcat) => (
-                    <div key={subcat.name} className="space-y-4">
-                      {group.subcategories.length > 1 && (
-                        <h3 className="text-[10px] uppercase tracking-widest font-black text-[color:var(--color-outline)] border-l-2 border-[color:var(--color-primary)]/50 pl-2">
-                          {subcat.name}
-                        </h3>
-                      )}
+                    <div key={subcat.name} className="bg-[color:var(--color-surface-container)] rounded-3xl p-5 shadow-sm border border-[color:var(--color-outline-variant)]/20 flex flex-col">
+                      <h3 className="text-[14px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight mb-4">
+                        {subcat.name}
+                      </h3>
                       
-                      {/* Grid of Service Cards */}
-                      <div className="grid gap-3 sm:gap-4 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
+                      {/* Horizontal Scroll of Service Cards */}
+                      <div className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex-1 items-start">
                         {subcat.items.map((item) => {
                           const serviceHref = getHrefForCategoryItem(group.title, item.name);
-                          const theme = CATEGORY_THEMES[group.title] || CATEGORY_THEMES['Travel'];
                           return (
                             <Link
                               key={item.name}
                               href={serviceHref}
-                              className={`relative flex flex-col items-center justify-between rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0c0c10] overflow-hidden aspect-[3/4] shadow-[0_4px_15px_-6px_rgba(0,0,0,0.05)] transition-all duration-400 ease-out hover:-translate-y-1.5 hover:shadow-[0_10px_25px_-8px_rgba(0,0,0,0.12)] group`}
+                              className="shrink-0 w-24 snap-start group flex flex-col items-center"
                             >
-                              {/* Faint Theme Gradient (for turf/floor effect) */}
-                              <div className={`absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t ${theme.gradient || 'from-slate-200 dark:from-slate-800'} to-transparent opacity-40 dark:opacity-20 z-0 transition-opacity duration-500 group-hover:opacity-60`} />
-
-                              {/* Top Title */}
-                              <h3 className="w-full text-center font-extrabold text-[11px] sm:text-[12px] text-slate-800 dark:text-slate-100 pt-3 px-1.5 tracking-tight z-10 leading-tight line-clamp-2">
+                              <div className="w-24 h-24 rounded-2xl bg-white dark:bg-[#1a1a24] shadow-[0_4px_15px_-6px_rgba(0,0,0,0.05)] border border-slate-200/80 dark:border-slate-800 group-hover:shadow-[0_10px_25px_-8px_rgba(0,0,0,0.12)] group-hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                                <img 
+                                  src={getServiceImage(item.name)} 
+                                  alt={item.name} 
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                                />
+                              </div>
+                              <h3 className="mt-2.5 text-center font-extrabold text-[11px] leading-tight text-[color:var(--color-on-surface-variant)] group-hover:text-[color:var(--color-primary)] line-clamp-2 px-1 w-full transition-colors duration-200">
                                 {item.name}
                               </h3>
-
-                              {/* Center Emoji / 3D Icon substitute */}
-                              <div className="flex-1 flex items-center justify-center w-full relative z-10 pb-2">
-                                <span className="text-[65px] sm:text-[75px] leading-none drop-shadow-[0_10px_10px_rgba(0,0,0,0.15)] group-hover:scale-[1.12] group-hover:-rotate-3 group-active:scale-95 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
-                                  {item.emoji}
-                                </span>
-                              </div>
                             </Link>
                           );
                         })}

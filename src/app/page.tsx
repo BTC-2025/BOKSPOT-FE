@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { MapPin, Star, Compass, ArrowRight, X, Sparkles } from 'lucide-react';
@@ -81,7 +81,7 @@ const EXPLORE_SECTIONS = [
     items: [
       { id: 'o1', title: 'Apollo Dental: 30% Off', subtitle: 'Promo code: SMILE30', tag: 'Save ₹300', rating: 'Promo', emoji: '🦷', link: '/service/1' },
       { id: 'o2', title: 'ZenFit: 1 Week Free Pass', subtitle: 'Promo code: ZENFITPASS', tag: 'Free Trial', rating: 'Fitness', emoji: '💪', link: '/service/2' },
-      { id: 'o3', title: 'Style Studio: ₹200 Cash', subtitle: 'Flat cashback on styling slots', tag: 'Cashback', rating: 'Salon', emoji: 'service/3', link: '/service/3' },
+      { id: 'o3', title: 'Style Studio: ₹200 Cash', subtitle: 'Flat cashback on styling slots', tag: 'Cashback', rating: 'Salon', emoji: '💇', link: '/service/3' },
       { id: 'o4', title: 'Grand Palace: 2+1 Offer', subtitle: 'Book 2 nights, get 1 night free', tag: 'Get 1 Free', rating: 'Hotel', emoji: '🏡', link: '/stay-accommodation/hotels' }
     ]
   },
@@ -98,7 +98,8 @@ const EXPLORE_SECTIONS = [
       { id: 'e1', title: 'Clay Pottery Class', location: 'Weekend workshop in Chennai', price: '₹400', ratingScore: '4.7', ratingText: 'Great', usersCount: '50+ Users', stars: 4, emoji: '🎨', image: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=500&auto=format&fit=crop&q=60', badge: 'Workshop', badgeBg: 'bg-purple-500', link: '/entertainment-events/workshops' },
       { id: 'e2', title: 'IPL Live Turf Screening', location: 'Match screening at Zen Arena', price: '₹299', ratingScore: '4.8', ratingText: 'Awesome', usersCount: '200+ Users', stars: 5, emoji: '⚽', image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=500&auto=format&fit=crop&q=60', badge: 'Live', badgeBg: 'bg-red-500', link: '/entertainment-events/events' },
       { id: 'e3', title: 'Corporate Badminton League', location: 'Trophies and cash prizes', price: '₹999', ratingScore: '4.9', ratingText: 'Exceptional', usersCount: '500+ Users', stars: 5, emoji: '🏸', image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=500&auto=format&fit=crop&q=60', badge: 'Tournament', badgeBg: 'bg-blue-600', link: '/sports-turf/badminton' },
-      { id: 'e4', title: 'Sunburn Arena EDM concert', location: 'Early bird tickets live now', price: '₹1,200', ratingScore: '4.9', ratingText: 'Exceptional', usersCount: '1k+ Users', stars: 5, emoji: '🎵', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&auto=format&fit=crop&q=60', badge: 'Selling Fast', badgeBg: 'bg-pink-500', link: '/entertainment-events/concerts' }
+      { id: 'e4', title: 'Sunburn Arena EDM concert', location: 'Early bird tickets live now', price: '₹1,200', ratingScore: '4.9', ratingText: 'Exceptional', usersCount: '1k+ Users', stars: 5, emoji: '🎵', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&auto=format&fit=crop&q=60', badge: 'Selling Fast', badgeBg: 'bg-pink-500', link: '/entertainment-events/concerts' },
+      { id: 'e5', title: 'Street Food Festival', location: 'Marina Beach Seaview', price: '₹150', ratingScore: '4.8', ratingText: 'Awesome', usersCount: '2k+ Users', stars: 5, emoji: '🌮', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&auto=format&fit=crop&q=60', badge: 'Must Try', badgeBg: 'bg-orange-500', link: '/entertainment-events/events' }
     ]
   },
   {
@@ -395,62 +396,70 @@ const CONCIERGE_JOURNEYS_POOL = [
 ];
 
 const mapExploreItemToConcierge = (item: any, sectionId: string) => {
-  const mappings: Record<string, { source: string; destination: string; platform: string; icon: string; iconColor: string }> = {
+  const mappings: Record<string, { source: string; destination: string; platform: string; icon: string; iconColor: string; image: string }> = {
     'n1': {
       source: 'Chennai Central',
       destination: 'New Metro Routes',
       platform: 'Open Today',
       icon: '🚇',
-      iconColor: '#3b82f6'
+      iconColor: '#3b82f6',
+      image: 'https://images.unsplash.com/photo-1548689816-c399f954f3dd?w=500&auto=format&fit=crop&q=60'
     },
     'n2': {
       source: 'ZenFit Studio',
       destination: 'Morning Yoga Batch',
       platform: 'Starts Mon 7AM',
       icon: '🧘',
-      iconColor: '#10b981'
+      iconColor: '#10b981',
+      image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&auto=format&fit=crop&q=60'
     },
     'n3': {
       source: 'City Gateways',
       destination: 'Hill Station Alert',
       platform: 'Monsoon Guide',
       icon: '🌧️',
-      iconColor: '#f59e0b'
+      iconColor: '#f59e0b',
+      image: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=500&auto=format&fit=crop&q=60'
     },
     'n4': {
       source: 'Mylapore Gate',
       destination: 'Temple Darshan',
       platform: 'Festival Booking',
       icon: '🛕',
-      iconColor: '#ec4899'
+      iconColor: '#ec4899',
+      image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=500&auto=format&fit=crop&q=60'
     },
     'e1': {
       source: 'Chennai Workshop',
       destination: 'Clay Pottery Class',
       platform: 'Sat 4:00 PM',
       icon: '🎨',
-      iconColor: '#a855f7'
+      iconColor: '#a855f7',
+      image: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=500&auto=format&fit=crop&q=60'
     },
     'e2': {
       source: 'Zen Arena Screen',
       destination: 'IPL Live Screening',
       platform: 'Sun 7:00 PM',
       icon: '⚽',
-      iconColor: '#ef4444'
+      iconColor: '#ef4444',
+      image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=500&auto=format&fit=crop&q=60'
     },
     'e3': {
       source: 'Arena Courts',
       destination: 'Badminton League',
       platform: 'Starts June 15',
       icon: '🏸',
-      iconColor: '#14b8a6'
+      iconColor: '#14b8a6',
+      image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=500&auto=format&fit=crop&q=60'
     },
     'e4': {
       source: 'VGP Beach Stage',
       destination: 'Sunburn EDM Concert',
       platform: 'Gate Open June 20',
       icon: '🎵',
-      iconColor: '#ec4899'
+      iconColor: '#ec4899',
+      image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&auto=format&fit=crop&q=60'
     }
   };
 
@@ -463,7 +472,7 @@ const mapExploreItemToConcierge = (item: any, sectionId: string) => {
       platform: mapped.platform,
       icon: mapped.icon,
       iconColor: mapped.iconColor,
-      image: item.image || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=500&auto=format&fit=crop&q=60',
+      image: mapped.image,
       ratingScore: item.ratingScore || '4.5',
       ratingText: item.ratingText || 'Good',
       usersCount: item.usersCount || '100+ Users',
@@ -478,7 +487,7 @@ const mapExploreItemToConcierge = (item: any, sectionId: string) => {
     platform: item.tag || 'Live Info',
     icon: item.emoji || (sectionId === 'news' ? '📰' : '📅'),
     iconColor: sectionId === 'news' ? '#3b82f6' : '#10b981',
-    image: item.image || 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&auto=format&fit=crop&q=60',
+    image: item.image || (sectionId === 'news' ? 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=500&auto=format&fit=crop&q=60' : 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&auto=format&fit=crop&q=60'),
     ratingScore: item.ratingScore || '4.5',
     ratingText: item.ratingText || 'Good',
     usersCount: item.usersCount || '100+ Users',
@@ -569,6 +578,39 @@ export default function HomePage() {
   const [userPannedCenter, setUserPannedCenter] = useState<[number, number] | null>(null);
   const [realServices, setRealServices] = useState<any[]>([]);
   const [adIndex, setAdIndex] = useState(0);
+  const [activeExploreSection, setActiveExploreSection] = useState('news');
+
+  const trendingScrollRef = useRef<HTMLDivElement>(null);
+  const scrollTrending = (direction: 'left' | 'right') => {
+    if (trendingScrollRef.current) {
+      const scrollAmount = 320;
+      trendingScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const recommendedScrollRef = useRef<HTMLDivElement>(null);
+  const scrollRecommended = (direction: 'left' | 'right') => {
+    if (recommendedScrollRef.current) {
+      const scrollAmount = 320;
+      recommendedScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const eventsScrollRef = useRef<HTMLDivElement>(null);
+  const scrollEvents = (direction: 'left' | 'right') => {
+    if (eventsScrollRef.current) {
+      const scrollAmount = 320;
+      eventsScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const journeysScrollRef = useRef<HTMLDivElement>(null);
+  const scrollJourneys = (direction: 'left' | 'right') => {
+    if (journeysScrollRef.current) {
+      const scrollAmount = 320;
+      journeysScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Real-time active Concierge Journeys
   const [activeJourneys, setActiveJourneys] = useState<any[]>([]);
@@ -865,7 +907,7 @@ export default function HomePage() {
           {/* Row 1: Main Categories & Dashboard pill */}
           <div className="flex items-center justify-between flex-wrap gap-4 mb-2 pt-3.5">
             <div className="flex items-center gap-4 overflow-x-auto py-2 pr-4 custom-scrollbar shrink-0 max-w-full lg:max-w-[75%] scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {Array.isArray(subnavCategories) && subnavCategories.map(catId => {
+              {['travel-transport', 'stay-accommodation', 'entertainment-events', 'sports-turf', 'lifestyle-local'].map(catId => {
                 const category = SUBNAV_CATEGORIES.find(c => c.id === catId);
                 if (!category) return null;
                 return (
@@ -874,33 +916,24 @@ export default function HomePage() {
                     href={category.href}
                     className="h-9 px-4 rounded-xl border border-[color:var(--color-outline-variant)]/20 bg-[color:var(--color-surface-container)]/40 hover:bg-[color:var(--color-surface-container-high)]/60 hover:border-[color:var(--color-outline-variant)]/40 transition-all flex items-center gap-2 cursor-pointer text-xs font-extrabold text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)] shadow-sm backdrop-blur-md shrink-0"
                   >
-                    <span className="text-[14px] leading-none">{category.emoji}</span>
-                    <span>{category.label}</span>
+                    <span className="text-[14px] leading-none shrink-0">{category.emoji}</span>
+                    <span className="whitespace-nowrap">{category.label}</span>
                   </Link>
                 );
               })}
-
-              {/* Shortcut Button (opens Categories Modal) */}
-              <button
-                onClick={() => setSubnavModalOpen(true)}
-                className="h-9 px-4 rounded-xl border border-dashed border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-container)]/20 hover:bg-[color:var(--color-surface-container-high)]/40 hover:border-[color:var(--color-outline-variant)]/60 transition-all flex items-center gap-1.5 cursor-pointer text-xs font-extrabold text-[color:var(--color-on-surface)] shrink-0 ml-1"
-              >
-                <span className="text-[14px] leading-none font-black">+</span>
-                <span>Shortcut</span>
-              </button>
             </div>
             <div className="flex items-center gap-3 px-1">
               <Link
                 href="/vendor/register"
-                className="custom-nav-btn pl-1.5 pr-4 h-8 rounded-full flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-[11px] font-bold cursor-pointer shrink-0"
+                className="bg-[#2a4365] text-white pl-1.5 pr-4 h-8 rounded-full flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-[11px] font-bold cursor-pointer shrink-0 border border-white/20"
               >
-                <div className="h-5.5 w-5.5 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
-                  <span className="material-symbols-outlined text-[13px] text-[#0a3161]">storefront</span>
+                <div className="h-6 w-6 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
+                  <span className="material-symbols-outlined text-[7px] text-[#2a4365]" style={{ transform: 'scale(0.7)' }}>storefront</span>
                 </div>
-                <span className="text-inherit text-[11px] font-bold tracking-wide select-none">VENDOR</span>
+                <span className="text-white text-[11px] font-bold tracking-wide select-none">VENDOR</span>
               </Link>
               <Link href="/support" className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors shrink-0" aria-label="Help & Support">
-                <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">help</span>
+                <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">support_agent</span>
               </Link>
               <Link href="/profile" className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors shrink-0" aria-label="Settings">
                 <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">settings</span>
@@ -1028,9 +1061,33 @@ export default function HomePage() {
                 <h2 className="text-[18px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight">Recommended For You</h2>
                 <p className="text-[11px] mt-0.5 text-[color:var(--color-outline)]">Curated bookings and activities tailored to your profile</p>
               </div>
+              <Link href="/search" className="flex items-center gap-1 text-[11px] font-bold text-[color:var(--color-primary)] hover:gap-1.5 transition-all duration-300">
+                View All
+                <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
+              </Link>
             </div>
 
-            <div className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x">
+            <div className="relative group">
+              {/* Left Arrow */}
+              <button 
+                onClick={() => scrollRecommended('left')} 
+                className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-[#1f2937] border border-black/10 dark:border-white/10 flex items-center justify-center shadow-lg hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
+              >
+                <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">chevron_left</span>
+              </button>
+
+              {/* Right Arrow */}
+              <button 
+                onClick={() => scrollRecommended('right')} 
+                className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-[#1f2937] border border-black/10 dark:border-white/10 flex items-center justify-center shadow-lg hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
+              >
+                <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">chevron_right</span>
+              </button>
+
+              <div 
+                ref={recommendedScrollRef}
+                className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+              >
               {RECOMMENDED_ITEMS.map((item) => (
                 <Link
                   key={item.id}
@@ -1091,81 +1148,10 @@ export default function HomePage() {
                   </div>
                 </Link>
               ))}
-            </div>
-          </section>
-
-          {/* Row 4.5: Upcoming Concierge Journey Section */}
-          <section className="mb-10 text-left">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-[18px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight">Upcoming Concierge Journeys & Events</h2>
               </div>
             </div>
-
-            <div className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x">
-              {activeJourneys.map((journey) => (
-                  <Link
-                    href="#"
-                    key={journey.id}
-                    className="w-[280px] shrink-0 snap-start group flex flex-col self-stretch"
-                  >
-                    <div className="bg-[color:var(--color-surface-container)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/20 shadow-sm hover:shadow-xl transition-all duration-300 relative flex flex-col h-full">
-                      {/* Live Ticket top indicator */}
-                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-teal-500 z-20" />
-                      
-                      {/* Image Section */}
-                      <div className="relative h-[160px] w-full shrink-0 overflow-hidden">
-                        <img 
-                          src={journey.image} 
-                          alt={journey.trainName} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        {/* Live Timer Badge */}
-                        <div className={`absolute top-2 left-2 bg-black/60 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm flex items-center gap-1 backdrop-blur-md`}>
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          Starts in {formatSecondsLeft(journey.secondsLeft)}
-                        </div>
-                      </div>
-                      
-                      {/* Content Section */}
-                      <div className="p-3 flex-1 flex flex-col">
-                        <div className="flex items-start justify-between mb-1">
-                          <h3 className="font-bold text-sm text-[color:var(--color-on-surface)] truncate pr-2">
-                            {journey.trainName}
-                          </h3>
-                          <div className="flex text-yellow-500 shrink-0">
-                            {[...Array(journey.stars || 4)].map((_, i) => (
-                              <Star key={i} className="w-3 h-3 fill-current" />
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <p className="text-[11px] text-[color:var(--color-outline)] mb-3">{journey.source} → {journey.destination}</p>
-                        
-                        <div className="flex items-end justify-between mt-auto">
-                          <div className="flex items-center gap-1.5">
-                            <div className="bg-[#20274d] text-white text-[11px] font-bold px-1.5 py-0.5 rounded shadow-sm">
-                              {journey.ratingScore || '9.0'}
-                            </div>
-                            <div className="text-[10px] text-[color:var(--color-on-surface)]">
-                              <span className="font-bold">{journey.ratingText || 'Excellent'}</span>
-                              <span className="text-[color:var(--color-outline)] mx-1">•</span>
-                              <span className="text-[color:var(--color-outline)]">{journey.usersCount || '200+ Users'}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            <div className="text-xs font-extrabold text-[color:var(--color-primary)]">
-                              {journey.platform}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-              ))}
-            </div>
           </section>
+
 
           {/* Row 5: Trending Now (Horizontal scrolling format below Recommended) */}
           {(() => {
@@ -1173,7 +1159,8 @@ export default function HomePage() {
             if (!sec) return null;
             return (
               <section className="mb-10 text-left">
-                <div className="flex items-center justify-between mb-5">
+                <div className="bg-[color:var(--color-surface-container)] rounded-3xl p-6 shadow-sm border border-[color:var(--color-outline-variant)]/20">
+                  <div className="flex items-center justify-between mb-5">
                   <div>
                     <h2 className="text-[18px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight flex items-center gap-2">
                       <span className="select-none text-xl">{sec.emoji}</span>
@@ -1181,13 +1168,35 @@ export default function HomePage() {
                     </h2>
                     <p className="text-[11px] mt-0.5 text-[color:var(--color-outline)]">{sec.description}</p>
                   </div>
-                  <Link href={sec.href} className="flex items-center gap-1 text-[11px] font-bold text-[color:var(--color-primary)] hover:gap-1.5 transition-all duration-300">
-                    View All
-                    <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
-                  </Link>
+                  <div className="flex items-center gap-4">
+                    <Link href={sec.href} className="flex items-center gap-1 text-[11px] font-bold text-[color:var(--color-primary)] hover:gap-1.5 transition-all duration-300">
+                      View All
+                      <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
+                    </Link>
+                  </div>
                 </div>
 
-                <div className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x">
+                <div className="relative group">
+                  {/* Left Arrow */}
+                  <button 
+                    onClick={() => scrollTrending('left')} 
+                    className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-[#1f2937] border border-black/10 dark:border-white/10 flex items-center justify-center shadow-lg hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">chevron_left</span>
+                  </button>
+
+                  {/* Right Arrow */}
+                  <button 
+                    onClick={() => scrollTrending('right')} 
+                    className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-[#1f2937] border border-black/10 dark:border-white/10 flex items-center justify-center shadow-lg hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">chevron_right</span>
+                  </button>
+
+                  <div 
+                    ref={trendingScrollRef}
+                    className="flex gap-4 overflow-x-auto pb-4 pt-1 scroll-smooth snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                  >
                   {sec.items.map((item) => (
                     <Link
                       key={item.id}
@@ -1248,6 +1257,8 @@ export default function HomePage() {
                       </div>
                     </Link>
                   ))}
+                  </div>
+                </div>
                 </div>
               </section>
             );
@@ -1273,7 +1284,27 @@ export default function HomePage() {
                   </Link>
                 </div>
 
-                <div className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x">
+                <div className="relative group">
+                  {/* Left Arrow */}
+                  <button 
+                    onClick={() => scrollEvents('left')} 
+                    className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-[#1f2937] border border-black/10 dark:border-white/10 flex items-center justify-center shadow-lg hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">chevron_left</span>
+                  </button>
+
+                  {/* Right Arrow */}
+                  <button 
+                    onClick={() => scrollEvents('right')} 
+                    className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-[#1f2937] border border-black/10 dark:border-white/10 flex items-center justify-center shadow-lg hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">chevron_right</span>
+                  </button>
+
+                  <div 
+                    ref={eventsScrollRef}
+                    className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                  >
                   {sec.items.map((item) => (
                     <Link
                       key={item.id}
@@ -1334,82 +1365,164 @@ export default function HomePage() {
                       </div>
                     </Link>
                   ))}
+                  </div>
                 </div>
               </section>
             );
           })()}
 
-          {/* Row 7, 8, 9: Explore More Sections (News, Offers, Featured in Banner format) */}
-          {EXPLORE_SECTIONS.filter(s => s.id !== 'trending' && s.id !== 'events').map((sec) => (
-            <section key={sec.id} className="mb-10 text-left">
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <h2 className="text-[18px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight flex items-center gap-2">
-                    <span className="select-none text-xl">{sec.emoji}</span>
-                    <span>{sec.title}</span>
-                  </h2>
-                  <p className="text-[11px] mt-0.5 text-[color:var(--color-outline)]">{sec.description}</p>
-                </div>
-                <Link href={sec.href} className="flex items-center gap-1 text-[11px] font-bold text-[color:var(--color-primary)] hover:gap-1.5 transition-all duration-300">
-                  View All
-                  <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
-                </Link>
+          {/* Row 4.5: Upcoming Concierge Journey Section */}
+          <section className="mb-10 text-left">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-[18px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight">Upcoming Concierge Journeys & Events</h2>
               </div>
+              <Link href="/search" className="flex items-center gap-1 text-[11px] font-bold text-[color:var(--color-primary)] hover:gap-1.5 transition-all duration-300">
+                View All
+                <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
+              </Link>
+            </div>
 
-              <div className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x">
-                {sec.items.map((item) => (
+            <div className="relative group overflow-hidden w-full">
+              <div 
+                className="flex gap-10 md:gap-14 overflow-visible pb-4 pt-1 animate-marquee"
+              >
+                {[...activeJourneys, ...activeJourneys, ...activeJourneys, ...activeJourneys, ...activeJourneys].map((journey, index) => (
                   <Link
-                    key={item.id}
-                    href={item.link}
-                    className="w-[320px] shrink-0 snap-start group block"
+                    href="#"
+                    key={`${journey.id}-${index}`}
+                    className="w-[140px] shrink-0 snap-start group flex flex-col items-center gap-2"
                   >
-                    <div 
-                      className="relative h-[150px] rounded-[24px] p-4 overflow-hidden flex flex-col justify-between shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                      style={{
-                        background: `linear-gradient(135deg, ${sec.from}, ${sec.to})`,
-                      }}
-                    >
-                      {/* Decorative Background Elements */}
-                      <div className="absolute -right-4 -bottom-4 text-[100px] opacity-[0.15] rotate-12 select-none group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 pointer-events-none">
-                        {item.emoji}
-                      </div>
-                      <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none" />
-
-                      {/* Content (Z-index above background) */}
-                      <div className="relative z-10 flex flex-col h-full justify-between">
-                        {/* Top Row: Badge & Rating */}
-                        <div className="flex items-start justify-between">
-                          <span className="text-[9px] uppercase font-black tracking-wider text-[#0e0e11] bg-white/95 px-2.5 py-1 rounded-full shadow-sm">
-                            {item.tag}
-                          </span>
-                          
-                          <div className="flex items-center gap-1 text-[10px] font-bold text-white bg-black/25 px-2.5 py-1 rounded-full backdrop-blur-md">
-                            <Star className="h-2.5 w-2.5 text-yellow-400 fill-yellow-400" />
-                            <span>{item.rating}</span>
-                          </div>
-                        </div>
-
-                        {/* Bottom Row: Title & Action */}
-                        <div className="mt-auto flex items-end justify-between gap-4">
-                          <div className="min-w-0">
-                            <h3 className="font-extrabold text-[15.5px] text-white leading-tight mb-1 truncate">
-                              {item.title}
-                            </h3>
-                            <p className="text-[11px] font-medium text-white/80 truncate">
-                              {item.subtitle}
-                            </p>
-                          </div>
-                          <div className="w-8 h-8 shrink-0 rounded-full bg-white/20 flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-colors backdrop-blur-md shadow-sm border border-white/20">
-                            <span className="material-symbols-outlined text-[15px] font-bold">arrow_forward</span>
-                          </div>
-                        </div>
+                    {/* Image Section */}
+                    <div className="relative h-[130px] w-[130px] rounded-full overflow-hidden border-2 border-white dark:border-white/20 shadow-md">
+                      <img 
+                        src={journey.image} 
+                        alt={journey.trainName} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    
+                    {/* Content Section */}
+                    <div className="flex flex-col items-center text-center w-full px-1">
+                      <h3 className="font-extrabold text-[14px] leading-tight text-[color:var(--color-on-surface)] line-clamp-2 w-full mb-1 min-h-[40px] flex items-center justify-center">
+                        {journey.trainName}
+                      </h3>
+                      
+                      {/* Live Timer Badge */}
+                      <div className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                        {formatSecondsLeft(journey.secondsLeft)}
                       </div>
                     </div>
                   </Link>
                 ))}
               </div>
-            </section>
-          ))}
+            </div>
+          </section>
+
+          {/* Unified Explore More Section (Tabs based on screenshot) */}
+          <section className="mb-10 text-left">
+            <h2 className="text-[18px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight mb-4">
+              Explore More Options
+            </h2>
+            <div className="flex flex-col-reverse md:flex-row bg-[color:var(--color-surface-container)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/20 shadow-sm min-h-[260px]">
+              
+              {/* Left Content Area (Vertical Scroll Grid) */}
+              <div className="flex-1 px-4 pt-1 pb-4 md:px-6 md:pt-2 md:pb-6 overflow-y-auto max-h-[260px] custom-scrollbar bg-slate-50/50 dark:bg-black/20">
+                {(() => {
+                  const activeSec = EXPLORE_SECTIONS.find(s => s.id === activeExploreSection);
+                  if (!activeSec) return null;
+                  
+                  const getImageForTitle = (title: string) => {
+                    const t = title.toLowerCase();
+                    if (t.includes('metro') || t.includes('rail')) return 'https://images.unsplash.com/photo-1541427468627-a89a96e5ca1d?w=500&auto=format&fit=crop&q=60';
+                    if (t.includes('yoga') || t.includes('zenfit')) return 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&auto=format&fit=crop&q=60';
+                    if (t.includes('monsoon') || t.includes('safety')) return 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=500&auto=format&fit=crop&q=60';
+                    if (t.includes('temple') || t.includes('darshan')) return 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=500&auto=format&fit=crop&q=60';
+                    if (t.includes('dental')) return 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=500&auto=format&fit=crop&q=60';
+                    if (t.includes('style') || t.includes('spa') || t.includes('salon')) return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500&auto=format&fit=crop&q=60';
+                    if (t.includes('palace') || t.includes('stay') || t.includes('hotel')) return 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&auto=format&fit=crop&q=60';
+                    if (t.includes('turf') || t.includes('sports')) return 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=500&auto=format&fit=crop&q=60';
+                    return 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=500&auto=format&fit=crop&q=60';
+                  };
+
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
+                      {activeSec.items.map((item) => (
+                        <div key={item.id} className="bg-white dark:bg-[#111111] rounded-xl overflow-hidden border border-[color:var(--color-outline-variant)]/40 shadow-sm hover:shadow-md transition-shadow flex flex-row h-[200px] group">
+                          {/* Top Image */}
+                          <div className="relative w-1/2 shrink-0 h-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                            <img src={item.image || getImageForTitle(item.title)} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            {item.tag && (
+                              <div className="absolute top-2 left-2 bg-[#b548ff] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
+                                <span className="material-symbols-outlined text-[10px]">sell</span>
+                                {item.tag}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Bottom Content */}
+                          <div className="p-3 flex flex-col flex-1 justify-between">
+                            <div className="flex justify-between items-start mb-1">
+                              <h3 className="font-extrabold text-[13px] text-[color:var(--color-on-surface)] truncate pr-1">{item.title}</h3>
+                              <div className="flex items-center text-yellow-500 shrink-0">
+                                {[...Array(item.stars || 4)].map((_, i) => <Star key={i} className="w-2.5 h-2.5 fill-current" />)}
+                              </div>
+                            </div>
+                            
+                            <p className="text-[10px] text-[color:var(--color-outline)] mb-3 line-clamp-1">
+                              {item.subtitle || item.location}
+                            </p>
+                            
+                            <div className="mt-auto flex justify-between items-end">
+                              <div className="flex items-center gap-1.5">
+                                <div className="bg-[#1f2937] dark:bg-white text-white dark:text-black font-extrabold text-[10px] px-1.5 py-0.5 rounded shadow-sm">
+                                  {item.rating || '4.5'}
+                                </div>
+                                <span className="text-[9px] font-bold text-[color:var(--color-on-surface)]">
+                                  Great <span className="text-[color:var(--color-outline)] font-normal mx-0.5">•</span> <span className="text-[color:var(--color-outline)] font-normal">50+</span>
+                                </span>
+                              </div>
+                              {item.price ? (
+                                <div className="font-extrabold text-[13px] text-[color:var(--color-on-surface)]">
+                                  {item.price}
+                                </div>
+                              ) : (
+                                <div className="text-[11px] font-extrabold text-[color:var(--color-primary)]">
+                                  View
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Right Sidebar (Nav Links) */}
+              <div className="w-full md:w-[260px] shrink-0 border-b md:border-b-0 md:border-l border-[color:var(--color-outline-variant)]/20 bg-white/10 dark:bg-black/10 flex flex-col pt-2">
+                
+                <div className="flex flex-col">
+                  {EXPLORE_SECTIONS.filter(s => s.id !== 'trending' && s.id !== 'events').map((sec) => (
+                    <button
+                      key={sec.id}
+                      onClick={() => setActiveExploreSection(sec.id)}
+                      className={`text-left px-5 py-4 text-[13px] font-semibold transition-all border-l-[3px] border-b border-b-[color:var(--color-outline-variant)]/10 last:border-b-0 ${
+                        activeExploreSection === sec.id 
+                          ? 'border-l-[color:var(--color-primary)] bg-[color:var(--color-primary)] text-white dark:bg-[color:var(--color-primary)] dark:text-white' 
+                          : 'border-l-transparent text-[color:var(--color-on-surface-variant)] hover:bg-black/5 dark:hover:bg-white/5'
+                      }`}
+                    >
+                      {sec.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </section>
 
           {/* Row 6: Nearby Services */}
           <section className="mb-12">

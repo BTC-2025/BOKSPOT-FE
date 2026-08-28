@@ -140,14 +140,14 @@ export const SERVICE_GROUPS = [
       {
         name: 'Healthcare',
         items: [
-          { name: 'Doctor Appointment', emoji: '🏥' }
+          { name: 'Doctor Appointment', emoji: '🩺' }
         ]
       },
       {
         name: 'Home Services',
         items: [
-          { name: 'Electrician Booking', emoji: '🧾' },
-          { name: 'Plumber Booking', emoji: '🔧' },
+          { name: 'Electrician Booking', emoji: '⚡' },
+          { name: 'Plumber Booking', emoji: '🚰' },
           { name: 'Cleaning Service', emoji: '🧹' },
           { name: 'Technician Service', emoji: '🛠️' }
         ]
@@ -169,7 +169,7 @@ export const SERVICE_GROUPS = [
         name: 'Workspace',
         items: [
           { name: 'Co-working Space', emoji: '🧑‍💻' },
-          { name: 'Meeting Room', emoji: '🏛️' }
+          { name: 'Meeting Room', emoji: '🤝' }
         ]
       },
       {
@@ -197,7 +197,7 @@ export const SERVICE_GROUPS = [
         items: [
           { name: 'Temple Darshan Booking', emoji: '🛕' },
           { name: 'Pooja Slot Booking', emoji: '🪔' },
-          { name: 'Pilgrimage Packages', emoji: '🚕' }
+          { name: 'Pilgrimage Packages', emoji: '📿' }
         ]
       }
     ]
@@ -212,7 +212,7 @@ export const SERVICE_GROUPS = [
         items: [
           { name: 'Cycle Rental', emoji: '🚲' },
           { name: 'Sports Bike Rental', emoji: '🏍️' },
-          { name: 'Camera Rental', emoji: '🎥' },
+          { name: 'Camera Rental', emoji: '📷' },
           { name: 'Sound System Rental', emoji: '🔊' },
           { name: 'Event Equipment Rental', emoji: '🪑' }
         ]

@@ -358,12 +358,12 @@ export function TopNav({
           <div className="flex-1 flex justify-end items-center gap-3 pr-4 lg:pr-6">
             {/* Desktop Actions Capsule (>= lg) */}
             {/* Desktop Actions (Separated Glass Circles) */}
-            <div className="hidden lg:flex items-center gap-2 mr-10">
+            <div className="hidden lg:flex items-center gap-2 mr-2">
               {/* Search Icon Container Wrapper */}
               <div className="relative" ref={searchContainerRef}>
                 <div 
                   className={`custom-nav-icon-container shadow-md transition-all duration-300 ${
-                    searchOpen ? 'w-48 px-3 py-1' : 'w-8 h-8 justify-center'
+                    searchOpen ? 'w-52 xl:w-64 px-3 py-1' : 'w-8 h-8 justify-center'
                   }`}
                 >
                   <button
@@ -380,7 +380,7 @@ export function TopNav({
                   </button>
                   <div
                     className={`overflow-hidden transition-all duration-300 flex items-center ${
-                      searchOpen ? 'w-32 xl:w-40 opacity-100 ml-2' : 'w-0 opacity-0'
+                      searchOpen ? 'w-36 xl:w-48 opacity-100 ml-2' : 'w-0 opacity-0'
                     }`}
                   >
                     <input
@@ -392,7 +392,7 @@ export function TopNav({
                         setShowSuggestions(true);
                       }}
                       onFocus={() => setShowSuggestions(true)}
-                      className="bg-transparent border-none outline-none text-xs text-[color:var(--color-on-surface)] placeholder-[color:var(--color-on-surface-variant)]/50 w-full"
+                      className="bg-transparent border-none outline-none text-xs text-[#111] dark:text-white placeholder-[#555] dark:placeholder-[#aaa] w-full font-bold"
                       onKeyDown={handleSearchInputKeyDown}
                       autoFocus={searchOpen}
                     />

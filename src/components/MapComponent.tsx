@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Locate, Navigation, Play, Pause } from 'lucide-react';
+import { Locate, Navigation, Play, Pause, Plus, Minus } from 'lucide-react';
 
 function calculateBearing(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -223,7 +223,7 @@ export default function MapComponent({
         navigator.geolocation.getCurrentPosition(
           successCallback,
           (err) => {
-            console.error("Fallback geolocation failed:", err);
+            console.warn("Fallback geolocation failed or denied. Proceeding with simulated location.");
             // Simulate a location offset near current active city center
             const shiftLat = center[0] + (Math.random() - 0.5) * 0.015;
             const shiftLng = center[1] + (Math.random() - 0.5) * 0.015;
@@ -243,6 +243,18 @@ export default function MapComponent({
     );
   };
 
+  const handleZoomIn = () => {
+    if (mapRef.current) {
+      mapRef.current.setZoom(mapRef.current.getZoom() + 1, { animate: true });
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (mapRef.current) {
+      mapRef.current.setZoom(mapRef.current.getZoom() - 1, { animate: true });
+    }
+  };
+
   // Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -258,8 +270,8 @@ export default function MapComponent({
       zoomDelta: 0,
     });
 
-    // Add custom zoom control
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    // Custom zoom controls are handled by floating buttons in the UI instead
+    // L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     // Set Initial Tile Layer
     const tileLayer = L.tileLayer(getTileUrl(mapMode), {
@@ -956,7 +968,7 @@ export default function MapComponent({
       {showRoute && (selectedMarkerId || customPin) && (
         <button
           onClick={handleSimulateNavigation}
-          className={`absolute bottom-48 right-3.5 z-[400] flex items-center justify-center w-10 h-10 rounded-xl border border-white/10 shadow-xl transition-all cursor-pointer group ${
+          className={`absolute bottom-[18rem] right-3.5 z-[400] flex items-center justify-center w-10 h-10 rounded-xl border border-white/10 shadow-xl transition-all cursor-pointer group ${
             isSimulating ? 'bg-amber-600 text-white animate-pulse' : 'bg-slate-900/90 hover:bg-amber-600 text-white'
           }`}
           title={isSimulating ? "Pause Simulation" : "Simulate Navigation"}
@@ -972,12 +984,30 @@ export default function MapComponent({
       {/* Floating Live Tracking Button */}
       <button
         onClick={() => setIsTracking(!isTracking)}
-        className={`absolute bottom-36 right-3.5 z-[400] flex items-center justify-center w-10 h-10 rounded-xl border border-white/10 shadow-xl transition-all cursor-pointer group ${
+        className={`absolute bottom-[15rem] right-3.5 z-[400] flex items-center justify-center w-10 h-10 rounded-xl border border-white/10 shadow-xl transition-all cursor-pointer group ${
           isTracking ? 'bg-emerald-600 text-white animate-pulse' : 'bg-slate-900/90 hover:bg-emerald-600 text-white'
         }`}
         title={isTracking ? "Live GPS Tracking Active" : "Start Live GPS Tracking"}
       >
         <Navigation className={`h-4.5 w-4.5 text-slate-300 group-hover:text-white transition-colors ${isTracking ? 'text-white' : ''}`} />
+      </button>
+
+      {/* Floating Zoom In Button */}
+      <button
+        onClick={handleZoomIn}
+        className="absolute bottom-48 right-3.5 z-[400] flex items-center justify-center w-10 h-10 rounded-xl bg-slate-900/90 hover:bg-indigo-600 text-white border border-white/10 shadow-xl transition-all cursor-pointer group"
+        title="Zoom In"
+      >
+        <Plus className="h-4.5 w-4.5 text-slate-300 group-hover:text-white transition-colors" />
+      </button>
+
+      {/* Floating Zoom Out Button */}
+      <button
+        onClick={handleZoomOut}
+        className="absolute bottom-36 right-3.5 z-[400] flex items-center justify-center w-10 h-10 rounded-xl bg-slate-900/90 hover:bg-indigo-600 text-white border border-white/10 shadow-xl transition-all cursor-pointer group"
+        title="Zoom Out"
+      >
+        <Minus className="h-4.5 w-4.5 text-slate-300 group-hover:text-white transition-colors" />
       </button>
 
       {/* Floating Geolocation Button */}
