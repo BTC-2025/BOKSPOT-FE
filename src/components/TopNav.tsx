@@ -309,11 +309,9 @@ export function TopNav({
                 }`}
               >
                 {pathname === '/' && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
+                  <div
                     className="absolute inset-0 rounded-full bg-[color:var(--color-primary)]/20 border border-[color:var(--color-primary)]/45 shadow-[0_0_12px_rgba(255,215,0,0.15)] backdrop-blur-md -z-10 custom-nav-active-bg"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
+                    />
                 )}
                 Home
               </Link>
@@ -326,11 +324,9 @@ export function TopNav({
                 }`}
               >
                 {pathname === '/categories' && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
+                  <div
                     className="absolute inset-0 rounded-full bg-[color:var(--color-primary)]/20 border border-[color:var(--color-primary)]/45 shadow-[0_0_12px_rgba(255,215,0,0.15)] backdrop-blur-md -z-10 custom-nav-active-bg"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
+                    />
                 )}
                 Categories
               </Link>
@@ -343,11 +339,9 @@ export function TopNav({
                 }`}
               >
                 {pathname === '/tracks' && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
+                  <div
                     className="absolute inset-0 rounded-full bg-[color:var(--color-primary)]/20 border border-[color:var(--color-primary)]/45 shadow-[0_0_12px_rgba(255,215,0,0.15)] backdrop-blur-md -z-10 custom-nav-active-bg"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
+                    />
                 )}
                 Tracks
               </Link>
@@ -439,21 +433,23 @@ export function TopNav({
               </div>
 
               {/* Wishlist Icon Container */}
-              <button 
+              <Link
+                href="/wishlist"
                 className="custom-nav-icon-container custom-nav-icon-btn w-8 h-8 shadow-md transition-all hover:scale-105 active:scale-95" 
                 aria-label="Wishlist"
               >
                 <Heart size={14} strokeWidth={2} />
-              </button>
+              </Link>
 
               {/* Cart Icon Container */}
-              <button 
+              <Link
+                href="/cart"
                 className="custom-nav-icon-container custom-nav-icon-btn w-8 h-8 shadow-md transition-all hover:scale-105 active:scale-95 relative" 
                 aria-label="Cart"
               >
                 <ShoppingBag size={14} strokeWidth={2} />
                 <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[color:var(--color-primary)] rounded-full shadow-[0_0_8px_rgba(255,215,0,0.6)]" />
-              </button>
+              </Link>
             </div>
 
             {/* Desktop Profile Dropdown */}
@@ -792,3 +788,4 @@ export function TopNav({
     </>
   );
 }
+

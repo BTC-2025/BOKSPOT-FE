@@ -568,6 +568,44 @@ const MOCK_ACTIVITIES = [
   { user: 'Rahul', city: 'Chennai', action: 'booked', item: 'Yoga Class', merchant: 'ZenFit', time: '7 mins ago', emoji: '🧘', link: '/service/svc-2' }
 ];
 
+function WishlistButton() {
+  const [wished, setWished] = useState(false);
+  return (
+    <button 
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setWished(!wished); }}
+      className="absolute top-2 right-2 bg-white/90 backdrop-blur w-7 h-7 flex items-center justify-center rounded-full z-20 shadow-sm transition-all"
+    >
+      <span className={`material-symbols-outlined text-[15px] ${wished ? 'text-red-500 fill-current font-bold' : 'text-gray-400'}`}>
+        favorite
+      </span>
+    </button>
+  );
+}
+
+function CartAddButton() {
+  const [qty, setQty] = useState(0);
+  if (qty === 0) {
+    return (
+      <button 
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQty(1); }}
+        className="absolute bottom-2 right-2 bg-white text-red-600 font-bold text-[20px] w-8 h-8 rounded-lg shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all z-20"
+      >
+        +
+      </button>
+    );
+  }
+  return (
+    <div 
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+      className="absolute bottom-2 right-2 bg-white text-red-600 font-bold text-[14px] px-1 py-1 rounded-lg shadow-md border border-gray-100 flex items-center justify-between min-w-[70px] h-8 z-20"
+    >
+      <button onClick={() => setQty(q => q - 1)} className="px-2 text-red-600 hover:bg-gray-100 rounded text-lg leading-none">-</button>
+      <span className="text-black text-xs">{qty}</span>
+      <button onClick={() => setQty(q => q + 1)} className="px-2 text-red-600 hover:bg-gray-100 rounded text-lg leading-none">+</button>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const { bookings } = useBookingFlowStore();
   const { city, latitude, longitude } = useLocationStore();
@@ -906,7 +944,7 @@ export default function HomePage() {
         <div className="mx-auto w-full">
           {/* Row 1: Main Categories & Dashboard pill */}
           <div className="flex items-center justify-between flex-wrap gap-4 mb-2 pt-3.5">
-            <div className="flex items-center gap-4 overflow-x-auto py-2 pr-4 custom-scrollbar shrink-0 max-w-full lg:max-w-[75%] scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex items-center gap-2.5 overflow-x-auto py-2 pr-4 custom-scrollbar shrink-0 max-w-full lg:max-w-[75%] scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {['travel-transport', 'stay-accommodation', 'entertainment-events', 'sports-turf', 'lifestyle-local'].map(catId => {
                 const category = SUBNAV_CATEGORIES.find(c => c.id === catId);
                 if (!category) return null;
@@ -914,7 +952,7 @@ export default function HomePage() {
                   <Link
                     key={category.id}
                     href={category.href}
-                    className="h-9 px-4 rounded-xl border border-[color:var(--color-outline-variant)]/20 bg-[color:var(--color-surface-container)]/40 hover:bg-[color:var(--color-surface-container-high)]/60 hover:border-[color:var(--color-outline-variant)]/40 transition-all flex items-center gap-2 cursor-pointer text-xs font-extrabold text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)] shadow-sm backdrop-blur-md shrink-0"
+                    className="transition-all flex items-center gap-1 cursor-pointer text-[13px] font-extrabold text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)] shrink-0 pr-2"
                   >
                     <span className="text-[14px] leading-none shrink-0">{category.emoji}</span>
                     <span className="whitespace-nowrap">{category.label}</span>
@@ -1102,6 +1140,8 @@ export default function HomePage() {
                         alt={item.title} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
+                      <WishlistButton />
+                      <CartAddButton />
                       {/* Badge */}
                       {item.badge && (
                         <div className={`absolute top-2 left-2 ${item.badgeBg} text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm flex items-center gap-1`}>
@@ -1211,6 +1251,8 @@ export default function HomePage() {
                             alt={item.title} 
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
+                          <WishlistButton />
+                          <CartAddButton />
                           {/* Badge */}
                           {item.badge && (
                             <div className={`absolute top-2 left-2 ${item.badgeBg} text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm flex items-center gap-1`}>
@@ -1319,6 +1361,8 @@ export default function HomePage() {
                             alt={item.title} 
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
+                          <WishlistButton />
+                          <CartAddButton />
                           {/* Badge */}
                           {item.badge && (
                             <div className={`absolute top-2 left-2 ${item.badgeBg} text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm flex items-center gap-1`}>
@@ -1420,6 +1464,8 @@ export default function HomePage() {
             </div>
           </section>
 
+          <div className="h-px bg-[color:var(--color-outline-variant)]/20 my-8 w-full" />
+
           {/* Unified Explore More Section (Tabs based on screenshot) */}
           <section className="mb-10 text-left">
             <h2 className="text-[18px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight mb-4">
@@ -1453,6 +1499,8 @@ export default function HomePage() {
                           {/* Top Image */}
                           <div className="relative w-1/2 shrink-0 h-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                             <img src={item.image || getImageForTitle(item.title)} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <WishlistButton />
+                            <CartAddButton />
                             {item.tag && (
                               <div className="absolute top-2 left-2 bg-[#b548ff] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
                                 <span className="material-symbols-outlined text-[10px]">sell</span>
