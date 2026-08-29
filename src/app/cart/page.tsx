@@ -1,49 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useCartStore } from '../../lib/store';
 
 export default function CartPage() {
-  // Initial items with their unit prices and starting quantities
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      name: 'Premium Bus Booking',
-      icon: 'directions_bus',
-      iconColor: 'blue',
-      date: 'Date: 24 Oct, 2024 | 10:00 AM',
-      unitPrice: 4500,
-      quantity: 1,
-    },
-    {
-      id: 2,
-      name: 'Luxury Hotel Stay',
-      icon: 'bed',
-      iconColor: 'emerald',
-      date: 'Date: 25 Oct - 27 Oct, 2024',
-      unitPrice: 15000,
-      quantity: 1,
-    }
-  ]);
+  const items = useCartStore(state => state.items);
+  const updateQuantity = useCartStore(state => state.updateQuantity);
+  const removeItem = useCartStore(state => state.removeItem);
 
-  const updateQuantity = (id: number, delta: number) => {
-    setItems((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const newQuantity = Math.max(1, item.quantity + delta); // Prevent quantity < 1
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      })
-    );
-  };
-
-  const removeItem = (id: number) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  // Hydration fix
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Calculations
-  const subtotal = items.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
+  const subtotal = items.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0);
   const tax = subtotal * 0.10; // 10% tax
   const serviceFee = items.length > 0 ? 500 : 0; // Flat ₹500 fee if items exist
   const totalAmount = subtotal + tax + serviceFee;
@@ -52,6 +23,8 @@ export default function CartPage() {
   const formatCurrency = (amount: number) => {
     return `₹${amount.toLocaleString('en-IN')}`;
   };
+
+  if (!mounted) return null;
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] pt-[104px] pb-24">
@@ -83,17 +56,25 @@ export default function CartPage() {
                 <div key={item.id} className="bg-white rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center gap-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100/50 hover:shadow-md transition-shadow">
                   
                   <div className="flex items-center gap-4 flex-1">
-                    {/* Icon */}
-                    <div className={`w-14 h-14 shrink-0 rounded-xl bg-${item.iconColor}-50 flex items-center justify-center text-${item.iconColor}-600`}>
-                      <span className="material-symbols-outlined text-[24px]">{item.icon}</span>
+                    {/* Icon / Image */}
+                    <div className={`w-14 h-14 shrink-0 rounded-xl bg-${item.iconColor || 'blue'}-50 flex items-center justify-center text-${item.iconColor || 'blue'}-600 overflow-hidden`}>
+                      {item.image ? (
+                        <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="material-symbols-outlined text-[24px]">{item.icon || 'sell'}</span>
+                      )}
                     </div>
                     
                     {/* Details */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-slate-800 text-base truncate">{item.name}</h3>
+                      <h3 className="font-bold text-slate-800 text-base truncate">{item.title}</h3>
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-                        <span className="material-symbols-outlined text-[14px]">calendar_month</span>
-                        <span>{item.date}</span>
+                        {item.date && (
+                          <>
+                            <span className="material-symbols-outlined text-[14px]">calendar_month</span>
+                            <span>{item.date}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -120,7 +101,7 @@ export default function CartPage() {
 
                     {/* Price */}
                     <div className="font-bold text-slate-800 text-[15px] md:text-[17px] whitespace-nowrap min-w-[80px] text-right">
-                      {formatCurrency(item.unitPrice * item.quantity)}
+                      {formatCurrency((item.price || 0) * item.quantity)}
                     </div>
                     
                     {/* Delete */}

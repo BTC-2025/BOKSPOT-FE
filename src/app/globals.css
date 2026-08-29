@@ -1225,3 +1225,8 @@
   background-size: 400% 400%;
   animation: lightGradientScroll 25s ease infinite;
 }
+
+/* Leaflet Z-Index Overrides */
+.leaflet-pane { z-index: 10 !important; }
+.leaflet-top, .leaflet-bottom { z-index: 10 !important; }
+.leaflet-control { z-index: 10 !important; }

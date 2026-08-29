@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { BokspotLoader } from '../../../components/ui/BokspotLoader';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, ChevronRight, MapPin, Star, Clock, Shield, Search, SlidersHorizontal,
@@ -1592,40 +1593,7 @@ export default function ProviderDiscoveryPage() {
   }, [category, city, latitude, longitude, mounted]);
 
   if (!mounted) {
-    return (
-      <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-300">
-        <div className="container-main flex items-center justify-between pt-6 pb-2">
-          <div className="flex items-center gap-4 min-w-0">
-            <Link href={`/${bookingType}`} className="btn-ghost p-2 shrink-0 border border-[var(--border-subtle)] rounded-full hover:bg-[var(--bg-surface)]">
-              <ArrowLeft size={20} />
-            </Link>
-            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] min-w-0">
-              <Link href="/" className="hover:text-[var(--text-primary)] transition-colors shrink-0">Home</Link>
-              <ChevronRight size={14} className="shrink-0" />
-              <span className="text-[var(--text-primary)] font-bold truncate">Loading...</span>
-            </div>
-          </div>
-        </div>
-        <div className="container-main py-6">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 w-64 bg-slate-300/20 rounded-lg"></div>
-            <div className="h-4 w-48 bg-slate-300/20 rounded-lg"></div>
-            <div className="space-y-4 pt-6">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-32 bg-slate-300/10 border border-slate-300/10 rounded-2xl p-6 flex gap-4">
-                  <div className="w-20 h-20 bg-slate-300/20 rounded-xl shrink-0"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-5 bg-slate-300/20 rounded w-1/3 animate-pulse"></div>
-                    <div className="h-4 bg-slate-300/20 rounded w-1/4 animate-pulse"></div>
-                    <div className="h-4 bg-slate-300/20 rounded w-1/2 animate-pulse"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </main>
-    );
+    return <BokspotLoader message="Initializing terminal..." />;
   }
 
   // Intercept the custom booking flows for custom dashboard category views
@@ -1664,40 +1632,7 @@ export default function ProviderDiscoveryPage() {
   });
 
   if (loading && !isCustomBooking) {
-    return (
-      <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-300">
-        <div className="container-main flex items-center justify-between pt-6 pb-2">
-          <div className="flex items-center gap-4 min-w-0">
-            <Link href={`/${bookingType}`} className="btn-ghost p-2 shrink-0 border border-[var(--border-subtle)] rounded-full hover:bg-[var(--bg-surface)]">
-              <ArrowLeft size={20} />
-            </Link>
-            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] min-w-0">
-              <Link href="/" className="hover:text-[var(--text-primary)] transition-colors shrink-0">Home</Link>
-              <ChevronRight size={14} className="shrink-0" />
-              <span className="text-[var(--text-primary)] font-bold truncate">Loading...</span>
-            </div>
-          </div>
-        </div>
-        <div className="container-main py-6">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 w-64 bg-slate-300/20 rounded-lg"></div>
-            <div className="h-4 w-48 bg-slate-300/20 rounded-lg"></div>
-            <div className="space-y-4 pt-6">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-32 bg-slate-300/10 border border-slate-300/10 rounded-2xl p-6 flex gap-4">
-                  <div className="w-20 h-20 bg-slate-300/20 rounded-xl shrink-0"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-5 bg-slate-300/20 rounded w-1/3 animate-pulse"></div>
-                    <div className="h-4 bg-slate-300/20 rounded w-1/4 animate-pulse"></div>
-                    <div className="h-4 bg-slate-300/20 rounded w-1/2 animate-pulse"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </main>
-    );
+    return <BokspotLoader message={`Scanning for ${categoryName}...`} />;
   }
 
   return (

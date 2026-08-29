@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { Search, Heart, ShoppingBag, Sparkles, MapPin, Map, X, User, Sun, Moon, Laptop } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useLocationStore, useUIStore, useUserStore } from '../lib/store';
+import { useLocationStore, useUIStore, useUserStore, useCartStore, useWishlistStore } from '../lib/store';
 import { LiveClock } from './LiveClock';
 import { ALL_SEARCHABLE_SERVICES } from '../lib/searchData';
 import { LocationSelectorModal } from './LocationSelectorModal';
@@ -49,6 +49,10 @@ export function TopNav({
 }: TopNavProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const cartItems = useCartStore(state => state.items);
+  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const wishlistItems = useWishlistStore(state => state.items);
+  const wishlistCount = wishlistItems.length;
   const { city, setCity, setLocation, setStatus, status, latitude, longitude } = useLocationStore();
   const [showMapModal, setShowMapModal] = useState(false);
   const [tempSelectedCity, setTempSelectedCity] = useState<string | null>(null);
@@ -273,7 +277,7 @@ export function TopNav({
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-[100] custom-navbar transition-all duration-300">
+      <header className="fixed top-0 left-0 right-0 custom-navbar transition-all duration-300" style={{ zIndex: 9999 }}>
         <div className="flex justify-between items-center w-full pl-6 lg:pl-12 pr-0 py-1.5 lg:py-2 max-w-full">
           {/* Left Column: Logo & Brand + Location Selector (Desktop) */}
           <div className="flex-1 flex justify-start items-center gap-6">
@@ -435,10 +439,13 @@ export function TopNav({
               {/* Wishlist Icon Container */}
               <Link
                 href="/wishlist"
-                className="custom-nav-icon-container custom-nav-icon-btn w-8 h-8 shadow-md transition-all hover:scale-105 active:scale-95" 
+                className="custom-nav-icon-container custom-nav-icon-btn w-8 h-8 shadow-md transition-all hover:scale-105 active:scale-95 relative" 
                 aria-label="Wishlist"
               >
                 <Heart size={14} strokeWidth={2} />
+                {wishlistCount > 0 && (
+                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                )}
               </Link>
 
               {/* Cart Icon Container */}
@@ -448,7 +455,13 @@ export function TopNav({
                 aria-label="Cart"
               >
                 <ShoppingBag size={14} strokeWidth={2} />
-                <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[color:var(--color-primary)] rounded-full shadow-[0_0_8px_rgba(255,215,0,0.6)]" />
+                {cartCount > 0 ? (
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold px-1 min-w-[16px] h-[16px] flex items-center justify-center rounded-full shadow-md">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                ) : (
+                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[color:var(--color-primary)] rounded-full shadow-[0_0_8px_rgba(255,215,0,0.6)]" />
+                )}
               </Link>
             </div>
 
