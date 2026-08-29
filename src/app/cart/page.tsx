@@ -1,9 +1,58 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 
 export default function CartPage() {
+  // Initial items with their unit prices and starting quantities
+  const [items, setItems] = useState([
+    {
+      id: 1,
+      name: 'Premium Bus Booking',
+      icon: 'directions_bus',
+      iconColor: 'blue',
+      date: 'Date: 24 Oct, 2024 | 10:00 AM',
+      unitPrice: 4500,
+      quantity: 1,
+    },
+    {
+      id: 2,
+      name: 'Luxury Hotel Stay',
+      icon: 'bed',
+      iconColor: 'emerald',
+      date: 'Date: 25 Oct - 27 Oct, 2024',
+      unitPrice: 15000,
+      quantity: 1,
+    }
+  ]);
+
+  const updateQuantity = (id: number, delta: number) => {
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          const newQuantity = Math.max(1, item.quantity + delta); // Prevent quantity < 1
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      })
+    );
+  };
+
+  const removeItem = (id: number) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  // Calculations
+  const subtotal = items.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
+  const tax = subtotal * 0.10; // 10% tax
+  const serviceFee = items.length > 0 ? 500 : 0; // Flat ₹500 fee if items exist
+  const totalAmount = subtotal + tax + serviceFee;
+
+  // Format currency helper
+  const formatCurrency = (amount: number) => {
+    return `₹${amount.toLocaleString('en-IN')}`;
+  };
+
   return (
     <div className="min-h-screen bg-[#F9FAFB] pt-[104px] pb-24">
       <div className="max-w-5xl mx-auto px-4 md:px-6">
@@ -20,59 +69,72 @@ export default function CartPage() {
           {/* Left Column: Cart Items */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             
-            {/* Item 1 */}
-            <div className="bg-white rounded-2xl p-4 md:p-5 flex items-center gap-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100/50 hover:shadow-md transition-shadow">
-              {/* Icon */}
-              <div className="w-14 h-14 shrink-0 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                <span className="material-symbols-outlined text-[24px]">directions_bus</span>
+            {items.length === 0 ? (
+              <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-slate-100">
+                <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">shopping_cart</span>
+                <h3 className="text-lg font-bold text-slate-700">Your cart is empty</h3>
+                <p className="text-slate-500 text-sm mt-1 mb-4">Looks like you haven't added any services yet.</p>
+                <Link href="/" className="text-[#0056b3] font-semibold hover:underline">
+                  Browse Services
+                </Link>
               </div>
-              
-              {/* Details */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-slate-800 text-base truncate">Premium Bus Booking</h3>
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-                  <span className="material-symbols-outlined text-[14px]">calendar_month</span>
-                  <span>Date: 24 Oct, 2024 | 10:00 AM</span>
-                </div>
-              </div>
-              
-              {/* Price & Actions */}
-              <div className="flex items-center gap-4 pl-2 md:pl-4">
-                <div className="font-bold text-slate-800 text-[15px] md:text-[17px] whitespace-nowrap">
-                  $45.00
-                </div>
-                <button className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[20px]">delete</span>
-                </button>
-              </div>
-            </div>
+            ) : (
+              items.map((item) => (
+                <div key={item.id} className="bg-white rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center gap-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100/50 hover:shadow-md transition-shadow">
+                  
+                  <div className="flex items-center gap-4 flex-1">
+                    {/* Icon */}
+                    <div className={`w-14 h-14 shrink-0 rounded-xl bg-${item.iconColor}-50 flex items-center justify-center text-${item.iconColor}-600`}>
+                      <span className="material-symbols-outlined text-[24px]">{item.icon}</span>
+                    </div>
+                    
+                    {/* Details */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-slate-800 text-base truncate">{item.name}</h3>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
+                        <span className="material-symbols-outlined text-[14px]">calendar_month</span>
+                        <span>{item.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Quantity & Price & Actions */}
+                  <div className="flex items-center justify-between md:justify-end gap-4 pl-0 md:pl-4 mt-3 md:mt-0 border-t border-slate-100 md:border-t-0 pt-3 md:pt-0">
+                    
+                    {/* Quantity Controls */}
+                    <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5">
+                      <button 
+                        onClick={() => updateQuantity(item.id, -1)}
+                        className="w-7 h-7 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200 rounded-md transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">remove</span>
+                      </button>
+                      <span className="w-8 text-center font-bold text-slate-700 text-sm">{item.quantity}</span>
+                      <button 
+                        onClick={() => updateQuantity(item.id, 1)}
+                        className="w-7 h-7 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200 rounded-md transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">add</span>
+                      </button>
+                    </div>
 
-            {/* Item 2 */}
-            <div className="bg-white rounded-2xl p-4 md:p-5 flex items-center gap-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100/50 hover:shadow-md transition-shadow">
-              {/* Icon */}
-              <div className="w-14 h-14 shrink-0 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                <span className="material-symbols-outlined text-[24px]">bed</span>
-              </div>
-              
-              {/* Details */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-slate-800 text-base truncate">Luxury Hotel Stay</h3>
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-                  <span className="material-symbols-outlined text-[14px]">calendar_month</span>
-                  <span>Date: 25 Oct - 27 Oct, 2024</span>
+                    {/* Price */}
+                    <div className="font-bold text-slate-800 text-[15px] md:text-[17px] whitespace-nowrap min-w-[80px] text-right">
+                      {formatCurrency(item.unitPrice * item.quantity)}
+                    </div>
+                    
+                    {/* Delete */}
+                    <button 
+                      onClick={() => removeItem(item.id)}
+                      className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  </div>
+
                 </div>
-              </div>
-              
-              {/* Price & Actions */}
-              <div className="flex items-center gap-4 pl-2 md:pl-4">
-                <div className="font-bold text-slate-800 text-[15px] md:text-[17px] whitespace-nowrap">
-                  $150.00
-                </div>
-                <button className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[20px]">delete</span>
-                </button>
-              </div>
-            </div>
+              ))
+            )}
 
           </div>
 
@@ -87,24 +149,27 @@ export default function CartPage() {
               <div className="flex flex-col gap-3.5 mb-6">
                 <div className="flex justify-between items-center text-[14px]">
                   <span className="text-slate-500 font-medium">Subtotal</span>
-                  <span className="text-slate-700 font-semibold">$195.00</span>
+                  <span className="text-slate-700 font-semibold">{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex justify-between items-center text-[14px]">
                   <span className="text-slate-500 font-medium">Tax (10%)</span>
-                  <span className="text-slate-700 font-semibold">$19.50</span>
+                  <span className="text-slate-700 font-semibold">{formatCurrency(tax)}</span>
                 </div>
                 <div className="flex justify-between items-center text-[14px]">
                   <span className="text-slate-500 font-medium">Service Fee</span>
-                  <span className="text-slate-700 font-semibold">$5.00</span>
+                  <span className="text-slate-700 font-semibold">{formatCurrency(serviceFee)}</span>
                 </div>
               </div>
 
               <div className="flex justify-between items-center pt-5 border-t border-slate-100 mb-6">
                 <span className="font-bold text-slate-800">Total Amount</span>
-                <span className="text-2xl font-extrabold text-[#0056b3] tracking-tight">$219.50</span>
+                <span className="text-2xl font-extrabold text-[#0056b3] tracking-tight">{formatCurrency(totalAmount)}</span>
               </div>
 
-              <button className="w-full bg-[#0056b3] hover:bg-[#004494] text-white font-bold py-3.5 rounded-full transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20 active:scale-[0.98]">
+              <button 
+                disabled={items.length === 0}
+                className="w-full bg-[#0056b3] hover:bg-[#004494] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-full transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20 active:scale-[0.98]"
+              >
                 Proceed to Checkout
                 <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
               </button>

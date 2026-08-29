@@ -56,7 +56,7 @@ export default function WishlistPage() {
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Starting at</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-extrabold text-slate-800">$299</span>
+                  <span className="text-2xl font-extrabold text-slate-800">₹12500</span>
                   <span className="text-xs text-slate-500 font-medium">/night</span>
                 </div>
               </div>
@@ -98,7 +98,7 @@ export default function WishlistPage() {
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Starting at</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-extrabold text-slate-800">$850</span>
+                  <span className="text-2xl font-extrabold text-slate-800">₹35000</span>
                   <span className="text-xs text-slate-500 font-medium">/person</span>
                 </div>
               </div>
@@ -133,7 +133,7 @@ export default function WishlistPage() {
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Starting at</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-extrabold text-slate-800">$150</span>
+                  <span className="text-2xl font-extrabold text-slate-800">₹4500</span>
                   <span className="text-xs text-slate-500 font-medium">/session</span>
                 </div>
               </div>
@@ -175,7 +175,7 @@ export default function WishlistPage() {
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Starting at</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-extrabold text-slate-800">$89</span>
+                  <span className="text-2xl font-extrabold text-slate-800">₹3000</span>
                   <span className="text-xs text-slate-500 font-medium">/day</span>
                 </div>
               </div>
@@ -190,3 +190,4 @@ export default function WishlistPage() {
     </div>
   );
 }
+
