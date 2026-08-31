@@ -1817,7 +1817,7 @@ export default function ProviderDiscoveryPage() {
                             {/* Image Header */}
                             <div className={`relative bg-gray-100 shrink-0 ${viewMode === 'list' ? 'sm:w-64 h-48 sm:h-auto' : 'h-48 w-full'}`}>
                               <img 
-                                src={s?.images?.[0] || m.images?.[0] || `https://images.unsplash.com/photo-1540039155732-68bebc6894b9?w=800&q=80`} 
+                                src={s?.metadata?.mainImageUrl || s?.imageUrl || s?.images?.[0] || m.images?.[0] || `https://images.unsplash.com/photo-1540039155732-68bebc6894b9?w=800&q=80`} 
                                 alt={m.name} 
                                 className="w-full h-full object-cover"
                               />

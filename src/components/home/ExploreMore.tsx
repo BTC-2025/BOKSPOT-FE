@@ -89,8 +89,8 @@ function ExploreCard({ item, getImageForTitle }: { item: any; getImageForTitle: 
       {/* Top Image (Left Side) */}
       <div className="relative w-1/2 shrink-0 bg-slate-100 dark:bg-slate-800 overflow-hidden">
         <img src={item.image || getImageForTitle(item.title)} alt={item.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        <WishlistButton item={item} />
-        <CartAddButton item={item} />
+        <WishlistButton item={{ ...item, image: item.image || getImageForTitle(item.title) }} />
+        <CartAddButton item={{ ...item, image: item.image || getImageForTitle(item.title) }} />
         {item.tag && (
           <div className="absolute top-2 left-2 bg-[#b548ff] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
             <span className="material-symbols-outlined text-[10px]">sell</span>

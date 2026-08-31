@@ -45,7 +45,7 @@ const SERVICE_IMAGE_MAP: Record<string, string> = {
   'Flight Booking': 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&auto=format&fit=crop&q=80',
   'Ferry / Boat Booking': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80',
   'Shuttle / Van Booking': 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&auto=format&fit=crop&q=80',
-  'Helicopter Booking (Premium)': 'https://loremflickr.com/600/600/helicopter?lock=1',
+  'Helicopter Booking (Premium)': 'https://images.unsplash.com/photo-1540866225557-9e4c58100c67?w=600&auto=format&fit=crop&q=80',
   'Cab / Taxi Booking': '/images/taxi_booking.jpg',
   'Bike Rental': 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&auto=format&fit=crop&q=80',
   'Self-Drive Car Rental': 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&auto=format&fit=crop&q=80',
@@ -69,7 +69,7 @@ const SERVICE_IMAGE_MAP: Record<string, string> = {
   // Sports
   'Football Turf': '/images/football.jpg',
   'Cricket Ground': 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&auto=format&fit=crop&q=80',
-  'Badminton Court': 'https://loremflickr.com/600/600/badminton,court?lock=1',
+  'Badminton Court': 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600&auto=format&fit=crop&q=80',
   'Tennis Court': 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=600&auto=format&fit=crop&q=80',
   'Basketball Court': 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&auto=format&fit=crop&q=80',
   'Swimming Pool Slots': '/images/swimming.jpg',
@@ -95,8 +95,8 @@ const SERVICE_IMAGE_MAP: Record<string, string> = {
   
   // Religious
   'Temple Darshan Booking': 'https://images.unsplash.com/photo-1561361058-c24cecae35ca?w=600&auto=format&fit=crop&q=80',
-  'Pooja Slot Booking': 'https://loremflickr.com/600/600/pooja,hindu?lock=1',
-  'Pilgrimage Packages': 'https://loremflickr.com/600/600/temple,india?lock=1',
+  'Pooja Slot Booking': 'https://images.unsplash.com/photo-1604169541334-0dcb65b03f0b?w=600&auto=format&fit=crop&q=80',
+  'Pilgrimage Packages': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=600&auto=format&fit=crop&q=80',
   
   // Equipment Rentals
   'Cycle Rental': 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&auto=format&fit=crop&q=80',

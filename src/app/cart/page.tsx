@@ -1,8 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useCartStore } from '../../lib/store';
+import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RECOMMENDED_ITEMS } from '../../lib/homeData';
+import { WishlistButton, CartAddButton } from '../../components/home/HomeShared';
 
 export default function CartPage() {
   const items = useCartStore(state => state.items);
@@ -12,6 +15,14 @@ export default function CartPage() {
   // Hydration fix
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  const recommendedScrollRef = useRef<HTMLDivElement>(null);
+  const scrollRecommended = (direction: 'left' | 'right') => {
+    if (recommendedScrollRef.current) {
+      const scrollAmount = 320;
+      recommendedScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Calculations
   const subtotal = items.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0);
@@ -163,6 +174,104 @@ export default function CartPage() {
             </div>
           </div>
           
+        </div>
+
+        {/* Recommended Items Carousel */}
+        <div className="mt-16 mb-8 border-t border-slate-200 pt-10">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-extrabold text-[#0A3161] tracking-tight">
+                Recommended based on your shopping trends
+              </h2>
+              <p className="text-sm text-slate-500 mt-1">Inspired by the items in your cart</p>
+            </div>
+            
+            {/* Custom Carousel Controls */}
+            <div className="hidden md:flex items-center gap-2">
+              <button 
+                onClick={() => scrollRecommended('left')}
+                className="w-10 h-10 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-700 hover:bg-slate-50 hover:text-black transition-all"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={() => scrollRecommended('right')}
+                className="w-10 h-10 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-700 hover:bg-slate-50 hover:text-black transition-all"
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div 
+            ref={recommendedScrollRef}
+            className="flex gap-4 overflow-x-auto pb-6 pt-2 custom-scrollbar scroll-smooth snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {RECOMMENDED_ITEMS.map((item) => (
+              <Link
+                key={item.id}
+                href={item.link}
+                className="w-[180px] shrink-0 snap-start group flex flex-col self-stretch"
+              >
+                <div className="bg-white rounded-2xl overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                  {/* Image Section */}
+                  <div className="relative h-[200px] w-full shrink-0 overflow-hidden">
+                    <img 
+                      src={item.image} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <WishlistButton item={item} />
+                    <CartAddButton item={item} />
+                    {/* Badge */}
+                    {item.badge && (
+                      <div className={`absolute top-2 left-2 ${item.badgeBg} text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm flex items-center gap-1`}>
+                        <span className="material-symbols-outlined text-[10px]">sell</span>
+                        {item.badge}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Content Section */}
+                  <div className="p-3 flex-1 flex flex-col">
+                    <div className="flex flex-col items-start justify-between mb-1">
+                      <h3 className="font-bold text-sm text-slate-800 line-clamp-2">
+                        {item.title}
+                      </h3>
+                      <div className="flex text-yellow-500 shrink-0 mt-1">
+                        {[...Array(item.stars || 4)].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 fill-current" />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <p className="text-[11px] text-slate-500 mb-3">{item.location}</p>
+                    
+                    <div className="flex flex-col gap-2 mt-auto">
+                      <div className="flex items-center gap-1.5">
+                        <div className="bg-[#20274d] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                          {item.ratingScore || '4.5'}
+                        </div>
+                        <div className="text-[10px] text-slate-700 truncate">
+                          <span className="font-bold">{item.ratingText || 'Great'}</span>
+                          <span className="text-slate-400 mx-1">•</span>
+                          <span className="text-slate-400">{item.usersCount || '50+'}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="w-full">
+                        <div className="text-[13px] font-extrabold text-slate-800">
+                          {item.price || 'View'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -98,8 +98,8 @@ export function StatCard({
 
 export function WishlistButton({ item }: { item?: any }) {
   const toggleItem = useWishlistStore(state => state.toggleItem);
-  const isInWishlist = useWishlistStore(state => state.isInWishlist);
-  const wished = item ? isInWishlist(item.id) : false;
+  const items = useWishlistStore(state => state.items);
+  const wished = item ? items.some((i: any) => i.id === item.id) : false;
 
   return (
     <button 
@@ -118,7 +118,10 @@ export function WishlistButton({ item }: { item?: any }) {
       }}
       className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur w-7 h-7 flex items-center justify-center rounded-full z-20 shadow-sm transition-all"
     >
-      <span className={`material-symbols-outlined text-[15px] ${wished ? 'text-red-500 fill-current font-bold' : 'text-gray-400'}`}>
+      <span 
+        className={`material-symbols-outlined text-[15px] transition-colors duration-300 ${wished ? 'text-red-500' : 'text-gray-400'}`}
+        style={{ fontVariationSettings: wished ? "'FILL' 1" : "'FILL' 0" }}
+      >
         favorite
       </span>
     </button>

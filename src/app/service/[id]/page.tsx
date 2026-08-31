@@ -238,7 +238,7 @@ export default function DistrictServiceDetailPage() {
                   }`}
                 >
                   <div className="w-16 h-12 bg-gray-200 rounded-lg overflow-hidden shrink-0">
-                    <img src={`https://picsum.photos/seed/${l.id}/200/150`} alt={l.name} className="w-full h-full object-cover" />
+                    <img src={l.imageUrl || l.image || `https://picsum.photos/seed/${l.id}/200/150`} alt={l.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1">
                     <h4 className="text-sm font-bold text-[color:var(--color-on-surface)]">{l.name || l.title}</h4>
