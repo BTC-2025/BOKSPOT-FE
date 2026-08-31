@@ -381,7 +381,7 @@
   }
 
   body {
-    background: linear-gradient(110deg, rgba(234, 84, 89, 0.3) 0%, #ffffff 45%, #ffffff 55%, rgba(248, 169, 2, 0.3) 100%) !important;
+    background: linear-gradient(to right, #f7f4e2 0%, #efe9e9 50%, #fbf1da 100%) !important;
     background-attachment: fixed !important;
     color: var(--color-on-surface);
     -webkit-font-smoothing: antialiased;
@@ -1227,6 +1227,15 @@
 }
 
 /* Leaflet Z-Index Overrides */
-.leaflet-pane { z-index: 10 !important; }
-.leaflet-top, .leaflet-bottom { z-index: 10 !important; }
-.leaflet-control { z-index: 10 !important; }
+.leaflet-pane {
+  z-index: 10 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 10 !important;
+}
+
+.leaflet-control {
+  z-index: 10 !important;
+}

@@ -116,7 +116,7 @@ export function WishlistButton({ item }: { item?: any }) {
           });
         }
       }}
-      className="absolute top-2 right-2 bg-white/90 backdrop-blur w-7 h-7 flex items-center justify-center rounded-full z-20 shadow-sm transition-all"
+      className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur w-7 h-7 flex items-center justify-center rounded-full z-20 shadow-sm transition-all"
     >
       <span className={`material-symbols-outlined text-[15px] ${wished ? 'text-red-500 fill-current font-bold' : 'text-gray-400'}`}>
         favorite
@@ -148,7 +148,7 @@ export function CartAddButton({ item }: { item?: any }) {
             });
           }
         }}
-        className="absolute bottom-2 right-2 bg-white text-red-600 font-bold text-[20px] w-8 h-8 rounded-lg shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all z-20"
+        className="absolute bottom-2.5 right-2.5 bg-white text-red-600 font-bold text-[20px] w-8 h-8 rounded-lg shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all z-20"
       >
         +
       </button>
@@ -157,7 +157,7 @@ export function CartAddButton({ item }: { item?: any }) {
   return (
     <div 
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-      className="absolute bottom-2 right-2 bg-white text-red-600 font-bold text-[14px] px-1 py-1 rounded-lg shadow-md border border-gray-100 flex items-center justify-between min-w-[70px] h-8 z-20"
+      className="absolute bottom-2.5 right-2.5 bg-white text-red-600 font-bold text-[14px] px-1 py-1 rounded-lg shadow-md border border-gray-100 flex items-center justify-between min-w-[70px] h-8 z-20"
     >
       <button onClick={() => { if(item) setQuantity(item.id, qty - 1); }} className="px-2 text-red-600 hover:bg-gray-100 rounded text-lg leading-none">-</button>
       <span className="text-black text-xs">{qty}</span>

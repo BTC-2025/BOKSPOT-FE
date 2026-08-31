@@ -45,54 +45,7 @@ export function ExploreMore() {
               return (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
                   {activeSec.items.map((item) => (
-                    <Link href={item.link || '#'} key={item.id} className="bg-white dark:bg-[#111111] rounded-xl overflow-hidden border border-[color:var(--color-outline-variant)]/40 shadow-sm hover:shadow-md transition-shadow flex flex-row h-[200px] group">
-                      {/* Top Image */}
-                      <div className="relative w-1/2 shrink-0 h-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                        <img src={item.image || getImageForTitle(item.title)} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <WishlistButton item={item} />
-                        <CartAddButton item={item} />
-                        {item.tag && (
-                          <div className="absolute top-2 left-2 bg-[#b548ff] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
-                            <span className="material-symbols-outlined text-[10px]">sell</span>
-                            {item.tag}
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Bottom Content */}
-                      <div className="p-3 flex flex-col flex-1 justify-between">
-                        <div className="flex justify-between items-start mb-1">
-                          <h3 className="font-extrabold text-[13px] text-[color:var(--color-on-surface)] truncate pr-1">{item.title}</h3>
-                          <div className="flex items-center text-yellow-500 shrink-0">
-                            {[...Array(item.stars || 4)].map((_, i) => <Star key={i} className="w-2.5 h-2.5 fill-current" />)}
-                          </div>
-                        </div>
-                        
-                        <p className="text-[10px] text-[color:var(--color-outline)] mb-3 line-clamp-1">
-                          {item.subtitle || item.location}
-                        </p>
-                        
-                        <div className="mt-auto flex justify-between items-end">
-                          <div className="flex items-center gap-1.5">
-                            <div className="bg-[#1f2937] dark:bg-white text-white dark:text-black font-extrabold text-[10px] px-1.5 py-0.5 rounded shadow-sm">
-                              {item.rating || '4.5'}
-                            </div>
-                            <span className="text-[9px] font-bold text-[color:var(--color-on-surface)]">
-                              Great <span className="text-[color:var(--color-outline)] font-normal mx-0.5">•</span> <span className="text-[color:var(--color-outline)] font-normal">50+</span>
-                            </span>
-                          </div>
-                          {item.price ? (
-                            <div className="font-extrabold text-[13px] text-[color:var(--color-on-surface)]">
-                              {item.price}
-                            </div>
-                          ) : (
-                            <div className="text-[11px] font-extrabold text-[color:var(--color-primary)]">
-                              View
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
+                    <ExploreCard key={item.id} item={item} getImageForTitle={getImageForTitle} />
                   ))}
                 </div>
               );
@@ -122,5 +75,81 @@ export function ExploreMore() {
         </div>
       </section>
     </motion.div>
+  );
+}
+
+function ExploreCard({ item, getImageForTitle }: { item: any; getImageForTitle: (title: string) => string }) {
+  const [expanded, setExpanded] = useState(false);
+  
+  // Dummy description to fill the gap
+  const description = item.description || "Experience the best quality service with our trusted partners. Perfect for your next outing, offering unmatched comfort and convenience for everyone involved.";
+
+  return (
+    <div className="bg-white dark:bg-[#111111] rounded-xl overflow-hidden border border-[color:var(--color-outline-variant)]/40 shadow-sm hover:shadow-md transition-shadow flex flex-row min-h-[200px] group">
+      {/* Top Image (Left Side) */}
+      <div className="relative w-1/2 shrink-0 bg-slate-100 dark:bg-slate-800 overflow-hidden">
+        <img src={item.image || getImageForTitle(item.title)} alt={item.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <WishlistButton item={item} />
+        <CartAddButton item={item} />
+        {item.tag && (
+          <div className="absolute top-2 left-2 bg-[#b548ff] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
+            <span className="material-symbols-outlined text-[10px]">sell</span>
+            {item.tag}
+          </div>
+        )}
+      </div>
+      
+      {/* Bottom Content (Right Side) */}
+      <div className="p-3 flex flex-col flex-1">
+        <div className="flex justify-between items-start mb-1">
+          <Link href={item.link || '#'} className="font-extrabold text-[13px] text-[color:var(--color-on-surface)] hover:text-[color:var(--color-primary)] pr-1 transition-colors" style={{ display: '-webkit-box', WebkitLineClamp: expanded ? 'unset' : 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            {item.title}
+          </Link>
+          <div className="flex items-center text-yellow-500 shrink-0">
+            {[...Array(item.stars || 4)].map((_, i) => <Star key={i} className="w-2.5 h-2.5 fill-current" />)}
+          </div>
+        </div>
+        
+        <p className="text-[10px] text-[color:var(--color-outline)] mb-2 line-clamp-1">
+          {item.subtitle || item.location}
+        </p>
+
+        {/* Expandable Description */}
+        <div className="mb-3 text-[10px] text-[color:var(--color-on-surface-variant)] leading-relaxed flex-1 flex flex-col justify-start">
+          <span className={expanded ? '' : 'line-clamp-3 relative'}>
+            {description}
+            {!expanded && (
+              <div className="absolute bottom-0 right-0 w-12 h-4 bg-gradient-to-l from-white dark:from-[#111111] to-transparent pointer-events-none" />
+            )}
+          </span>
+          <button 
+            onClick={() => setExpanded(!expanded)}
+            className="text-[color:var(--color-primary)] font-bold hover:underline mt-0.5 self-start"
+          >
+            {expanded ? 'less' : 'more'}
+          </button>
+        </div>
+        
+        <div className="mt-auto flex justify-between items-end pt-2 border-t border-[color:var(--color-outline-variant)]/10">
+          <div className="flex items-center gap-1.5">
+            <div className="bg-[#1f2937] dark:bg-white text-white dark:text-black font-extrabold text-[10px] px-1.5 py-0.5 rounded shadow-sm">
+              {item.rating || '4.5'}
+            </div>
+            <span className="text-[9px] font-bold text-[color:var(--color-on-surface)]">
+              Great <span className="text-[color:var(--color-outline)] font-normal mx-0.5">•</span> <span className="text-[color:var(--color-outline)] font-normal">50+</span>
+            </span>
+          </div>
+          {item.price ? (
+            <div className="font-extrabold text-[13px] text-[color:var(--color-on-surface)]">
+              {item.price}
+            </div>
+          ) : (
+            <Link href={item.link || '#'} className="text-[11px] font-extrabold text-[color:var(--color-primary)] hover:underline">
+              View
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

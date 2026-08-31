@@ -372,7 +372,7 @@ export default function CategoriesPage() {
         <div className="mx-auto max-w-7xl">
 
         {/* Category Tabs Switcher (Sticky Row) */}
-        <div className="sticky top-[42px] md:top-[48px] z-30 bg-[color:var(--color-background)]/80 backdrop-blur-lg border-b border-[color:var(--color-outline-variant)]/20 py-3 mb-8 -mx-4 px-4 md:-mx-8 md:px-8 overflow-x-auto flex gap-2.5 scrollbar-none scroll-smooth">
+        <div className="sticky top-[42px] md:top-[48px] z-30 border-b border-[color:var(--color-outline-variant)]/20 py-3 mb-8 -mx-4 px-4 md:-mx-8 md:px-8 overflow-x-auto flex gap-2.5 scrollbar-none scroll-smooth">
           {SERVICE_GROUPS.map((group) => {
             const id = group.title.toLowerCase().replace(/\s+/g, '-');
             return (
@@ -396,10 +396,10 @@ export default function CategoriesPage() {
               <section
                 key={group.title}
                 id={id}
-                className="scroll-mt-36 text-left animate-fade-up"
+                className="scroll-mt-36 text-left animate-fade-up border-b border-[color:var(--color-outline-variant)]/20 pb-12 mb-12 last:border-0"
               >
                 {/* Category Header */}
-                <div className="flex items-center gap-4.5 mb-6 border-b border-[color:var(--color-outline-variant)]/15 pb-4">
+                <div className="flex items-center gap-4.5 mb-6">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-[color:var(--color-primary)]/20 bg-[color:var(--color-primary)]/10 text-[color:var(--color-primary)] shadow-md">
                     <span className="material-symbols-outlined text-[26px]">{group.icon}</span>
                   </div>

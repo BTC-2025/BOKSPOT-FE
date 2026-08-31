@@ -77,11 +77,11 @@ export function CarouselSections() {
                 <Link
                   key={item.id}
                   href={item.link}
-                  className="w-[280px] shrink-0 snap-start group flex flex-col self-stretch"
+                  className="w-[180px] shrink-0 snap-start group flex flex-col self-stretch"
                 >
                   <div className="bg-[color:var(--color-surface-container)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/20 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
                     {/* Image Section */}
-                    <div className="relative h-[160px] w-full shrink-0 overflow-hidden">
+                    <div className="relative h-[200px] w-full shrink-0 overflow-hidden">
                       <img 
                         src={item.image} 
                         alt={item.title} 
@@ -100,11 +100,11 @@ export function CarouselSections() {
                     
                     {/* Content Section */}
                     <div className="p-3 flex-1 flex flex-col">
-                      <div className="flex items-start justify-between mb-1">
-                        <h3 className="font-bold text-sm text-[color:var(--color-on-surface)] truncate pr-2">
+                      <div className="flex flex-col items-start justify-between mb-1">
+                        <h3 className="font-bold text-sm text-[color:var(--color-on-surface)] line-clamp-2">
                           {item.title}
                         </h3>
-                        <div className="flex text-yellow-500 shrink-0">
+                        <div className="flex text-yellow-500 shrink-0 mt-1">
                           {[...Array(item.stars)].map((_, i) => (
                             <Star key={i} className="w-3 h-3 fill-current" />
                           ))}
@@ -113,20 +113,20 @@ export function CarouselSections() {
                       
                       <p className="text-[11px] text-[color:var(--color-outline)] mb-3">{item.location}</p>
                       
-                      <div className="flex items-end justify-between mt-auto">
+                      <div className="flex flex-col gap-2 mt-auto">
                         <div className="flex items-center gap-1.5">
-                          <div className="bg-[#20274d] text-white text-[11px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                          <div className="bg-[#20274d] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
                             {item.ratingScore}
                           </div>
-                          <div className="text-[10px] text-[color:var(--color-on-surface)]">
+                          <div className="text-[10px] text-[color:var(--color-on-surface)] truncate">
                             <span className="font-bold">{item.ratingText}</span>
                             <span className="text-[color:var(--color-outline)] mx-1">•</span>
                             <span className="text-[color:var(--color-outline)]">{item.usersCount}</span>
                           </div>
                         </div>
                         
-                        <div className="text-right">
-                          <div className="text-sm font-extrabold text-[color:var(--color-on-surface)]">
+                        <div className="w-full">
+                          <div className="text-[13px] font-extrabold text-[color:var(--color-on-surface)]">
                             {item.price}
                           </div>
                         </div>
@@ -298,11 +298,11 @@ export function CarouselSections() {
                     <Link
                       key={item.id}
                       href={item.link}
-                      className="w-[280px] shrink-0 snap-start group flex flex-col self-stretch"
+                      className="w-[380px] shrink-0 snap-start group flex flex-col self-stretch"
                     >
                       <div className="bg-[color:var(--color-surface-container)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/20 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
                         {/* Image Section */}
-                        <div className="relative h-[160px] w-full shrink-0 overflow-hidden">
+                        <div className="relative h-[200px] w-full shrink-0 overflow-hidden">
                           <img 
                             src={item.image} 
                             alt={item.title} 

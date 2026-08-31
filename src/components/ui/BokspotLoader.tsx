@@ -19,7 +19,7 @@ export function BokspotLoader({
   return (
     <div className={`flex flex-col items-center justify-center bg-[color:var(--color-background)] ${fullScreen ? 'min-h-screen fixed inset-0 z-[99999]' : 'h-full w-full py-16'} backdrop-blur-sm bg-opacity-95 dark:bg-opacity-90`}>
       
-      <div className="relative flex items-center justify-center w-40 h-40 mb-4">
+      <div className="relative flex items-center justify-center w-28 h-28 mb-4">
         
         {/* The Rotating Outer Ring */}
         <div 
@@ -33,22 +33,22 @@ export function BokspotLoader({
           
           {/* Top */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[color:var(--color-surface)] border border-[color:var(--color-outline-variant)]/30 rounded-full p-1.5 shadow-md" style={{ animation: `spin ${orbitDuration} linear infinite reverse` }}>
-            <Building2 size={16} className="text-[#0a3161]" />
+            <Building2 size={14} className="text-[#0a3161]" />
           </div>
           
           {/* Right */}
           <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 bg-[color:var(--color-surface)] border border-[color:var(--color-outline-variant)]/30 rounded-full p-1.5 shadow-md" style={{ animation: `spin ${orbitDuration} linear infinite reverse` }}>
-            <Utensils size={16} className="text-[#ff6325]" />
+            <Utensils size={14} className="text-[#ff6325]" />
           </div>
           
           {/* Bottom */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-[color:var(--color-surface)] border border-[color:var(--color-outline-variant)]/30 rounded-full p-1.5 shadow-md" style={{ animation: `spin ${orbitDuration} linear infinite reverse` }}>
-            <Ticket size={16} className="text-purple-500" />
+            <Ticket size={14} className="text-purple-500" />
           </div>
           
           {/* Left */}
           <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 bg-[color:var(--color-surface)] border border-[color:var(--color-outline-variant)]/30 rounded-full p-1.5 shadow-md" style={{ animation: `spin ${orbitDuration} linear infinite reverse` }}>
-            <Waves size={16} className="text-cyan-500" />
+            <Waves size={14} className="text-cyan-500" />
           </div>
 
         </div>
@@ -60,12 +60,8 @@ export function BokspotLoader({
           transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse", ease: "easeInOut" }}
           className="absolute inset-0 flex items-center justify-center z-10"
         >
-          <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 shadow-xl">
-            <Sparkles className="w-4 h-4 text-[#ff6325] fill-[#ff6325]" />
-            <span className="font-['Playfair_Display'] text-[15px] tracking-[0.1em] uppercase font-black flex items-center">
-              <span className="logo-text-bok text-[#0a3161]">BOK</span>
-              <span className="logo-text-spot text-[#ff6325]">SPOT</span>
-            </span>
+          <div className="flex items-center justify-center bg-white p-2 rounded-xl shadow-xl border border-slate-200">
+            <img src="/images/bs-logo.jpg" alt="BokSpot" className="w-10 h-10 object-contain" />
           </div>
         </motion.div>
       </div>
