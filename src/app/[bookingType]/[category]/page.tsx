@@ -1790,12 +1790,17 @@ export default function ProviderDiscoveryPage() {
                         merchantObj: mObj,
                         service: service,
                         categories: new Set(),
+                        groupImageUrl: null,
                         dist: (latitude !== null && longitude !== null && mObj.latitude && mObj.longitude)
                             ? `${calculateDistance(latitude, longitude, mObj.latitude, mObj.longitude)} km`
                             : '4.5 km',
                       };
                     }
-                    if (mObj.allCategories && Array.isArray(mObj.allCategories)) {
+                    if (service.name === '__BOKSPOT_GROUP__') {
+                      acc[mId].groupImageUrl = service.metadata?.mainImageUrl || service.imageUrl;
+                      acc[mId].groupName = service.category;
+                      acc[mId].groupCity = service.city;
+                    } else if (mObj.allCategories && Array.isArray(mObj.allCategories)) {
                       mObj.allCategories.forEach((cat: string) => acc[mId].categories.add(cat));
                     } else if (service.name) {
                        acc[mId].categories.add(service.name);
@@ -1817,20 +1822,24 @@ export default function ProviderDiscoveryPage() {
                             {/* Image Header */}
                             <div className={`relative bg-gray-100 shrink-0 ${viewMode === 'list' ? 'sm:w-64 h-48 sm:h-auto' : 'h-48 w-full'}`}>
                               <img 
-                                src={s?.metadata?.mainImageUrl || s?.imageUrl || s?.images?.[0] || m.images?.[0] || `https://images.unsplash.com/photo-1540039155732-68bebc6894b9?w=800&q=80`} 
+                                src={group.groupImageUrl || s?.metadata?.mainImageUrl || s?.imageUrl || s?.images?.[0] || m.images?.[0] || `https://images.unsplash.com/photo-1540039155732-68bebc6894b9?w=800&q=80`} 
                                 alt={m.name} 
                                 className="w-full h-full object-cover"
+                                onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1540039155732-68bebc6894b9?w=800&q=80'; }}
                               />
                             </div>
 
                             {/* Info Body */}
                             <div className="p-4 flex flex-col flex-1">
-                              <h3 className="font-bold text-[15px] text-[color:var(--color-on-surface)] truncate leading-tight mb-1">
-                                {m.name}
+                              <h3 className="font-bold text-[15px] text-[color:var(--color-on-surface)] truncate leading-tight mb-0.5">
+                                {group.groupName || m.name}
                               </h3>
+                              <p className="text-[10px] text-[color:var(--color-on-surface-variant)] uppercase tracking-wide font-bold mb-2">
+                                {m.name}
+                              </p>
                               
                               <div className="flex items-center text-[11px] font-medium text-[color:var(--color-on-surface-variant)] mb-3">
-                                <span className="truncate max-w-[140px]">{city || 'Chennai'}</span>
+                                <span className="truncate max-w-[140px]">{group.groupCity || city || 'Chennai'}</span>
                                 {group.dist && (
                                   <>
                                     <span className="mx-1.5 text-[color:var(--color-outline-variant)]">•</span>

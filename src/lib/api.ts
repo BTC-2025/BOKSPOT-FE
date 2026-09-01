@@ -226,6 +226,7 @@ export const api = {
             rating: srv.rating || 5,
             reviewCount: srv.reviewCount || 10,
             isFeatured: srv.isFeatured || false,
+            metadata: srv.metadata || {},
             merchant: srv.metadata?.merchantName || srv.merchant?.name || 'Merchant',
             merchantObj: srv.merchant ? {
               id: srv.merchant.id,
@@ -301,6 +302,7 @@ export const api = {
                 rating: srv.rating || 5,
                 reviewCount: srv.reviewCount || 10,
                 isFeatured: srv.isFeatured || false,
+                metadata: srv.metadata || {},
                 merchant: srv.metadata?.merchantName || srv.merchant?.name || 'Merchant',
                 merchantObj: srv.merchant ? {
                   ...srv.merchant,

@@ -13,7 +13,7 @@ export default function CheckoutPage() {
   const { user } = useUserStore();
 
   const [name, setName] = useState('User Name');
-  const [email, setEmail] = useState('user@example.com');
+  const [address, setAddress] = useState('123 Main St, City');
   const [phone, setPhone] = useState('+91 98765 43210');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (user) {
       setName(user.fullName || '');
-      setEmail(user.email || '');
+      setAddress(user.address || '');
       setPhone(user.phone || '');
     }
   }, [user]);
@@ -92,7 +92,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !phone.trim()) {
+    if (!name.trim() || !address.trim() || !phone.trim()) {
       setError('Please fill in all contact fields.');
       return;
     }
@@ -240,17 +240,6 @@ export default function CheckoutPage() {
                     
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
-                        <label className="block text-xs font-bold text-[color:var(--color-on-surface-variant)] mb-1.5 uppercase tracking-wider">Email Address</label>
-                        <input
-                          required
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="w-full rounded-xl border border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-dim)]/50 px-4 py-3 text-sm text-[color:var(--color-on-surface)] outline-none focus:border-[color:var(--color-primary)]/50 focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
-                          placeholder="e.g. john@example.com"
-                        />
-                      </div>
-                      <div>
                         <label className="block text-xs font-bold text-[color:var(--color-on-surface-variant)] mb-1.5 uppercase tracking-wider">Phone Number</label>
                         <input
                           required
@@ -259,6 +248,17 @@ export default function CheckoutPage() {
                           onChange={(e) => setPhone(e.target.value)}
                           className="w-full rounded-xl border border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-dim)]/50 px-4 py-3 text-sm text-[color:var(--color-on-surface)] outline-none focus:border-[color:var(--color-primary)]/50 focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                           placeholder="e.g. +91 98765 43210"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[color:var(--color-on-surface-variant)] mb-1.5 uppercase tracking-wider">Address</label>
+                        <input
+                          required
+                          type="text"
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          className="w-full rounded-xl border border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-dim)]/50 px-4 py-3 text-sm text-[color:var(--color-on-surface)] outline-none focus:border-[color:var(--color-primary)]/50 focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
+                          placeholder="e.g. 123 Main St, City"
                         />
                       </div>
                     </div>
@@ -328,7 +328,7 @@ export default function CheckoutPage() {
                       </>
                     ) : (
                       <>
-                        Pay & Confirm Booking
+                        Complete Booking
                       </>
                     )}
                   </button>

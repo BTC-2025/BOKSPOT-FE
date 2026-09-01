@@ -117,7 +117,10 @@ export default function VenueProfilePage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-6 md:py-8">
-        <h1 className="text-3xl md:text-4xl font-extrabold mb-6 text-[color:var(--color-on-surface)]">{venueName}</h1>
+        <div className="mb-6">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-[color:var(--color-on-surface)]">{venueName}</h1>
+          {address && <p className="text-sm font-medium text-[color:var(--color-on-surface-variant)] mt-1">{address}</p>}
+        </div>
 
         {/* Hero Image Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 rounded-3xl overflow-hidden mb-8 h-[300px] md:h-[400px]">
@@ -134,7 +137,7 @@ export default function VenueProfilePage() {
             <div className="relative cursor-pointer" onClick={() => { setCurrentImageIdx(3); setIsGalleryOpen(true); }}>
               <img src={galleryImages[3] || galleryImages[0] || `https://picsum.photos/seed/${merchantId}4/400/300`} alt="Detail" className="w-full h-full object-cover rounded-xl" />
             </div>
-            <div className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer" onClick={() => { setCurrentImageIdx(4); setIsGalleryOpen(true); }}>
+            <div className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer" onClick={() => { setCurrentImageIdx(0); setIsGalleryOpen(true); }}>
               <img src={galleryImages[4] || galleryImages[0] || `https://picsum.photos/seed/${merchantId}5/400/300`} alt="Detail" className="w-full h-full object-cover brightness-50" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <button className="bg-white text-black px-4 py-2 rounded-full font-bold text-sm shadow-lg hover:scale-105 transition-transform">Show all photos</button>
@@ -148,18 +151,34 @@ export default function VenueProfilePage() {
           <div className="flex-1 space-y-8">
             {/* Options Summary */}
             <div>
-              <h2 className="text-xl font-bold mb-4">{liveServices.length} Options available</h2>
-              <div className="flex flex-wrap gap-3">
-                {liveServices.map(svc => (
-                  <button 
-                    key={svc.id} 
-                    onClick={() => router.push(`/service/${svc.id}`)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-[color:var(--color-primary)]/30 bg-[color:var(--color-primary)]/5 text-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-on-primary)] transition-all cursor-pointer text-xs font-bold shadow-sm"
-                  >
-                    <CheckCircle2 size={14} />
-                    <span>{svc.name}</span>
-                  </button>
-                ))}
+              <h2 className="text-xl font-bold mb-4">
+                {liveServices.filter((svc: any) => svc.name !== '__BOKSPOT_GROUP__').length} Category available at {venueName}
+              </h2>
+              <div className="flex overflow-x-auto gap-4 pb-4 snap-x hide-scrollbar">
+                {liveServices.filter((svc: any) => svc.name !== '__BOKSPOT_GROUP__').length === 0 ? (
+                  <p className="text-sm text-[color:var(--color-on-surface-variant)] italic p-4">No specific categories have been added by the business yet.</p>
+                ) : (
+                  liveServices.filter((svc: any) => svc.name !== '__BOKSPOT_GROUP__').map(svc => (
+                    <div 
+                      key={svc.id} 
+                      onClick={() => router.push(`/service/${svc.id}`)}
+                      className="flex shrink-0 w-64 h-20 bg-[color:var(--color-surface)] border border-[color:var(--color-outline-variant)]/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer snap-start group"
+                    >
+                      <div className="w-20 shrink-0 bg-gray-100 relative">
+                        <img 
+                          src={svc.imageUrl || (svc.images && svc.images.length > 0 && svc.images[0] ? svc.images[0] : null) || `https://picsum.photos/seed/${svc.id}/200/200`} 
+                          alt={svc.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                        />
+                      </div>
+                      <div className="p-3 flex items-center justify-center flex-1">
+                        <h3 className="font-bold text-sm text-[color:var(--color-on-surface)] text-center leading-tight">
+                          {svc.name}
+                        </h3>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -236,6 +255,18 @@ export default function VenueProfilePage() {
                   </p>
                 </div>
               )}
+
+              {/* Policies */}
+              {finalMerchantObj.metadata?.policies && finalMerchantObj.metadata.policies.length > 0 && (
+                <div className="mt-8">
+                  <h2 className="text-xl font-bold mb-4">Policies</h2>
+                  <ul className="list-disc pl-5 space-y-2 text-sm text-[color:var(--color-on-surface-variant)] font-medium">
+                    {finalMerchantObj.metadata.policies.map((policy: string, idx: number) => (
+                      <li key={idx}>{policy}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 
@@ -252,7 +283,7 @@ export default function VenueProfilePage() {
               <div className="p-4 rounded-2xl border border-[color:var(--color-outline-variant)]/30 bg-[color:var(--color-surface-variant)]/10">
                 <h3 className="font-bold text-sm mb-1">{venueName} - {city || 'Chennai'}</h3>
                 <p className="text-xs text-[color:var(--color-on-surface-variant)] mb-3">{address || '168 Main Road, Block 1'}</p>
-                <div className="flex items-center gap-2 text-xs font-bold">
+                <div className="flex items-center gap-2 text-xs font-bold mb-4">
                   <Map size={14} /> View on Map
                   {/* Calculate distance dynamically */}
                   {(() => {
@@ -275,6 +306,16 @@ export default function VenueProfilePage() {
                     return null;
                   })()}
                 </div>
+                
+                {/* Around Property */}
+                <div className="pt-4 border-t border-[color:var(--color-outline-variant)]/30">
+                  <h4 className="text-xs font-bold text-[color:var(--color-on-surface)] mb-2 uppercase tracking-wider">Around Property</h4>
+                  <ul className="space-y-1 text-xs text-[color:var(--color-on-surface-variant)] font-medium">
+                    <li className="flex justify-between"><span>Hospital</span> <span>0.5 km</span></li>
+                    <li className="flex justify-between"><span>Temple</span> <span>0.2 km</span></li>
+                    <li className="flex justify-between"><span>Supermarket</span> <span>1.0 km</span></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -288,13 +329,13 @@ export default function VenueProfilePage() {
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsModalOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999]"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-[color:var(--color-surface)] rounded-3xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-[85vh]"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-[color:var(--color-surface)] rounded-3xl shadow-2xl z-[99999] overflow-hidden flex flex-col max-h-[85vh]"
             >
               <div className="flex items-center justify-between p-6 border-b border-[color:var(--color-outline-variant)]/20">
                 <h2 className="text-2xl font-extrabold">Select Category</h2>
@@ -305,7 +346,7 @@ export default function VenueProfilePage() {
               
               <div className="p-6 overflow-y-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {liveServices.map(svc => {
+                  {liveServices.filter((svc: any) => svc.name !== '__BOKSPOT_GROUP__').map(svc => {
                      const numOptions = svc.rawConfig?.metadata?.listings ? svc.rawConfig.metadata.listings.length : 1;
                      return (
                        <button
@@ -313,11 +354,16 @@ export default function VenueProfilePage() {
                          onClick={() => router.push(`/service/${svc.id}`)}
                          className="flex flex-col text-left p-6 rounded-2xl border border-[color:var(--color-outline-variant)]/30 hover:border-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/5 transition-all group"
                        >
-                         <h3 className="text-lg font-bold mb-2 group-hover:text-[color:var(--color-primary)] transition-colors">{svc.name}</h3>
+                         <h3 className="text-lg font-bold mb-2 group-hover:text-[color:var(--color-primary)] transition-colors">
+                           {svc.name}
+                         </h3>
                          <p className="text-sm text-[color:var(--color-on-surface-variant)] font-medium">{numOptions} option{numOptions !== 1 ? 's' : ''}</p>
                        </button>
                      );
                   })}
+                  {liveServices.filter((svc: any) => svc.name !== '__BOKSPOT_GROUP__').length === 0 && (
+                    <p className="text-sm text-[color:var(--color-on-surface-variant)] italic p-4 col-span-2 text-center">No specific categories have been added by the business yet.</p>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -332,7 +378,7 @@ export default function VenueProfilePage() {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col"
+            className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-xl flex flex-col"
           >
             {/* Gallery Header */}
             <div className="flex items-center justify-between p-4 md:p-6 text-white absolute top-0 left-0 right-0 z-10">
