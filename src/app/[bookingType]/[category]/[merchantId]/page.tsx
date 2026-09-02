@@ -166,7 +166,7 @@ export default function VenueProfilePage() {
                     >
                       <div className="w-20 shrink-0 bg-gray-100 relative">
                         <img 
-                          src={svc.imageUrl || (svc.images && svc.images.length > 0 && svc.images[0] ? svc.images[0] : null) || `https://picsum.photos/seed/${svc.id}/200/200`} 
+                          src={svc.imageUrl || svc.image || svc.metadata?.mainImageUrl || svc.metadata?.images?.[0] || (svc.images && svc.images.length > 0 && svc.images[0] ? svc.images[0] : null) || `https://picsum.photos/seed/${svc.id}/200/200`} 
                           alt={svc.name} 
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
                         />

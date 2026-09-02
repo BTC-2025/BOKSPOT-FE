@@ -81,7 +81,7 @@ const SERVICE_IMAGE_MAP: Record<string, string> = {
   'Gym / Yoga Slot Booking': 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop&q=80',
   'Doctor Appointment': 'https://images.unsplash.com/photo-1638202993928-7267aad84c31?w=600&auto=format&fit=crop&q=80',
   'Electrician Booking': 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80',
-  'Plumber Booking': 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&auto=format&fit=crop&q=80',
+  'Plumber Booking': '/images/plumbing_category.jpg',
   'Cleaning Service': 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&auto=format&fit=crop&q=80',
   'Technician Service': 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=600&auto=format&fit=crop&q=80',
   'Studio Booking': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&auto=format&fit=crop&q=80',
@@ -95,7 +95,7 @@ const SERVICE_IMAGE_MAP: Record<string, string> = {
   
   // Religious
   'Temple Darshan Booking': 'https://images.unsplash.com/photo-1561361058-c24cecae35ca?w=600&auto=format&fit=crop&q=80',
-  'Pooja Slot Booking': 'https://images.unsplash.com/photo-1604169541334-0dcb65b03f0b?w=600&auto=format&fit=crop&q=80',
+  'Pooja Slot Booking': '/images/pooja_category.jpg',
   'Pilgrimage Packages': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=600&auto=format&fit=crop&q=80',
   
   // Equipment Rentals

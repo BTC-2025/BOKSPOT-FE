@@ -1,10 +1,9 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { Shield, CreditCard, Clock, MapPin, ArrowLeft, ChevronRight, AlertCircle, Sparkles } from 'lucide-react';
-import { useBookingFlowStore, useUserStore } from '../../../lib/store';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Shield, CreditCard, Clock, MapPin, ArrowLeft, ChevronRight, AlertCircle, Check, User, Phone, Home, Bed, Users } from 'lucide-react';
+import { useBookingFlowStore, useUserStore } from '../../../lib/store';
 import { useRouter } from 'next/navigation';
 
 export default function CheckoutPage() {
@@ -12,29 +11,26 @@ export default function CheckoutPage() {
   const { selectedService, selectedSlot, addBooking, notes } = useBookingFlowStore();
   const { user } = useUserStore();
 
-  const [name, setName] = useState('User Name');
-  const [address, setAddress] = useState('123 Main St, City');
-  const [phone, setPhone] = useState('+91 98765 43210');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
+  const [timeLeft, setTimeLeft] = useState(585);
+  const [selectedAddons, setSelectedAddons] = useState<number[]>([]);
 
-  // Pre-populate details from logged in user
   useEffect(() => {
     if (user) {
       setName(user.fullName || '');
-      setAddress(user.address || '');
       setPhone(user.phone || '');
+      setEmail(user.email || '');
     }
   }, [user]);
 
-  // Time remaining count down state
-  const [timeLeft, setTimeLeft] = useState(585); // 9 mins 45 secs
-
   useEffect(() => {
     if (!timeLeft) return;
-    const interval = setInterval(() => {
-      setTimeLeft(t => t - 1);
-    }, 1000);
+    const interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
     return () => clearInterval(interval);
   }, [timeLeft]);
 
@@ -46,28 +42,18 @@ export default function CheckoutPage() {
 
   if (!selectedService || !selectedSlot) {
     return (
-      <main className="min-h-screen bg-[var(--color-background)] text-[var(--color-on-surface)] transition-colors duration-300">
-        <nav className="fixed top-0 left-0 right-0 z-50 custom-navbar border-b border-[var(--color-outline-variant)]/30 backdrop-blur-xl">
-          <div className="container-main flex items-center justify-between h-16 px-4 md:px-8">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="btn-ghost p-2">
-                <ArrowLeft size={20} />
-              </Link>
-              <div className="flex items-center gap-2 text-sm text-[var(--color-outline)]">
-                <Link href="/" className="hover:text-[var(--color-on-surface)] transition-colors">Home</Link>
-                <ChevronRight size={14} />
-                <span className="text-[var(--color-on-surface)]">Checkout</span>
-              </div>
-            </div>
-          </div>
-        </nav>
-        <div className="pt-32 flex flex-col items-center justify-center py-20 text-center px-4">
-          <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+      <main className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm px-4 py-4 flex items-center gap-3">
+          <Link href="/" className="p-2 rounded-full hover:bg-gray-100"><ArrowLeft size={20} /></Link>
+          <h1 className="font-extrabold text-lg">Checkout</h1>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center py-20 text-center px-4">
+          <div className="w-16 h-16 rounded-full bg-red-50 border border-red-200 flex items-center justify-center mb-4">
             <AlertCircle className="h-8 w-8 text-red-500" />
           </div>
-          <h2 className="text-xl font-bold text-[color:var(--color-on-surface)]">No Active Booking Session</h2>
-          <p className="text-sm text-[color:var(--color-on-surface-variant)] mt-1.5 max-w-sm">You haven't selected a service or date/time slot. Please browse services to start booking.</p>
-          <Link href="/search" className="mt-6 rounded-xl bg-[color:var(--color-primary)] px-5 py-3 text-sm font-bold text-[color:var(--color-on-primary)] transition-transform hover:scale-[1.02] shadow-lg shadow-[color:var(--color-primary)]/10">
+          <h2 className="text-xl font-bold text-gray-900">No Active Booking Session</h2>
+          <p className="text-sm text-gray-500 mt-2 max-w-sm">Please select a service and time slot before proceeding to checkout.</p>
+          <Link href="/search" className="mt-6 rounded-xl bg-[color:var(--color-primary)] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[color:var(--color-primary)]/20">
             Browse Services
           </Link>
         </div>
@@ -75,52 +61,43 @@ export default function CheckoutPage() {
     );
   }
 
-  const price = selectedService.price;
+  const listing = selectedService.selectedListing;
+  const meta = listing?.metadata || {};
+  const availableAddons = meta.addons || [];
+  const addonsTotal = selectedAddons.reduce((sum: number, idx: number) => sum + (availableAddons[idx]?.price || 0), 0);
+  
+  const basePrice = listing?.price || selectedService.price || 0;
   const platformFee = 29;
-  const gst = Math.round(price * 0.18);
-  const total = price + platformFee + gst;
+  const gst = Math.round((basePrice + addonsTotal) * 0.18);
+  const total = basePrice + addonsTotal + platformFee + gst;
 
-  // Format date display
   const formatDate = (dateStr: string) => {
     try {
-      const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
-      return new Date(dateStr).toLocaleDateString('en', options);
-    } catch {
-      return dateStr;
-    }
+      return new Date(dateStr).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    } catch { return dateStr; }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !address.trim() || !phone.trim()) {
-      setError('Please fill in all contact fields.');
+    if (!name.trim() || !phone.trim()) {
+      setError('Please fill in your name and phone number.');
       return;
     }
     setError(null);
     setIsSubmitting(true);
 
-    // Simulate Payment processing
     setTimeout(() => {
-      const generateBookingRef = () => {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let ref = 'BK-';
-        for (let i = 0; i < 6; i++) {
-          ref += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return ref;
-      };
-
-      const ref = generateBookingRef();
-      const merchantName = selectedService.merchant?.name || selectedService.merchant || '';
-      const categoryName = selectedService.category?.name || selectedService.category || 'Default';
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let ref = 'BK-';
+      for (let i = 0; i < 6; i++) ref += chars.charAt(Math.floor(Math.random() * chars.length));
 
       const newBooking = {
         id: String(Date.now()),
-        ref: ref,
+        ref,
         serviceId: selectedService.id,
-        serviceName: selectedService.name,
-        merchantName: merchantName,
-        category: categoryName,
+        serviceName: listing?.name || selectedService.name,
+        merchantName: selectedService.merchant?.name || selectedService.merchant || '',
+        category: selectedService.category?.name || selectedService.category || 'Default',
         date: selectedSlot.date,
         time: selectedSlot.time,
         amount: total,
@@ -135,220 +112,311 @@ export default function CheckoutPage() {
       };
 
       addBooking(newBooking);
-
-      // Sync booking with NestJS backend so that port 3600 (Admin) can capture it
-      fetch('/api/v1/bookings/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBooking),
-      })
-        .then(res => res.json())
-        .then(data => console.log('Successfully synced booking to backend:', data))
-        .catch(err => console.error('Error syncing booking to backend:', err));
-
       setIsSubmitting(false);
       router.push(`/booking/success?ref=${ref}`);
     }, 1800);
   };
 
   return (
-    <main className="min-h-screen bg-[color:var(--color-background)] text-[color:var(--color-on-surface)] transition-colors duration-300">
-      {/* Sticky header */}
-      <nav className="fixed top-0 left-0 right-0 z-50 custom-navbar border-b border-[color:var(--color-outline-variant)]/30 backdrop-blur-xl">
-        <div className="container-main flex items-center justify-between h-16 px-4 md:px-8">
-          <div className="flex items-center gap-4">
-            <Link href={`/service/${selectedService.id}`} className="btn-ghost p-2">
-              <ArrowLeft size={20} />
-            </Link>
-            <div className="flex items-center gap-2 text-sm text-[color:var(--color-outline)]">
-              <Link href="/" className="hover:text-[color:var(--color-on-surface)] transition-colors">Home</Link>
-              <ChevronRight size={14} />
-              <Link href="/search" className="hover:text-[color:var(--color-on-surface)] transition-colors">Search</Link>
-              <ChevronRight size={14} />
-              <Link href={`/service/${selectedService.id}`} className="hover:text-[color:var(--color-on-surface)] transition-colors">Details</Link>
-              <ChevronRight size={14} />
-              <span className="text-[color:var(--color-on-surface)]">Checkout</span>
-            </div>
+    <main className="min-h-screen bg-gray-50 pb-24">
+      {/* Header */}
+      <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center gap-3">
+          <button onClick={() => router.back()} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="font-extrabold text-lg">Complete Your Booking</h1>
+            <p className="text-xs text-gray-500 font-medium">{selectedService.merchant}</p>
           </div>
+          {timeLeft > 0 && (
+            <div className="ml-auto flex items-center gap-1.5 text-xs font-bold bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-full">
+              <Clock size={12} /><span>Expires in {formatTime(timeLeft)}</span>
+            </div>
+          )}
         </div>
-      </nav>
+      </div>
 
-      <div className="pt-16">
-        <div className="container-main py-8 px-4 md:px-8">
-          <div className="max-w-5xl mx-auto">
-            <h1 className="text-[24px] md:text-[28px] font-black tracking-tight mb-6">Booking Checkout</h1>
-            
-            <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-5 items-start">
-              <div className="lg:col-span-3 space-y-4">
-                {/* Service Details summary */}
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl border border-[color:var(--color-outline-variant)]/30 bg-[color:var(--color-surface-container)]/80 p-6 card-glass">
-                  <h2 className="font-bold text-lg mb-4 text-[color:var(--color-on-surface)] flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-[color:var(--color-primary)]" /> Booking Details
-                  </h2>
-                  <div className="space-y-3.5 text-sm">
-                    <div className="flex justify-between items-center py-0.5 border-b border-[color:var(--color-outline-variant)]/20 pb-2">
-                      <span className="text-[color:var(--color-on-surface-variant)]">Service</span>
-                      <span className="font-bold text-[color:var(--color-on-surface)]">{selectedService.name}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-0.5 border-b border-[color:var(--color-outline-variant)]/20 pb-2">
-                      <span className="text-[color:var(--color-on-surface-variant)]">Merchant</span>
-                      <span className="font-semibold text-[color:var(--color-on-surface)]">{selectedService.merchant}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-0.5 border-b border-[color:var(--color-outline-variant)]/20 pb-2">
-                      <span className="text-[color:var(--color-on-surface-variant)]">Date</span>
-                      <span className="font-semibold text-[color:var(--color-on-surface)]">{formatDate(selectedSlot.date)}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-0.5 border-b border-[color:var(--color-outline-variant)]/20 pb-2">
-                      <span className="text-[color:var(--color-on-surface-variant)]">Time Slot</span>
-                      <span className="font-bold text-[color:var(--color-primary)] bg-[color:var(--color-primary)]/10 px-2.5 py-1 rounded-lg border border-[color:var(--color-primary)]/20">{selectedSlot.time}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-0.5 border-b border-[color:var(--color-outline-variant)]/20 pb-2">
-                      <span className="text-[color:var(--color-on-surface-variant)]">Duration</span>
-                      <span className="font-semibold text-[color:var(--color-on-surface)]">{selectedService.duration} minutes</span>
-                    </div>
-                    <div className="flex justify-between items-center py-0.5">
-                      <span className="text-[color:var(--color-on-surface-variant)]">Venue Address</span>
-                      <span className="font-semibold text-[color:var(--color-on-surface)] flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-[color:var(--color-primary)]" /> {selectedService.city}</span>
-                    </div>
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-5 items-start">
+          {/* LEFT COLUMN */}
+          <div className="lg:col-span-3 space-y-4">
+
+            {/* ── Booking Summary Card ── */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-gray-100">
+                <h2 className="font-extrabold text-base text-gray-900">📋 Booking Summary</h2>
+              </div>
+              <div className="flex gap-4 p-5">
+                {(listing?.imageUrl || listing?.image || selectedService.images?.[0]) && (
+                  <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                    <img
+                      src={listing?.imageUrl || listing?.image || selectedService.images?.[0]}
+                      alt={listing?.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                </motion.div>
+                )}
+                <div className="flex-1 space-y-2">
+                  <h3 className="font-extrabold text-lg text-gray-900">{listing?.name || selectedService.name}</h3>
+                  <p className="text-sm text-gray-500 font-medium">{selectedService.name} · {selectedService.merchant}</p>
 
-                {/* User Input Form */}
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                  className="rounded-2xl border border-[color:var(--color-outline-variant)]/30 bg-[color:var(--color-surface-container)]/80 p-6 card-glass">
-                  <h2 className="font-bold text-lg mb-4 text-[color:var(--color-on-surface)]">Contact Information</h2>
-                  
-                  {error && (
-                    <div className="mb-4 rounded-xl bg-red-500/10 border border-red-500/25 p-3.5 text-xs font-semibold text-red-500 flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 shrink-0" /> {error}
-                    </div>
-                  )}
+                  {/* Dynamic Details */}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {meta.roomType && (
+                      <span className="text-xs font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100 flex items-center gap-1">
+                        <Bed size={11} />{meta.roomType}
+                      </span>
+                    )}
+                    {meta.maxGuests && (
+                      <span className="text-xs font-bold px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full border border-purple-100 flex items-center gap-1">
+                        <Users size={11} />Max {meta.maxGuests} guests
+                      </span>
+                    )}
+                    {meta.checkInTime && (
+                      <span className="text-xs font-bold px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full border border-amber-100 flex items-center gap-1">
+                        <Clock size={11} />Check-in: {meta.checkInTime}
+                      </span>
+                    )}
+                    {meta.checkOutTime && (
+                      <span className="text-xs font-bold px-2.5 py-1 bg-orange-50 text-orange-700 rounded-full border border-orange-100 flex items-center gap-1">
+                        <Clock size={11} />Check-out: {meta.checkOutTime}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Add-ons Section */}
+              {availableAddons.length > 0 && (
+                <div className="p-5 border-t border-gray-100 bg-gray-50/50">
+                  <h3 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Add-ons & Extras</h3>
+                  <div className="space-y-2">
+                    {availableAddons.map((addon: any, idx: number) => {
+                      const isSelected = selectedAddons.includes(idx);
+                      return (
+                        <label key={idx} className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${isSelected ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/5' : 'border-gray-200 bg-white hover:border-gray-300'}`}>
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${isSelected ? 'bg-[color:var(--color-primary)] border-[color:var(--color-primary)]' : 'border-gray-300 bg-white'}`}>
+                              {isSelected && <Check size={14} className="text-white" />}
+                            </div>
+                            <span className={`text-sm font-bold ${isSelected ? 'text-[color:var(--color-primary)]' : 'text-gray-700'}`}>{addon.name}</span>
+                          </div>
+                          <span className="text-sm font-extrabold text-gray-900">+₹{addon.price}</span>
+                          <input type="checkbox" className="hidden" checked={isSelected} onChange={() => {
+                            if (isSelected) setSelectedAddons(selectedAddons.filter(i => i !== idx));
+                            else setSelectedAddons([...selectedAddons, idx]);
+                          }} />
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-[color:var(--color-on-surface-variant)] mb-1.5 uppercase tracking-wider">Full Name</label>
+              {/* Date & Time */}
+              <div className="px-5 pb-5 grid grid-cols-2 gap-3">
+                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1">Date</p>
+                  <p className="text-sm font-extrabold text-gray-900 leading-tight">{formatDate(selectedSlot.date)}</p>
+                </div>
+                <div className="bg-[color:var(--color-primary)]/5 rounded-xl p-3 border border-[color:var(--color-primary)]/20">
+                  <p className="text-[10px] font-black text-[color:var(--color-primary)] uppercase tracking-wider mb-1">Time Slot</p>
+                  <p className="text-sm font-extrabold text-gray-900">{selectedSlot.time}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── User Details ── */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+              <h2 className="font-extrabold text-base text-gray-900 mb-4 flex items-center gap-2">
+                <User size={18} className="text-[color:var(--color-primary)]" /> Your Details
+              </h2>
+
+              {error && (
+                <div className="mb-4 rounded-xl bg-red-50 border border-red-200 p-3 text-xs font-semibold text-red-600 flex items-center gap-2">
+                  <AlertCircle size={14} /> {error}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-black text-gray-500 mb-1.5 uppercase tracking-wider">Full Name *</label>
+                  <div className="relative">
+                    <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      required
+                      type="text"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder="e.g. Vinoth Kumar"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-[color:var(--color-primary)] focus:bg-white focus:ring-2 focus:ring-[color:var(--color-primary)]/20 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-black text-gray-500 mb-1.5 uppercase tracking-wider">Phone Number *</label>
+                    <div className="relative">
+                      <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input
                         required
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full rounded-xl border border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-dim)]/50 px-4 py-3 text-sm text-[color:var(--color-on-surface)] outline-none focus:border-[color:var(--color-primary)]/50 focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
-                        placeholder="e.g. John Doe"
+                        type="tel"
+                        value={phone}
+                        onChange={e => setPhone(e.target.value)}
+                        placeholder="+91 98765 43210"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-[color:var(--color-primary)] focus:bg-white focus:ring-2 focus:ring-[color:var(--color-primary)]/20 transition-all"
                       />
                     </div>
-                    
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="block text-xs font-bold text-[color:var(--color-on-surface-variant)] mb-1.5 uppercase tracking-wider">Phone Number</label>
-                        <input
-                          required
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full rounded-xl border border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-dim)]/50 px-4 py-3 text-sm text-[color:var(--color-on-surface)] outline-none focus:border-[color:var(--color-primary)]/50 focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
-                          placeholder="e.g. +91 98765 43210"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-[color:var(--color-on-surface-variant)] mb-1.5 uppercase tracking-wider">Address</label>
-                        <input
-                          required
-                          type="text"
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                          className="w-full rounded-xl border border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-dim)]/50 px-4 py-3 text-sm text-[color:var(--color-on-surface)] outline-none focus:border-[color:var(--color-primary)]/50 focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
-                          placeholder="e.g. 123 Main St, City"
-                        />
-                      </div>
-                    </div>
                   </div>
-                </motion.div>
-
-                {/* Payment summary */}
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                  className="rounded-2xl border border-[color:var(--color-outline-variant)]/30 bg-[color:var(--color-surface-container)]/80 p-6 card-glass">
-                  <h2 className="font-bold text-lg mb-4 flex items-center gap-2 text-[color:var(--color-on-surface)]">
-                    <CreditCard className="h-5 w-5 text-[color:var(--color-primary)]" /> Payment Options
-                  </h2>
-                  <div className="rounded-xl border border-[color:var(--color-primary)]/30 bg-[color:var(--color-primary)]/8 p-4 flex items-center gap-3">
-                    <div className="h-10 w-14 rounded-lg bg-[color:var(--color-surface-container-highest)] border border-[color:var(--color-outline-variant)]/40 flex items-center justify-center text-[color:var(--color-primary)] font-bold text-xs tracking-wider shadow">
-                      UPI/CARD
-                    </div>
-                    <div>
-                      <div className="font-semibold text-sm text-[color:var(--color-on-surface)]">Direct Razorpay Portal</div>
-                      <div className="text-xs text-[color:var(--color-on-surface-variant)] mt-0.5">UPI, Cards, Net Banking, and Wallets supported</div>
-                    </div>
+                  <div>
+                    <label className="block text-xs font-black text-gray-500 mb-1.5 uppercase tracking-wider">Email (optional)</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="you@email.com"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-[color:var(--color-primary)] focus:bg-white focus:ring-2 focus:ring-[color:var(--color-primary)]/20 transition-all"
+                    />
                   </div>
-                  <div className="mt-4 flex items-center gap-2 text-xs text-[color:var(--color-outline)]">
-                    <Shield className="h-4 w-4 text-green-500 shrink-0" /> Secure 256-bit SSL encrypted checkout platform
-                  </div>
-                </motion.div>
+                </div>
               </div>
+            </div>
 
-              {/* Sidebar summary */}
-              <div className="lg:col-span-2">
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                  className="sticky top-20 rounded-2xl border border-[color:var(--color-outline-variant)]/30 bg-[color:var(--color-surface-container)]/80 p-6 card-glass">
-                  <h2 className="font-bold text-lg mb-4 text-[color:var(--color-on-surface)]">Price Summary</h2>
-                  
-                  <div className="space-y-3.5 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[color:var(--color-on-surface-variant)]">Service Fee</span>
-                      <span className="font-semibold text-[color:var(--color-on-surface)]">₹{price}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[color:var(--color-on-surface-variant)]">Platform Fee</span>
-                      <span className="font-semibold text-[color:var(--color-on-surface)]">₹{platformFee}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[color:var(--color-on-surface-variant)]">GST (18%)</span>
-                      <span className="font-semibold text-[color:var(--color-on-surface)]">₹{gst}</span>
-                    </div>
-                    <hr className="border-[color:var(--color-outline-variant)]/20 my-1" />
-                    <div className="flex justify-between items-center font-black text-lg py-1">
-                      <span className="text-[color:var(--color-on-surface)]">Total Amount</span>
-                      <span className="text-[color:var(--color-primary)] text-xl">₹{total}</span>
-                    </div>
-                  </div>
+            {/* ── Payment Method ── */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+              <h2 className="font-extrabold text-base text-gray-900 mb-4 flex items-center gap-2">
+                <CreditCard size={18} className="text-[color:var(--color-primary)]" /> Payment Method
+              </h2>
 
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`mt-6 flex w-full items-center justify-center gap-2.5 rounded-xl py-3.5 font-bold text-[color:var(--color-on-primary)] transition-all shadow-lg ${
-                      isSubmitting 
-                        ? 'bg-gray-500 cursor-not-allowed opacity-80' 
-                        : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-indigo-500/25 active:scale-[0.98]'
+              <div className="space-y-2">
+                {[
+                  { id: 'upi', label: 'UPI / QR Code', sub: 'Google Pay, PhonePe, Paytm', icon: '📱' },
+                  { id: 'card', label: 'Credit / Debit Card', sub: 'Visa, Mastercard, RuPay', icon: '💳' },
+                  { id: 'netbanking', label: 'Net Banking', sub: 'All major banks supported', icon: '🏦' },
+                ].map(method => (
+                  <label
+                    key={method.id}
+                    className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      paymentMethod === method.id
+                        ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/5'
+                        : 'border-gray-100 hover:border-gray-200'
                     }`}
                   >
-                    {isSubmitting ? (
-                      <>
-                        <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
-                        Processing Payment...
-                      </>
-                    ) : (
-                      <>
-                        Complete Booking
-                      </>
-                    )}
-                  </button>
-
-                  {timeLeft > 0 ? (
-                    <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-[color:var(--color-outline)] bg-[color:var(--color-surface-dim)]/40 py-2 rounded-lg border border-[color:var(--color-outline-variant)]/10">
-                      <Clock className="h-3.5 w-3.5 text-[color:var(--color-primary)]" />
-                      <span>Slot hold expires in <span className="font-bold text-[color:var(--color-on-surface)] font-mono">{formatTime(timeLeft)}</span></span>
+                    <input
+                      type="radio"
+                      name="payment"
+                      value={method.id}
+                      checked={paymentMethod === method.id}
+                      onChange={() => setPaymentMethod(method.id as any)}
+                      className="hidden"
+                    />
+                    <span className="text-2xl">{method.icon}</span>
+                    <div className="flex-1">
+                      <p className="font-bold text-sm text-gray-900">{method.label}</p>
+                      <p className="text-xs text-gray-500">{method.sub}</p>
                     </div>
-                  ) : (
-                    <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-red-500 bg-red-500/10 py-2 rounded-lg border border-red-500/20">
-                      <AlertCircle className="h-3.5 w-3.5" />
-                      <span>Slot hold expired. Please re-select a slot.</span>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      paymentMethod === method.id ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary)]' : 'border-gray-300'
+                    }`}>
+                      {paymentMethod === method.id && <div className="w-2 h-2 rounded-full bg-white" />}
                     </div>
-                  )}
-                </motion.div>
+                  </label>
+                ))}
               </div>
-            </form>
+
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-gray-400">
+                <Shield size={13} className="text-green-500" /> 256-bit SSL encrypted · Powered by Razorpay
+              </div>
+            </div>
           </div>
-        </div>
+
+          {/* RIGHT COLUMN: Price Summary */}
+          <div className="lg:col-span-2">
+            <div className="sticky top-20 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-gray-100">
+                <h2 className="font-extrabold text-base text-gray-900">💰 Price Details</h2>
+              </div>
+
+              <div className="p-5 space-y-3.5">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600 font-medium">Base Price</span>
+                  <span className="font-bold text-gray-900">₹{basePrice.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600 font-medium">Platform Fee</span>
+                  <span className="font-bold text-gray-900">₹{platformFee}</span>
+                </div>
+                {addonsTotal > 0 && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-[color:var(--color-primary)] font-bold">Add-ons Total</span>
+                    <span className="font-bold text-[color:var(--color-primary)]">+₹{addonsTotal.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center text-sm">
+                  <div>
+                    <span className="text-gray-600 font-medium">GST</span>
+                    <span className="text-xs text-gray-400 ml-1">(18%)</span>
+                  </div>
+                  <span className="font-bold text-gray-900">₹{gst.toLocaleString()}</span>
+                </div>
+
+                <div className="border-t border-gray-100 pt-3 mt-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-extrabold text-gray-900 text-base">Total Amount</span>
+                    <span className="font-black text-2xl text-[color:var(--color-primary)]">₹{total.toLocaleString()}</span>
+                  </div>
+                  <p className="text-xs text-gray-400 text-right mt-0.5">Inclusive of all taxes</p>
+                </div>
+              </div>
+
+              <div className="px-5 pb-5">
+                <button
+                  type="submit"
+                  disabled={isSubmitting || timeLeft === 0}
+                  className={`w-full py-4 rounded-xl font-extrabold text-base transition-all shadow-lg flex items-center justify-center gap-2 ${
+                    isSubmitting
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : timeLeft === 0
+                      ? 'bg-red-100 text-red-400 cursor-not-allowed'
+                      : 'bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/90 text-white shadow-[color:var(--color-primary)]/30 hover:scale-[1.02] active:scale-[0.98]'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...</>
+                  ) : timeLeft === 0 ? (
+                    'Session Expired'
+                  ) : (
+                    <><Shield size={18} /> Confirm & Pay ₹{total.toLocaleString()}</>
+                  )}
+                </button>
+
+                {timeLeft > 0 ? (
+                  <p className="text-center text-xs text-gray-400 mt-3 flex items-center justify-center gap-1">
+                    <Clock size={11} />Slot held for <span className="font-bold text-amber-600 font-mono">{formatTime(timeLeft)}</span>
+                  </p>
+                ) : (
+                  <p className="text-center text-xs text-red-500 mt-3 flex items-center justify-center gap-1">
+                    <AlertCircle size={11} />Slot expired. Go back and re-select.
+                  </p>
+                )}
+              </div>
+
+              {/* What's included */}
+              <div className="px-5 pb-5 pt-0">
+                <div className="bg-gray-50 rounded-xl p-4 space-y-2 border border-gray-100">
+                  <p className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2">Included</p>
+                  {['Instant booking confirmation', 'Cancel up to 24hrs before', 'Customer support 24/7'].map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs text-gray-600 font-medium">
+                      <Check size={13} className="text-green-500 shrink-0" />{item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
     </main>
   );
