@@ -1800,9 +1800,11 @@ export default function ProviderDiscoveryPage() {
                       acc[mId].groupImageUrl = service.metadata?.mainImageUrl || service.imageUrl;
                       acc[mId].groupName = service.category;
                       acc[mId].groupCity = service.city;
-                    } else if (mObj.allCategories && Array.isArray(mObj.allCategories)) {
+                    } 
+                    
+                    if (mObj.allCategories && Array.isArray(mObj.allCategories)) {
                       mObj.allCategories.forEach((cat: string) => acc[mId].categories.add(cat));
-                    } else if (service.name) {
+                    } else if (service.name && service.name !== '__BOKSPOT_GROUP__') {
                        acc[mId].categories.add(service.name);
                     }
                     return acc;
@@ -1831,13 +1833,9 @@ export default function ProviderDiscoveryPage() {
 
                             {/* Info Body */}
                             <div className="p-4 flex flex-col flex-1">
-                              <h3 className="font-bold text-[15px] text-[color:var(--color-on-surface)] truncate leading-tight mb-0.5">
-                                {group.groupName || m.name}
-                              </h3>
-                              <p className="text-[10px] text-[color:var(--color-on-surface-variant)] uppercase tracking-wide font-bold mb-2">
+                              <h3 className="font-bold text-[16px] text-[color:var(--color-on-surface)] truncate leading-tight mb-1">
                                 {m.name}
-                              </p>
-                              
+                              </h3>
                               <div className="flex items-center text-[11px] font-medium text-[color:var(--color-on-surface-variant)] mb-3">
                                 <span className="truncate max-w-[140px]">{group.groupCity || city || 'Chennai'}</span>
                                 {group.dist && (
@@ -1852,7 +1850,14 @@ export default function ProviderDiscoveryPage() {
                               {chips.length > 0 && (
                                 <div className="flex flex-wrap gap-1.5 mt-auto">
                                   {chips.map((chip: any, idx: number) => (
-                                    <span key={idx} className="bg-[color:var(--color-surface-container)] border border-[color:var(--color-outline-variant)]/40 px-2 py-0.5 rounded text-[9px] font-semibold text-[color:var(--color-on-surface)]">
+                                    <span 
+                                      key={idx} 
+                                      className={`px-2 py-0.5 rounded text-[9px] font-semibold border transition-colors ${
+                                        chip === categoryName 
+                                          ? 'bg-[color:var(--color-primary)] border-[color:var(--color-primary)] text-[#0C0C10]' 
+                                          : 'bg-[color:var(--color-surface-container)] border-[color:var(--color-outline-variant)]/40 text-[color:var(--color-on-surface)]'
+                                      }`}
+                                    >
                                       {chip}
                                     </span>
                                   ))}

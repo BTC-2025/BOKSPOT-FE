@@ -107,7 +107,6 @@ export default function DistrictServiceDetailPage() {
     }
   });
   let slotsToDisplay = Array.from(availableSlotsMap.values());
-  if (slotsToDisplay.length === 0) slotsToDisplay = DUMMY_SLOTS;
 
   const archetype = service.metadata?.archetype || service.rawConfig?.metadata?.archetype;
   const catLower = (service.category?.name || service.category || '').toLowerCase();
@@ -167,30 +166,34 @@ export default function DistrictServiceDetailPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
           <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Time Slots Available</h2>
           <div className="flex flex-wrap gap-2">
-            {slotsToDisplay.map(slot => {
-              const isSelected = selectedSlotId === slot.id;
-              return (
-                <button
-                  key={slot.id}
-                  onClick={() => slot.available && setSelectedSlotId(isSelected ? null : slot.id)}
-                  disabled={!slot.available}
-                  className={`px-4 py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${
-                    !slot.available
-                      ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
-                      : isSelected
-                      ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary)] text-white shadow-md'
-                      : 'border-gray-200 bg-white text-gray-800 hover:border-[color:var(--color-primary)] hover:text-[color:var(--color-primary)]'
-                  }`}
-                >
-                  {slot.timeStr}
-                  {slot.available && slot.remaining <= 2 && (
-                    <span className={`ml-2 text-[10px] font-black ${isSelected ? 'text-white/80' : 'text-orange-500'}`}>
-                      {slot.remaining} left
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+            {slotsToDisplay.length > 0 ? (
+              slotsToDisplay.map(slot => {
+                const isSelected = selectedSlotId === slot.id;
+                return (
+                  <button
+                    key={slot.id}
+                    onClick={() => slot.available && setSelectedSlotId(isSelected ? null : slot.id)}
+                    disabled={!slot.available}
+                    className={`px-4 py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${
+                      !slot.available
+                        ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
+                        : isSelected
+                        ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary)] text-white shadow-md'
+                        : 'border-gray-200 bg-white text-gray-800 hover:border-[color:var(--color-primary)] hover:text-[color:var(--color-primary)]'
+                    }`}
+                  >
+                    {slot.timeStr}
+                    {slot.available && slot.remaining <= 2 && (
+                      <span className={`ml-2 text-[10px] font-black ${isSelected ? 'text-white/80' : 'text-orange-500'}`}>
+                        {slot.remaining} left
+                      </span>
+                    )}
+                  </button>
+                );
+              })
+            ) : (
+              <p className="text-sm text-gray-500 font-medium py-2">No slots available on this date.</p>
+            )}
           </div>
         </div>
         </>
