@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { useCartStore } from '../../lib/store';
+import { useRouter } from 'next/navigation';
+import { useCartStore, useBookingFlowStore } from '../../lib/store';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RECOMMENDED_ITEMS } from '../../lib/homeData';
 import { WishlistButton, CartAddButton } from '../../components/home/HomeShared';
@@ -11,6 +12,34 @@ export default function CartPage() {
   const items = useCartStore(state => state.items);
   const updateQuantity = useCartStore(state => state.updateQuantity);
   const removeItem = useCartStore(state => state.removeItem);
+  const clearCart = useCartStore(state => state.clearCart);
+  
+  const router = useRouter();
+  const { addBooking } = useBookingFlowStore();
+
+  const handlePayment = () => {
+    // Generate bookings from cart items
+    items.forEach(item => {
+      addBooking({
+        id: `BKG-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+        ref: `REF-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+        merchantId: 'merchant-id', // default
+        merchantName: 'BOKSPOT Merchant',
+        serviceId: item.id,
+        serviceName: item.title,
+        amount: (item.price || 0) * item.quantity,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        time: '10:00 AM', // Default time
+        status: 'CONFIRMED',
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    clearCart();
+    
+    // Redirect to user tracks page where bookings are shown
+    router.push('/user/bookings');
+  };
 
   // Hydration fix
   const [mounted, setMounted] = useState(false);
@@ -159,11 +188,12 @@ export default function CartPage() {
               </div>
 
               <button 
+                onClick={handlePayment}
                 disabled={items.length === 0}
                 className="w-full bg-[#0056b3] hover:bg-[#004494] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-full transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20 active:scale-[0.98]"
               >
-                Proceed to Checkout
-                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                Proceed to Payment
+                <span className="material-symbols-outlined text-[18px]">payment</span>
               </button>
               
               <p className="text-center text-xs text-slate-400 mt-5 font-medium flex items-center justify-center gap-1.5">
