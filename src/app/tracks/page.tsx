@@ -65,6 +65,25 @@ const ADD_ONS = [
   },
 ];
 
+const getBookingType = (serviceName: string, fallback?: string) => {
+  const name = (serviceName || '').toLowerCase();
+  if (name.includes('room') || name.includes('hotel') || name.includes('suite')) return 'Hotel Booking';
+  if (name.includes('cricket') || name.includes('ground 1')) return 'Cricket Ground Booking';
+  if (name.includes('football') || name.includes('turf')) return 'Football Turf Booking';
+  if (name.includes('ground')) return 'Cricket Ground Booking';
+  if (name.includes('hair') || name.includes('spa')) return 'Salon Booking';
+  if (name.includes('table') || name.includes('dine')) return 'Restaurant Booking';
+  return fallback || 'Service Booking';
+};
+
+const getCategoryName = (serviceName: string, originalCat: string) => {
+  if (originalCat && originalCat !== 'Category') return originalCat;
+  const name = (serviceName || '').toLowerCase();
+  if (name.includes('room')) return 'Deluxe Room';
+  if (name.includes('ground')) return 'Shed A';
+  return 'General';
+};
+
 function TracksContent() {
   const router = useRouter();
   const { bookings, cancelBooking } = useBookingFlowStore();
@@ -307,10 +326,10 @@ function TracksContent() {
                         </div>
                         <div className="flex flex-col gap-1 mt-2">
                           <span className="text-[11px] font-black uppercase tracking-widest text-[color:var(--color-primary)]">
-                            {b.merchantCategory || 'Cricket Ground'} Booking
+                            {b.merchantCategory || getBookingType(b.serviceName)}
                           </span>
                           <span className="text-sm font-bold text-[color:var(--color-on-surface)]">
-                            {b.category || 'Category'} &bull; {b.serviceName}
+                            {getCategoryName(b.serviceName, b.category)} &bull; {b.serviceName}
                           </span>
                         </div>
                       </div>

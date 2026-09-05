@@ -42,22 +42,7 @@ export const EXPLORE_SECTIONS = [
       { id: 'n4', title: 'Kapaleeshwarar Temple Darshan', subtitle: 'Special festival booking slots open', tag: '2d ago', rating: 'Temple', emoji: '🛕', link: '/religious-government/darshan' }
     ]
   },
-  {
-    id: 'offers',
-    title: 'Offers & Discounts',
-    description: 'Handpicked deals for savings',
-    emoji: '🏷️',
-    from: '#FBBF24',
-    to: '#F59E0B',
-    glow: 'rgba(251,191,36,0.30)',
-    href: '/search?q=offers',
-    items: [
-      { id: 'o1', title: 'Apollo Dental: 30% Off', subtitle: 'Promo code: SMILE30', tag: 'Save ₹300', rating: 'Promo', emoji: '🦷', link: '/service/1' },
-      { id: 'o2', title: 'ZenFit: 1 Week Free Pass', subtitle: 'Promo code: ZENFITPASS', tag: 'Free Trial', rating: 'Fitness', emoji: '💪', link: '/service/2' },
-      { id: 'o3', title: 'Style Studio: ₹200 Cash', subtitle: 'Flat cashback on styling slots', tag: 'Cashback', rating: 'Salon', emoji: '💇', link: '/service/3' },
-      { id: 'o4', title: 'Grand Palace: 2+1 Offer', subtitle: 'Book 2 nights, get 1 night free', tag: 'Get 1 Free', rating: 'Hotel', emoji: '🏡', link: '/stay-accommodation/hotels' }
-    ]
-  },
+
   {
     id: 'events',
     title: 'Local Events',

@@ -53,35 +53,18 @@ export function CarouselSections() {
             </div>
 
             <div className="relative group">
-              {/* Left Arrow */}
-              <button 
-                onClick={() => scrollRecommended('left')} 
-                className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-[#1f2937] border border-black/10 dark:border-white/10 flex items-center justify-center shadow-lg hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
-              >
-                <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">chevron_left</span>
-              </button>
 
-              {/* Right Arrow */}
-              <button 
-                onClick={() => scrollRecommended('right')} 
-                className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-[#1f2937] border border-black/10 dark:border-white/10 flex items-center justify-center shadow-lg hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
-              >
-                <span className="material-symbols-outlined text-[20px] text-[color:var(--color-on-surface)]">chevron_right</span>
-              </button>
 
-              <div 
-                ref={recommendedScrollRef}
-                className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-              >
-              {RECOMMENDED_ITEMS.map((item) => (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 pb-4 pt-1">
+              {RECOMMENDED_ITEMS.slice(0, 6).map((item) => (
                 <Link
                   key={item.id}
                   href={item.link}
-                  className="w-[180px] shrink-0 snap-start group flex flex-col self-stretch"
+                  className="w-full shrink-0 group flex flex-col self-stretch"
                 >
                   <div className="bg-[color:var(--color-surface-container)] rounded-2xl overflow-hidden border border-[color:var(--color-outline-variant)]/20 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
                     {/* Image Section */}
-                    <div className="relative h-[200px] w-full shrink-0 overflow-hidden">
+                    <div className="relative h-[260px] w-full shrink-0 overflow-hidden">
                       <img 
                         src={item.image} 
                         alt={item.title} 

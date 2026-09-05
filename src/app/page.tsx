@@ -15,6 +15,7 @@ import { api } from '../lib/api';
 import { CarouselSections } from '../components/home/CarouselSections';
 import { ConciergeJourneys } from '../components/home/ConciergeJourneys';
 import { ExploreMore } from '../components/home/ExploreMore';
+import { OffersForYou } from '../components/home/OffersForYou';
 import { NearbyRadar } from '../components/home/NearbyRadar';
 import { ShortcutsDock } from '../components/home/ShortcutsDock';
 import { AdBanner } from '../components/home/AdBanner';
@@ -227,6 +228,7 @@ export default function HomePage() {
           <div className="h-px bg-[color:var(--color-outline-variant)]/20 my-8 w-full" />
 
           <ExploreMore />
+          <OffersForYou />
           <NearbyRadar />
           {/* Row 7: Detailed Footer */}
           <footer className="mt-16 border-t border-[color:var(--color-outline-variant)]/20 bg-[color:var(--color-surface-container)]/10 backdrop-blur-xl pt-12 pb-24 px-6 md:px-12 rounded-t-[32px] card-glass relative overflow-hidden">
