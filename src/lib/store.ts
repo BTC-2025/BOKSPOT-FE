@@ -22,6 +22,7 @@ export const useUserStore = create<UserState>()(
         fullName: 'vinothkumar',
         email: 'gmvinoth@bnxmail.com',
         phone: '+91 99887 76655',
+        address: '',
         emoji: '🧑',
         avatarColor: 'from-blue-600 to-indigo-700',
         profilePhoto: null
@@ -133,6 +134,7 @@ interface BookingFlowState {
   setNotes: (notes: string) => void;
   setBookingResult: (result: any) => void;
   addBooking: (booking: PersistedBooking) => void;
+  updateBooking: (bookingId: string, updates: Partial<PersistedBooking>) => void;
   cancelBooking: (bookingId: string) => void;
   completeBooking: (bookingId: string) => void;
   addService: (service: MockService) => void;
@@ -156,11 +158,7 @@ export const useBookingFlowStore = create<BookingFlowState>()(
       attendeeCount: 1,
       notes: '',
       bookingResult: null,
-      bookings: [
-        { id: '1', ref: 'BK-A1B2C3', serviceId: 'svc-1', serviceName: 'Premium Haircut', merchantName: 'Style Studio', date: '2026-05-20', time: '10:00 AM', status: 'CONFIRMED', amount: 599, city: 'Chennai', durationMinutes: 45, customerName: 'Ramesh Kumar', customerEmail: 'ramesh@gmail.com', customerPhone: '+91 99887 76655', notes: 'Needs top styling.', bookedAt: '2026-05-19T10:30:00.000Z' },
-        { id: '2', ref: 'BK-D4E5F6', serviceId: 'svc-2', serviceName: 'Yoga Class', merchantName: 'ZenFit', date: '2026-05-22', time: '7:00 AM', status: 'CONFIRMED', amount: 499, city: 'Chennai', durationMinutes: 60, customerName: 'Priya Raj', customerEmail: 'priya@outlook.com', customerPhone: '+91 91234 56789', notes: 'Prefers morning sunlight.', bookedAt: '2026-05-21T07:15:00.000Z' },
-        { id: '3', ref: 'BK-G7H8I9', serviceId: 'svc-3', serviceName: 'Table Reservation', merchantName: 'The Grand temple Dine', date: '2026-05-15', time: '8:00 PM', status: 'COMPLETED', amount: 1200, city: 'Madurai', durationMinutes: 120, customerName: 'Ananth Subramanian', customerEmail: 'ananth@yahoo.com', customerPhone: '+91 98450 12345', notes: 'Window seat if possible.', bookedAt: '2026-05-14T20:00:00.000Z' },
-      ],
+      bookings: [],
       services: MOCK_SERVICES,
       merchants: [
         { id: '1', name: 'Apollo Dental Care', category: 'Doctor Appointment', status: 'ACTIVE', rating: 4.8, email: 'info@apollodental.com', phone: '+91 98765 43210', city: 'Chennai', address: '42 Anna Nagar Main Road', description: 'Apollo Dental Care is a state-of-the-art dental clinic providing top-tier oral care services.', vendorId: '2026050001', latitude: 13.0827, longitude: 80.2707 },
@@ -204,6 +202,9 @@ export const useBookingFlowStore = create<BookingFlowState>()(
       setNotes: (notes) => set({ notes }),
       setBookingResult: (result) => set({ bookingResult: result }),
       addBooking: (booking) => set((state) => ({ bookings: [booking, ...state.bookings] })),
+      updateBooking: (bookingId, updates) => set((state) => ({
+        bookings: state.bookings.map((b) => b.id === bookingId || b.ref === bookingId ? { ...b, ...updates } : b)
+      })),
       cancelBooking: (bookingId) => set((state) => ({
         bookings: state.bookings.map((b) => b.id === bookingId ? { ...b, status: 'CANCELLED' as const } : b)
       })),

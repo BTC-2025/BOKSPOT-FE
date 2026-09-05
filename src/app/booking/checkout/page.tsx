@@ -86,7 +86,7 @@ export default function CheckoutPage() {
     setError(null);
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let ref = 'BK-';
       for (let i = 0; i < 6; i++) ref += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -97,11 +97,12 @@ export default function CheckoutPage() {
         serviceId: selectedService.id,
         serviceName: listing?.name || selectedService.name,
         merchantName: selectedService.merchant?.name || selectedService.merchant || '',
+        merchantId: selectedService.merchantObj?.id || selectedService.merchantId || (typeof selectedService.merchant === 'string' ? selectedService.merchant : selectedService.merchant?.id) || '',
         category: selectedService.category?.name || selectedService.category || 'Default',
         date: selectedSlot.date,
         time: selectedSlot.time,
         amount: total,
-        status: 'CONFIRMED' as const,
+        status: 'PENDING' as const,
         city: selectedService.city,
         durationMinutes: selectedService.duration,
         customerName: name,
@@ -109,11 +110,25 @@ export default function CheckoutPage() {
         customerPhone: phone,
         notes: notes || '',
         bookedAt: new Date().toISOString(),
+        paymentMethod,
       };
 
+      // Save locally
       addBooking(newBooking);
+
+      // Sync to backend so Business Dashboard can see it
+      try {
+        await fetch('/api/v1/bookings/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newBooking),
+        });
+      } catch (err) {
+        console.warn('Sync failed, continuing offline:', err);
+      }
+
       setIsSubmitting(false);
-      router.push(`/booking/success?ref=${ref}`);
+      router.push(`/booking/track?ref=${ref}`);
     }, 1800);
   };
 
@@ -388,7 +403,7 @@ export default function CheckoutPage() {
                   ) : timeLeft === 0 ? (
                     'Session Expired'
                   ) : (
-                    <><Shield size={18} /> Confirm & Pay ₹{total.toLocaleString()}</>
+                    <><Shield size={18} /> Pay & Confirm ₹{total.toLocaleString()}</>
                   )}
                 </button>
 

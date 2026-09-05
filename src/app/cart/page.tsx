@@ -38,7 +38,7 @@ export default function CartPage() {
     clearCart();
     
     // Redirect to user tracks page where bookings are shown
-    router.push('/user/bookings');
+    router.push('/tracks');
   };
 
   // Hydration fix

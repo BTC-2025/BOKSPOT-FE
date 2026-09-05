@@ -358,13 +358,11 @@ function getServiceSubtitle(name: string): string {
 
 export default function CategoriesPage() {
   const router = useRouter();
+  const [activeGroup, setActiveGroup] = useState<string>('ALL');
 
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
+  const visibleGroups = activeGroup === 'ALL'
+    ? SERVICE_GROUPS
+    : SERVICE_GROUPS.filter(g => g.title === activeGroup);
 
   return (
     <>
@@ -373,25 +371,40 @@ export default function CategoriesPage() {
 
         {/* Category Tabs Switcher (Sticky Row) */}
         <div className="sticky top-[42px] md:top-[48px] z-30 border-b border-[color:var(--color-outline-variant)]/20 py-3 mb-8 -mx-4 px-4 md:-mx-8 md:px-8 overflow-x-auto flex gap-2.5 scrollbar-none scroll-smooth">
-          {SERVICE_GROUPS.map((group) => {
-            const id = group.title.toLowerCase().replace(/\s+/g, '-');
-            return (
-              <button
-                key={group.title}
-                onClick={() => scrollToSection(id)}
-                className="px-4 py-2.5 rounded-full text-[11.5px] font-bold bg-[color:var(--color-surface-container)]/40 border border-[color:var(--color-outline-variant)]/20 text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)] hover:border-[color:var(--color-primary)]/30 hover:scale-[1.03] active:scale-95 transition-all cursor-pointer flex items-center gap-2 shrink-0 shadow-sm backdrop-blur-md"
-              >
-                <span className="text-sm shrink-0">{GROUP_EMOJIS[group.title] || '📍'}</span>
-                <span className="whitespace-nowrap">{group.title}</span>
-              </button>
-            );
-          })}
+          {/* All button first */}
+          <button
+            key="ALL"
+            onClick={() => setActiveGroup('ALL')}
+            className={`px-4 py-2.5 rounded-full text-[11.5px] font-bold border transition-all cursor-pointer flex items-center gap-2 shrink-0 shadow-sm backdrop-blur-md ${
+              activeGroup === 'ALL'
+                ? 'bg-[color:var(--color-primary)] text-white border-[color:var(--color-primary)] scale-105'
+                : 'bg-[color:var(--color-surface-container)]/40 border-[color:var(--color-outline-variant)]/20 text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)] hover:border-[color:var(--color-primary)]/30 hover:scale-[1.03] active:scale-95'
+            }`}
+          >
+            <span className="text-sm shrink-0">🌐</span>
+            <span className="whitespace-nowrap">All</span>
+          </button>
+          {SERVICE_GROUPS.map((group) => (
+            <button
+              key={group.title}
+              onClick={() => setActiveGroup(group.title)}
+              className={`px-4 py-2.5 rounded-full text-[11.5px] font-bold border transition-all cursor-pointer flex items-center gap-2 shrink-0 shadow-sm backdrop-blur-md ${
+                activeGroup === group.title
+                  ? 'bg-[color:var(--color-primary)] text-white border-[color:var(--color-primary)] scale-105'
+                  : 'bg-[color:var(--color-surface-container)]/40 border-[color:var(--color-outline-variant)]/20 text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)] hover:border-[color:var(--color-primary)]/30 hover:scale-[1.03] active:scale-95'
+              }`}
+            >
+              <span className="text-sm shrink-0">{GROUP_EMOJIS[group.title] || '📍'}</span>
+              <span className="whitespace-nowrap">{group.title}</span>
+            </button>
+          ))}
         </div>
 
         {/* Categories Section Feed */}
         <div className="space-y-12">
-          {SERVICE_GROUPS.map((group) => {
+          {visibleGroups.map((group) => {
             const id = group.title.toLowerCase().replace(/\s+/g, '-');
+            const isSingleView = activeGroup !== 'ALL';
             return (
               <section
                 key={group.title}
@@ -413,41 +426,84 @@ export default function CategoriesPage() {
                   </div>
                 </div>
 
-                {/* Subcategories & Service Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {group.subcategories.map((subcat) => (
-                    <div key={subcat.name} className="bg-[color:var(--color-surface-container)] rounded-3xl p-5 shadow-sm border border-[color:var(--color-outline-variant)]/20 flex flex-col">
-                      <h3 className="text-[14px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight mb-4">
-                        {subcat.name}
-                      </h3>
-                      
-                      {/* Horizontal Scroll of Service Cards */}
-                      <div className="flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar scroll-smooth snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex-1 items-start">
-                        {subcat.items.map((item) => {
-                          const serviceHref = getHrefForCategoryItem(group.title, item.name);
-                          return (
-                            <Link
-                              key={item.name}
-                              href={serviceHref}
-                              className="shrink-0 w-24 snap-start group flex flex-col items-center"
-                            >
-                              <div className="w-24 h-24 rounded-2xl bg-white dark:bg-[#1a1a24] shadow-[0_4px_15px_-6px_rgba(0,0,0,0.05)] border border-slate-200/80 dark:border-slate-800 group-hover:shadow-[0_10px_25px_-8px_rgba(0,0,0,0.12)] group-hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
-                                <img 
-                                  src={getServiceImage(item.name)} 
-                                  alt={item.name} 
-                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                                />
-                              </div>
-                              <h3 className="mt-2.5 text-center font-extrabold text-[11px] leading-tight text-[color:var(--color-on-surface-variant)] group-hover:text-[color:var(--color-primary)] line-clamp-2 px-1 w-full transition-colors duration-200">
-                                {item.name}
-                              </h3>
-                            </Link>
-                          );
-                        })}
+                {isSingleView ? (
+                  /* ── SINGLE CATEGORY VIEW: No container, big cards in grid ── */
+                  <div className="space-y-10">
+                    {group.subcategories.map((subcat) => (
+                      <div key={subcat.name}>
+                        {/* Subcategory heading — no box */}
+                        <h3 className="text-[16px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight mb-5 flex items-center gap-2">
+                          <span className="w-1 h-5 rounded-full bg-[color:var(--color-primary)] inline-block" />
+                          {subcat.name}
+                        </h3>
+                        {/* Big card grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                          {subcat.items.map((item) => {
+                            const serviceHref = getHrefForCategoryItem(group.title, item.name);
+                            return (
+                              <Link
+                                key={item.name}
+                                href={serviceHref}
+                                className="group flex flex-col items-center"
+                              >
+                                <div className="w-full aspect-square rounded-3xl bg-white dark:bg-[#1a1a24] shadow-md border border-slate-200/80 dark:border-slate-800 group-hover:shadow-xl group-hover:-translate-y-2 transition-all duration-300 relative overflow-hidden">
+                                  <img
+                                    src={getServiceImage(item.name)}
+                                    alt={item.name}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                  />
+                                  {/* Gradient overlay */}
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                  {/* Price badge */}
+                                  <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <span className="text-white text-[10px] font-bold">{getServicePrice(item.name)}</span>
+                                  </div>
+                                </div>
+                                <h3 className="mt-3 text-center font-extrabold text-[13px] leading-tight text-[color:var(--color-on-surface-variant)] group-hover:text-[color:var(--color-primary)] line-clamp-2 px-1 w-full transition-colors duration-200">
+                                  {item.name}
+                                </h3>
+                              </Link>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* ── ALL VIEW: Original compact horizontal scroll with container ── */
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {group.subcategories.map((subcat) => (
+                      <div key={subcat.name} className="bg-[color:var(--color-surface-container)] rounded-3xl p-5 shadow-sm border border-[color:var(--color-outline-variant)]/20 flex flex-col">
+                        <h3 className="text-[14px] font-extrabold text-[color:var(--color-on-surface)] tracking-tight mb-4">
+                          {subcat.name}
+                        </h3>
+                        <div className="flex gap-4 overflow-x-auto pb-4 pt-1 scroll-smooth snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex-1 items-start">
+                          {subcat.items.map((item) => {
+                            const serviceHref = getHrefForCategoryItem(group.title, item.name);
+                            return (
+                              <Link
+                                key={item.name}
+                                href={serviceHref}
+                                className="shrink-0 w-24 snap-start group flex flex-col items-center"
+                              >
+                                <div className="w-24 h-24 rounded-2xl bg-white dark:bg-[#1a1a24] shadow-[0_4px_15px_-6px_rgba(0,0,0,0.05)] border border-slate-200/80 dark:border-slate-800 group-hover:shadow-[0_10px_25px_-8px_rgba(0,0,0,0.12)] group-hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                                  <img
+                                    src={getServiceImage(item.name)}
+                                    alt={item.name}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                  />
+                                </div>
+                                <h3 className="mt-2.5 text-center font-extrabold text-[11px] leading-tight text-[color:var(--color-on-surface-variant)] group-hover:text-[color:var(--color-primary)] line-clamp-2 px-1 w-full transition-colors duration-200">
+                                  {item.name}
+                                </h3>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
             );
           })}

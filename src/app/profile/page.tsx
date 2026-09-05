@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   User, Mail, Phone, Camera, Bell, Shield, LogOut, 
-  Award, Sparkles, Check, CheckCircle2, Sliders, ShieldCheck, Heart 
+  Award, Sparkles, Check, CheckCircle2, Sliders, ShieldCheck, Heart, MapPin 
 } from 'lucide-react';
 import { useUserStore, useUIStore } from '../../lib/store';
 
@@ -30,6 +30,7 @@ export default function ProfilePage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
   const [avatar, setAvatar] = useState('jetsetter');
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
@@ -61,6 +62,7 @@ export default function ProfilePage() {
       setFullName(user.fullName || '');
       setEmail(user.email || '');
       setPhone(user.phone || '');
+      setAddress(user.address || '');
       setAvatar(user.avatarPreset || 'jetsetter');
       setProfilePhoto(user.profilePhoto || null);
 
@@ -76,7 +78,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!mounted || !user) return;
     setHasChanges(true);
-  }, [username, fullName, email, phone, avatar, profilePhoto, seatPref, dietaryPref, travelClass, promoEmails, smsAlerts, twoFactor, mounted]);
+  }, [username, fullName, email, phone, address, avatar, profilePhoto, seatPref, dietaryPref, travelClass, promoEmails, smsAlerts, twoFactor, mounted]);
 
   // Reset flag on initial mount/load
   useEffect(() => {
@@ -123,6 +125,7 @@ export default function ProfilePage() {
         fullName: fullName.trim(),
         email: email.trim(),
         phone: phone.trim(),
+        address: address.trim(),
         avatarPreset: avatar,
         emoji: AVATAR_PRESETS.find(p => p.id === avatar)?.emoji || '🧑',
         profilePhoto: profilePhoto,
@@ -380,10 +383,29 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-3 rounded-xl border border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-dim)] px-3.5 py-2.5">
                         <Phone size={16} className="text-[color:var(--color-outline)]" />
                         <input 
-                          type="text" 
+                          type="tel" 
                           required
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
+                          className="flex-grow bg-transparent outline-none text-xs text-[color:var(--color-on-surface)] placeholder-[color:var(--color-outline)] focus:ring-0" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-1">
+                    {/* Address */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] uppercase tracking-wider text-[color:var(--color-outline)] font-bold">
+                        Home Address
+                      </label>
+                      <div className="flex items-center gap-3 rounded-xl border border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface-dim)] px-3.5 py-2.5">
+                        <MapPin size={16} className="text-[color:var(--color-outline)]" />
+                        <input 
+                          type="text" 
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          placeholder="123 Main St, City, Country"
                           className="flex-grow bg-transparent outline-none text-xs text-[color:var(--color-on-surface)] placeholder-[color:var(--color-outline)] focus:ring-0" 
                         />
                       </div>

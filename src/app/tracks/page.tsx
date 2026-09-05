@@ -1,335 +1,438 @@
 'use client';
 
 import { Suspense, useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  CheckCircle2, Clock, MapPin, 
-  Phone, AlertCircle, ChevronRight,
-  Package, Check, Home, 
-  Map, MessageSquare, XCircle, ArrowLeft,
-  Navigation, CheckCircle, Ticket
+import {
+  CheckCircle2, Clock, MapPin, XCircle,
+  Train, Bus, Plane, Car, Navigation, Compass,
+  Calendar, ChevronRight,
+  Shield, Hotel, Coffee, Zap, User, Mail, Phone, Building2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useBookingFlowStore } from '../../lib/store';
+import { useBookingFlowStore, useUserStore } from '../../lib/store';
+
+const TRANSPORT_MODES = [
+  { id: 'flight', icon: Plane, label: 'Flight' },
+  { id: 'train', icon: Train, label: 'Train' },
+  { id: 'bus', icon: Bus, label: 'Bus' },
+  { id: 'cab', icon: Car, label: 'Cab' },
+];
+
+const STATUS_STYLE: Record<string, { badge: string; dot: string; label: string }> = {
+  PENDING:   { badge: 'bg-amber-50 text-amber-700 border border-amber-200',   dot: 'bg-amber-400 animate-pulse', label: 'Pending' },
+  CONFIRMED: { badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500 animate-pulse', label: 'Confirmed' },
+  CANCELLED: { badge: 'bg-red-50 text-red-600 border border-red-200',         dot: 'bg-red-400',             label: 'Cancelled' },
+  COMPLETED: { badge: 'bg-blue-50 text-blue-700 border border-blue-200',      dot: 'bg-blue-500',            label: 'Completed' },
+};
+
+const ADD_ONS = [
+  {
+    icon: Car,
+    color: 'from-amber-400 to-orange-500',
+    bg: 'bg-amber-50',
+    title: 'Airport / Station Cab',
+    desc: 'Pre-book a cab from your arrival terminal to your final destination with instant verification.',
+    price: '₹399',
+    cta: 'BOOK CAB →',
+  },
+  {
+    icon: Hotel,
+    color: 'from-rose-400 to-pink-500',
+    bg: 'bg-rose-50',
+    title: 'Transit Room / Hotel',
+    desc: 'Book hourly rooms or premium hotels near your arrival station/airport for a quick refresh.',
+    price: '₹1,200',
+    cta: 'BOOK STAY →',
+  },
+  {
+    icon: Coffee,
+    color: 'from-sky-400 to-blue-500',
+    bg: 'bg-sky-50',
+    title: 'Airport Lounge Pass',
+    desc: 'Get exclusive access to premium terminal lounges with complimentary dining and high-speed Wi-Fi.',
+    price: '₹799',
+    cta: 'GET PASS →',
+  },
+  {
+    icon: Shield,
+    color: 'from-violet-400 to-purple-500',
+    bg: 'bg-violet-50',
+    title: 'Travel Protection',
+    desc: 'Secure your journey against cancellations, delays, baggage loss, or medical emergencies.',
+    price: '₹99',
+    cta: 'PROTECT TRIP →',
+  },
+];
 
 function TracksContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const bookingId = searchParams.get('id');
-  
   const { bookings, cancelBooking } = useBookingFlowStore();
-
+  const { user } = useUserStore();
   const [mounted, setMounted] = useState(false);
+  const [selectedMode, setSelectedMode] = useState('');
+  const [pnr, setPnr] = useState('');
+  const [liveStatuses, setLiveStatuses] = useState<Record<string, string>>({});
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'PENDING' | 'CONFIRMED' | 'CANCELLED'>('ALL');
+
+  const FILTERS = [
+    { id: 'ALL',       label: 'All Bookings' },
+    { id: 'PENDING',   label: 'Active' },
+    { id: 'CONFIRMED', label: 'Completed' },
+    { id: 'CANCELLED', label: 'Cancelled' },
+  ];
+
+  useEffect(() => { setMounted(true); }, []);
+
+  // Live poll backend for status updates
   useEffect(() => {
-    setMounted(true);
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/v1/bookings/sync?t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const json = await res.json();
+        const all: any[] = json?.data || json;
+        if (Array.isArray(all) && !cancelled) {
+          const map: Record<string, string> = {};
+          all.forEach((b: any) => { map[b.ref] = b.status; });
+          setLiveStatuses(map);
+        }
+      } catch {}
+    };
+    poll();
+    const id = setInterval(poll, 3000);
+    return () => { cancelled = true; clearInterval(id); };
   }, []);
 
   if (!mounted) return null;
 
-  const booking = bookings.find(b => b.id === bookingId);
+  const mergedBookings = bookings.map(b => ({
+    ...b,
+    status: (liveStatuses[b.ref] || b.status) as any,
+  }));
 
-  if (!booking) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-20 px-4 flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[color:var(--color-primary)]/10 to-blue-500/10 blur-[100px]" />
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative z-10 bg-white/5 backdrop-blur-3xl border border-white/10 p-12 rounded-3xl text-center max-w-md w-full shadow-2xl"
-        >
-          <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="w-10 h-10 text-red-400" />
-          </div>
-          <h2 className="text-2xl font-black text-white mb-2">Booking Not Found</h2>
-          <p className="text-slate-400 mb-8">We couldn't locate the tracking details for this session. It may have been removed.</p>
-          <Link href="/user/bookings" className="block w-full px-6 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all">
-            Return to Dashboard
-          </Link>
-        </motion.div>
-      </div>
-    );
-  }
+  const filteredBookings = mergedBookings.filter(b =>
+    activeFilter === 'ALL' || b.status === activeFilter
+  );
 
-  const isCancelled = booking.status === 'CANCELLED';
-  const isCompleted = booking.status === 'COMPLETED';
-  const isConfirmed = booking.status === 'CONFIRMED';
-
-  const getStatusColor = () => {
-    if (isCancelled) return 'from-red-500 to-rose-600';
-    if (isCompleted) return 'from-blue-500 to-indigo-600';
-    return 'from-[color:var(--color-primary)] to-emerald-400';
-  };
-
-  const STAGES = isCancelled 
-    ? [
-        { id: 'placed', label: 'Requested', icon: Package, completed: true, active: false },
-        { id: 'cancelled', label: 'Cancelled', icon: XCircle, completed: true, active: true, isError: true }
-      ]
-    : [
-        { id: 'placed', label: 'Requested', icon: Package, completed: true, active: false },
-        { id: 'confirmed', label: 'Confirmed', icon: Check, completed: true, active: isConfirmed },
-        { id: 'progress', label: 'In Progress', icon: Clock, completed: isCompleted, active: false },
-        { id: 'completed', label: 'Completed', icon: Home, completed: isCompleted, active: isCompleted }
-      ];
-
-  const EVENTS = [
-    ...(isCancelled ? [{
-      id: 'evt-cancel', title: 'Booking Terminated', date: booking.date, time: 'Now', status: 'active', icon: XCircle
-    }] : []),
-    ...(isCompleted ? [{
-      id: 'evt-complete', title: 'Service Fulfilled', date: booking.date, time: booking.time, status: 'active', icon: CheckCircle2
-    }] : []),
-    ...(isConfirmed && !isCancelled && !isCompleted ? [{
-      id: 'evt-upcoming', title: 'Awaiting Check-in', date: booking.date, time: booking.time, status: 'active', icon: Clock
-    }] : []),
-    { id: 'evt-confirm', title: 'Confirmed by Merchant', date: booking.createdAt || booking.date, time: 'System', status: 'completed', icon: CheckCircle2 },
-    { id: 'evt-placed', title: 'Booking Requested', date: booking.createdAt || booking.date, time: 'System', status: 'completed', icon: Package }
-  ];
-
-  const handleCancel = () => {
-    if (confirm(`Are you certain you want to cancel reservation ${booking.ref}?`)) {
+  const handleCancel = async (booking: any) => {
+    if (confirm(`Cancel reservation ${booking.ref}?`)) {
       cancelBooking(booking.id);
+      try {
+        await fetch('/api/v1/bookings/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...booking, status: 'CANCELLED' }),
+        });
+        setLiveStatuses(prev => ({ ...prev, [booking.ref]: 'CANCELLED' }));
+      } catch {}
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] relative overflow-hidden pb-24">
-      {/* Dynamic Background Glows based on status */}
-      <div className={`absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b ${getStatusColor()} opacity-[0.03] pointer-events-none`} />
-      <div className={`absolute top-20 right-20 w-96 h-96 bg-gradient-to-br ${getStatusColor()} rounded-full blur-[120px] opacity-[0.08] pointer-events-none`} />
+    <main className="page-content px-4 md:px-8 lg:pr-8 min-h-screen">
+      <div className="mx-auto max-w-5xl py-8 sm:py-12 space-y-10">
 
-      {/* Floating Header */}
-      <div className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-200/50 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
-          <Link href="/user/bookings" className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 hover:scale-105 active:scale-95 transition-all">
-            <ArrowLeft size={18} />
-          </Link>
-          <div className="flex flex-col items-center justify-center">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tracking</p>
-            <p className="text-sm font-extrabold text-slate-800">#{booking.ref}</p>
-          </div>
-          <div className="w-10" /> {/* Spacer */}
+        {/* ── Header ────────────────────────────────────────────── */}
+        <div>
+          <h1 className="text-3xl md:text-4xl font-black text-[color:var(--color-on-surface)] tracking-tight">
+            Track your bookings<br className="hidden sm:block" /> and live activity
+          </h1>
+          <p className="mt-2 text-[color:var(--color-on-surface-variant)] text-sm md:text-base max-w-xl">
+            Keep an eye on reservations, service progress, and important transit updates from one clean dashboard.
+          </p>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-8 mt-8 space-y-8 relative z-10">
-        
-        {/* Hero Card */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+        {/* ── 1. Real-Time Travel Tracker ───────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative bg-white rounded-[2rem] p-6 sm:p-10 shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden"
+          className="bg-[color:var(--color-surface-container)]/60 backdrop-blur-xl border border-[color:var(--color-outline-variant)]/30 rounded-3xl p-6 shadow-sm"
         >
-          <div className={`absolute top-0 left-0 w-2 h-full bg-gradient-to-b ${getStatusColor()}`} />
-          
-          <div className="flex flex-col md:flex-row justify-between gap-8">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 ${
-                  isCancelled ? 'bg-red-50 text-red-600' :
-                  isCompleted ? 'bg-blue-50 text-blue-600' :
-                  'bg-green-50 text-green-600'
-                }`}>
-                  {isConfirmed && <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />}
-                  {isCompleted && <CheckCircle2 size={14} />}
-                  {isCancelled && <XCircle size={14} />}
-                  {booking.status}
-                </div>
-              </div>
+          <div className="flex items-center gap-2 mb-4">
+            <Compass size={18} className="text-[color:var(--color-primary)]" />
+            <h2 className="font-extrabold text-[color:var(--color-on-surface)] text-base">Real-Time Travel Tracker</h2>
+          </div>
+          <p className="text-xs text-[color:var(--color-on-surface-variant)] mb-5">
+            Select a travel classification, input your PNR reference or ticket identifier, and hook into real-time satellite updates.
+          </p>
 
-              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 leading-tight mb-2">
-                {booking.serviceName}
-              </h1>
-              <p className="text-slate-500 font-medium flex items-center gap-2">
-                <MapPin size={16} className="text-slate-400" />
-                {booking.merchantName} {booking.city && `• ${booking.city}`}
-              </p>
+          {/* Transport Mode Selector */}
+          <p className="text-[10px] font-black uppercase tracking-widest text-[color:var(--color-on-surface-variant)] mb-3">Transportation Mode</p>
+          <div className="flex gap-2 mb-5">
+            {TRANSPORT_MODES.map(({ id, icon: Icon, label }) => (
+              <button
+                key={id}
+                onClick={() => setSelectedMode(id)}
+                title={label}
+                className={`w-11 h-11 rounded-2xl flex items-center justify-center border transition-all duration-200 ${
+                  selectedMode === id
+                    ? 'bg-[color:var(--color-primary)] text-white border-[color:var(--color-primary)] scale-110 shadow-md'
+                    : 'bg-[color:var(--color-surface)] border-[color:var(--color-outline-variant)]/30 text-[color:var(--color-on-surface-variant)] hover:border-[color:var(--color-primary)]/40'
+                }`}
+              >
+                <Icon size={18} />
+              </button>
+            ))}
+          </div>
 
-              <div className="mt-8 flex flex-wrap items-center gap-6">
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Date & Time</p>
-                  <p className="font-extrabold text-slate-800">{booking.date} <span className="text-slate-400 font-medium mx-1">at</span> {booking.time}</p>
-                </div>
-                <div className="w-px h-10 bg-slate-100 hidden sm:block" />
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Paid</p>
-                  <p className="font-extrabold text-slate-800 text-xl">₹{booking.amount}</p>
-                </div>
-              </div>
-            </div>
+          {/* PNR Input + Find Button */}
+          <p className="text-[10px] font-black uppercase tracking-widest text-[color:var(--color-on-surface-variant)] mb-2">PNR / Ticket / Reference</p>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={pnr}
+              onChange={e => setPnr(e.target.value)}
+              placeholder="e.g., Booking CAB-8291"
+              className="flex-1 px-4 py-3 rounded-2xl border border-[color:var(--color-outline-variant)]/40 bg-[color:var(--color-surface)] text-[color:var(--color-on-surface)] text-sm font-medium placeholder:text-[color:var(--color-on-surface-variant)]/50 focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]/30"
+            />
+            <button
+              onClick={() => pnr && router.push(`/booking/track?ref=${pnr}`)}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[color:var(--color-primary)] text-white font-bold text-sm hover:opacity-90 active:scale-95 transition-all shadow-md"
+            >
+              <Navigation size={16} />
+              Find & Track
+            </button>
+          </div>
 
-            {!isCancelled && (
-              <div className="shrink-0 flex items-center justify-center">
-                <Link href={`/booking/success?ref=${booking.ref}`} className="group relative w-32 h-32 rounded-3xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/5 transition-all">
-                  <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Ticket className="w-5 h-5 text-[color:var(--color-primary)]" />
-                  </div>
-                  <span className="text-xs font-bold text-slate-600 group-hover:text-[color:var(--color-primary)]">View Ticket</span>
-                </Link>
+          {/* Stats Row */}
+          <div className="grid grid-cols-3 gap-4 mt-6 pt-5 border-t border-[color:var(--color-outline-variant)]/20">
+            {[
+              { label: 'Recent Bookings', value: `${mergedBookings.filter(b => b.status === 'PENDING').length} active items`, sub: 'Track ongoing and upcoming reservations' },
+              { label: 'Live Updates',    value: 'Realtime status',   sub: 'Monitor booking and service changes' },
+              { label: 'Saved Trails',    value: `${mergedBookings.filter(b => b.status === 'CONFIRMED').length} journeys`,        sub: 'Keep track of frequent destinations' },
+            ].map(s => (
+              <div key={s.label} className="bg-[color:var(--color-surface)]/60 rounded-2xl p-4 border border-[color:var(--color-outline-variant)]/20">
+                <p className="text-[9px] font-black uppercase tracking-widest text-[color:var(--color-on-surface-variant)] mb-1">{s.label}</p>
+                <p className="font-black text-[color:var(--color-on-surface)] text-sm">{s.value}</p>
+                <p className="text-[10px] text-[color:var(--color-on-surface-variant)] mt-0.5">{s.sub}</p>
               </div>
-            )}
+            ))}
           </div>
         </motion.div>
 
-        {/* Glowing Progress Nodes */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-[2rem] p-6 sm:p-10 shadow-lg shadow-slate-200/50 border border-slate-100"
-        >
-          <div className="relative flex flex-col sm:flex-row justify-between gap-10 sm:gap-0">
-            {/* Background Line */}
-            <div className="absolute top-6 left-12 right-12 h-1 bg-slate-100 rounded-full hidden sm:block" />
-            <div className="absolute top-6 bottom-6 left-6 w-1 bg-slate-100 rounded-full sm:hidden" />
+        {/* ── 2. My Bookings ────────────────────────────────────── */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-black text-xl text-[color:var(--color-on-surface)]">My Bookings</h2>
+          </div>
 
-            {/* Animated Active Line */}
-            <div className="absolute top-6 left-12 right-12 h-1 hidden sm:block z-0 overflow-hidden rounded-full">
-              <motion.div 
-                className={`h-full bg-gradient-to-r ${getStatusColor()}`}
-                initial={{ width: '0%' }}
-                animate={{ width: isCancelled || isCompleted ? '100%' : isConfirmed ? '50%' : '0%' }}
-                transition={{ duration: 1, ease: "easeOut" }}
-              />
-            </div>
-            
-            <div className="absolute top-6 bottom-6 left-6 w-1 sm:hidden z-0 overflow-hidden rounded-full">
-              <motion.div 
-                className={`w-full bg-gradient-to-b ${getStatusColor()}`}
-                initial={{ height: '0%' }}
-                animate={{ height: isCancelled || isCompleted ? '100%' : isConfirmed ? '50%' : '0%' }}
-                transition={{ duration: 1, ease: "easeOut" }}
-              />
-            </div>
+          {/* Filter Tabs */}
+          <div className="flex bg-[color:var(--color-surface-container)]/60 backdrop-blur-xl p-1.5 rounded-2xl border border-[color:var(--color-outline-variant)]/30 w-full overflow-x-auto no-scrollbar shadow-sm mb-5">
+            {FILTERS.map(f => (
+              <button
+                key={f.id}
+                onClick={() => setActiveFilter(f.id as any)}
+                className={`relative px-5 py-2.5 text-sm font-bold rounded-xl whitespace-nowrap transition-all duration-300 flex-1 ${
+                  activeFilter === f.id
+                    ? 'text-white'
+                    : 'text-[color:var(--color-on-surface-variant)] hover:text-[color:var(--color-on-surface)]'
+                }`}
+              >
+                {activeFilter === f.id && (
+                  <motion.div
+                    layoutId="filter-pill"
+                    className="absolute inset-0 bg-[color:var(--color-primary)] rounded-xl shadow-lg"
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{f.label}</span>
+              </button>
+            ))}
+          </div>
 
-            {STAGES.map((stage, idx) => {
-              const Icon = stage.icon;
+          {filteredBookings.length === 0 ? (
+            <div className="bg-[color:var(--color-surface-container)]/60 border border-[color:var(--color-outline-variant)]/20 rounded-3xl p-10 text-center">
+              <Calendar size={36} className="mx-auto mb-3 text-[color:var(--color-on-surface-variant)]/40" />
+              <p className="font-bold text-[color:var(--color-on-surface)]">
+                {activeFilter === 'ALL' ? 'No bookings yet' : `No ${activeFilter.toLowerCase()} bookings`}
+              </p>
+              <p className="text-xs text-[color:var(--color-on-surface-variant)] mt-1">Your upcoming reservations will appear here.</p>
+              {activeFilter === 'ALL' && (
+                <Link href="/categories" className="inline-block mt-4 px-5 py-2.5 bg-[color:var(--color-primary)] text-white rounded-2xl text-sm font-bold hover:opacity-90 transition-opacity">
+                  Browse Services
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <AnimatePresence mode="popLayout">
+                {filteredBookings.map((b, i) => {
+                  const st = STATUS_STYLE[b.status] || STATUS_STYLE.PENDING;
+                  
+                  const formatDate = (iso: string) => {
+                    if (!iso) return '';
+                    try {
+                      return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                    } catch { return iso; }
+                  };
+                  
+                  const formatDateTime = (iso: string) => {
+                    if (!iso) return '';
+                    try {
+                      return new Date(iso).toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                    } catch { return iso; }
+                  };
+
+                  return (
+                    <motion.div
+                      key={b.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="bg-[color:var(--color-surface-container)]/60 backdrop-blur-xl border border-[color:var(--color-outline-variant)]/30 rounded-3xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group"
+                    >
+                      {/* Status + Ref */}
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[color:var(--color-on-surface-variant)]">
+                          REF #{b.ref}
+                        </span>
+                        <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${st.badge}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
+                          {st.label}
+                        </span>
+                      </div>
+
+                      {/* Business & Service Info */}
+                      <div className="mb-3 border-b border-[color:var(--color-outline-variant)]/20 pb-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h2 className="font-black text-[color:var(--color-on-surface)] text-xl leading-tight mb-0.5">{b.merchantName}</h2>
+                            <p className="text-[11px] text-[color:var(--color-on-surface-variant)] opacity-80 flex items-center gap-1 mb-2">
+                              <MapPin size={10}/> {b.merchantAddress || b.city || 'No Address Provided'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1 mt-2">
+                          <span className="text-[11px] font-black uppercase tracking-widest text-[color:var(--color-primary)]">
+                            {b.merchantCategory || 'Cricket Ground'} Booking
+                          </span>
+                          <span className="text-sm font-bold text-[color:var(--color-on-surface)]">
+                            {b.category || 'Category'} &bull; {b.serviceName}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm font-bold text-[color:var(--color-primary)]">
+                        <span className="flex items-center gap-1"><Calendar size={13} />{formatDate(b.date)}</span>
+                        <span className="flex items-center gap-1"><Clock size={13} />{b.time}</span>
+                      </div>
+
+                      {/* Details Grid */}
+                      <div className="grid grid-cols-1 gap-2 mt-4 pt-2">
+                        
+                        {/* User Info */}
+                        <div className="flex items-start gap-2">
+                          <User size={12} className="text-[color:var(--color-on-surface-variant)] mt-0.5 shrink-0" />
+                          <div className="text-xs text-[color:var(--color-on-surface-variant)] font-medium flex flex-col gap-0.5">
+                            <span className="font-bold text-[color:var(--color-on-surface)]">{b.customerName || user?.fullName || 'N/A'}</span>
+                            <div className="flex flex-wrap items-center gap-x-2">
+                              {b.customerEmail && <span className="flex items-center gap-1"><Mail size={10}/> {b.customerEmail}</span>}
+                              {b.customerPhone && <span className="flex items-center gap-1"><Phone size={10}/> {b.customerPhone}</span>}
+                            </div>
+                            <span className="opacity-80 flex items-center gap-1 mt-0.5"><MapPin size={10}/> {b.customerAddress || user?.address || 'No Address Provided'}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Booked At Info */}
+                        {b.bookedAt && (
+                          <div className="flex items-start gap-2 mt-1">
+                            <Clock size={12} className="text-[color:var(--color-on-surface-variant)] mt-0.5 shrink-0" />
+                            <p className="text-[10px] text-[color:var(--color-on-surface-variant)] font-medium uppercase tracking-wider">
+                              Placed on {formatDateTime(b.bookedAt)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Amount and Action */}
+                      <div className="flex flex-col mt-5 pt-4 border-t border-[color:var(--color-outline-variant)]/20 gap-3">
+                        <div className="flex items-center justify-between w-full">
+                          <div>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-[color:var(--color-on-surface-variant)]">Total Amount</p>
+                            <p className="font-black text-[color:var(--color-on-surface)] text-lg">₹{b.amount}</p>
+                          </div>
+                          <Link
+                            href={`/booking/track?ref=${b.ref}`}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-[color:var(--color-primary)] text-white rounded-2xl text-xs font-bold hover:opacity-90 group-hover:gap-2.5 transition-all"
+                          >
+                            Track <ChevronRight size={13} />
+                          </Link>
+                        </div>
+                        {b.status === 'PENDING' && (
+                          <div className="w-full flex justify-end">
+                            <button 
+                              onClick={() => handleCancel(b)}
+                              className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-all"
+                            >
+                              Cancel Booking
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+
+        {/* ── 3. Connected Services & Add-ons ──────────────────── */}
+        <div>
+          <div className="mb-5">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[color:var(--color-primary)] border border-[color:var(--color-primary)]/30 bg-[color:var(--color-primary)]/5 px-3 py-1 rounded-full">
+              Transit Essentials
+            </span>
+            <h2 className="font-black text-2xl text-[color:var(--color-on-surface)] mt-3">Connected Services &amp; Add-ons</h2>
+            <p className="text-sm text-[color:var(--color-on-surface-variant)] mt-1 max-w-xl">
+              Maximize comfort and security on your journey. Complete your itinerary with pre-booked transfers, accommodations, lounge passes, or protection plans.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {ADD_ONS.map((addon, i) => {
+              const Icon = addon.icon;
               return (
-                <div key={stage.id} className="relative z-10 flex sm:flex-col items-center gap-4 sm:gap-3 flex-1 sm:text-center group">
-                  <div className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-sm ${
-                    stage.active 
-                      ? (stage.isError ? 'bg-red-500 text-white shadow-lg shadow-red-500/30 scale-110' : 'bg-green-500 text-white shadow-lg shadow-green-500/30 scale-110') 
-                      : stage.completed 
-                        ? (stage.isError ? 'bg-red-500 text-white' : 'bg-green-500 text-white') 
-                        : 'bg-white text-slate-300 border-2 border-slate-100'
-                  }`}>
-                    <Icon size={20} strokeWidth={stage.active ? 2.5 : 2} />
-                    {stage.active && !stage.isError && (
-                      <span className="absolute -inset-1 rounded-2xl border-2 border-green-500/30 animate-ping" />
-                    )}
+                <motion.div
+                  key={addon.title}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.07 }}
+                  className="bg-[color:var(--color-surface-container)]/60 backdrop-blur-xl border border-[color:var(--color-outline-variant)]/20 rounded-3xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-1 transition-all group"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${addon.color} flex items-center justify-center shadow-sm`}>
+                      <Icon size={18} className="text-white" />
+                    </div>
+                    <span className="text-[9px] font-black uppercase text-[color:var(--color-on-surface-variant)] tracking-wider opacity-50">⊕</span>
                   </div>
-                  <div className="sm:mt-2">
-                    <p className={`font-black text-sm uppercase tracking-wider ${
-                      stage.active || stage.completed ? 'text-slate-800' : 'text-slate-400'
-                    }`}>
-                      {stage.label}
-                    </p>
+                  <div className="flex-1">
+                    <h3 className="font-extrabold text-[color:var(--color-on-surface)] text-sm">{addon.title}</h3>
+                    <p className="text-[11px] text-[color:var(--color-on-surface-variant)] mt-1 leading-relaxed">{addon.desc}</p>
                   </div>
-                </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs font-black text-[color:var(--color-on-surface-variant)]">Starts at <span className="text-[color:var(--color-on-surface)]">{addon.price}</span></span>
+                    <button className="px-3 py-1.5 bg-[color:var(--color-primary)] text-white rounded-xl text-[10px] font-black tracking-wide hover:opacity-90 active:scale-95 transition-all">
+                      {addon.cta}
+                    </button>
+                  </div>
+                </motion.div>
               );
             })}
           </div>
-        </motion.div>
-
-        {/* Dynamic Timeline & Action Orbs */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-2 bg-white rounded-[2rem] p-6 sm:p-10 shadow-lg shadow-slate-200/50 border border-slate-100"
-          >
-            <h3 className="font-black text-xl text-slate-900 mb-8 flex items-center gap-3">
-              <Navigation className="text-[color:var(--color-primary)]" size={24} /> 
-              Journey Log
-            </h3>
-            
-            <div className="relative pl-6 ml-2 space-y-10 before:absolute before:inset-0 before:ml-0 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-slate-200 before:to-transparent">
-              {EVENTS.map((event, i) => (
-                <div key={event.id} className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-6 group">
-                  <div className="absolute -left-9 mt-1.5 sm:mt-0 w-6 h-6 bg-white border-[3px] border-slate-100 rounded-full flex items-center justify-center z-10 transition-colors group-hover:border-slate-300">
-                    {event.status === 'active' ? (
-                      <div className={`w-2.5 h-2.5 rounded-full shadow-md ${isCancelled ? 'bg-red-500 shadow-red-500/50 animate-pulse' : 'bg-green-500 shadow-green-500/50 animate-pulse'}`} />
-                    ) : (
-                      <div className="w-2.5 h-2.5 bg-slate-200 rounded-full" />
-                    )}
-                  </div>
-                  
-                  <div className="flex-1">
-                    <p className={`font-extrabold ${event.status === 'active' ? 'text-slate-900 text-lg' : 'text-slate-500 text-base'}`}>
-                      {event.title}
-                    </p>
-                  </div>
-                  <div className="shrink-0 text-left sm:text-right bg-slate-50 px-4 py-2 rounded-xl">
-                    <p className={`text-sm font-black ${event.status === 'active' ? (isCancelled ? 'text-red-600' : 'text-[color:var(--color-primary)]') : 'text-slate-500'}`}>{event.time}</p>
-                    <p className="text-xs text-slate-400 font-semibold">{event.date}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="space-y-6"
-          >
-            <div className="bg-white rounded-[2rem] p-6 shadow-lg shadow-slate-200/50 border border-slate-100">
-              <h3 className="font-black text-lg text-slate-900 mb-5">Quick Actions</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-                    <Phone size={20} />
-                  </div>
-                  <span className="text-xs font-bold">Call</span>
-                </button>
-                
-                <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-                    <Map size={20} />
-                  </div>
-                  <span className="text-xs font-bold">Directions</span>
-                </button>
-
-                <button className="col-span-2 flex items-center justify-between p-4 rounded-2xl bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
-                      <MessageSquare size={18} className="text-slate-500" />
-                    </div>
-                    <span className="text-sm font-bold">24/7 Support Chat</span>
-                  </div>
-                  <ChevronRight size={18} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-            </div>
-
-            {!isCancelled && !isCompleted && (
-              <div className="bg-white rounded-[2rem] p-6 shadow-lg shadow-red-500/5 border border-red-50">
-                <h3 className="font-black text-lg text-slate-900 mb-4">Danger Zone</h3>
-                <button 
-                  onClick={handleCancel}
-                  className="w-full py-4 text-sm font-black text-white bg-red-500 hover:bg-red-600 rounded-2xl transition-colors shadow-lg shadow-red-500/20 active:scale-95"
-                >
-                  Cancel Reservation
-                </button>
-                <p className="text-[10px] font-bold text-slate-400 text-center mt-3 uppercase tracking-wider">This action cannot be undone</p>
-              </div>
-            )}
-          </motion.div>
-
         </div>
+
       </div>
-    </div>
+    </main>
   );
 }
 
 export default function TracksPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center pt-20">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-slate-200 border-t-[color:var(--color-primary)] rounded-full animate-spin" />
       </div>
     }>
